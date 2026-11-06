@@ -199,6 +199,12 @@ STATE_POLICY_COLLISION_RUNTIME_ADMISSION_SCHEMA = (
 STATE_POLICY_COLLISION_RUNTIME_ADMISSION_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_collision_runtime_admission_campaign.v1"
 )
+STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_collision_runtime_revalidation.v1"
+)
+STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_collision_runtime_revalidation_campaign.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -12627,6 +12633,265 @@ def admit_state_policy_collision_request_campaign(
     return campaign, admissions
 
 
+def revalidate_state_policy_collision_runtime_inputs(
+    admission_campaign: dict[str, Any],
+    runtime_admissions: dict[str, dict[str, Any]],
+    virtual_profile_bytes: bytes,
+    robot_import_receipt: dict[str, Any],
+    robot_usd_bytes: bytes,
+    toolchain_lock: dict[str, Any],
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    """Reload and bind LM4 runtime files without starting Isaac or a GPU."""
+    _verify_lm3_digest(admission_campaign, "campaign_sha256", "admission campaign")
+    _require_lm3_zero_authority(admission_campaign, "admission campaign")
+    if (
+        admission_campaign.get("schema")
+        != STATE_POLICY_COLLISION_RUNTIME_ADMISSION_CAMPAIGN_SCHEMA
+        or admission_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_RUNTIME_INPUT_REVALIDATION"
+        or admission_campaign.get("runtime_files_revalidated") is not False
+        or admission_campaign.get("isaac_started") is not False
+        or admission_campaign.get("gpu_started") is not False
+        or admission_campaign.get("collision_diagnostics_executed") != 0
+        or admission_campaign.get("prior_collision_results_reused") is not False
+    ):
+        raise MechanicsContractError("runtime revalidation admission boundary changed")
+    rows = admission_campaign.get("admissions")
+    if (
+        not isinstance(rows, list)
+        or not rows
+        or len(rows) != admission_campaign.get("admission_count")
+        or len(rows) != admission_campaign.get("fresh_collision_diagnostics_required")
+    ):
+        raise MechanicsContractError("runtime revalidation denominator changed")
+    rows_by_id = {row.get("episode_id"): row for row in rows if isinstance(row, dict)}
+    if (
+        None in rows_by_id
+        or len(rows_by_id) != len(rows)
+        or set(runtime_admissions) != set(rows_by_id)
+    ):
+        raise MechanicsContractError("runtime revalidation admission set changed")
+
+    required_hash_sets: set[tuple[str, str, str, str]] = set()
+    total_bounded_samples = 0
+    for episode_id, row in rows_by_id.items():
+        admission = runtime_admissions[episode_id]
+        _verify_lm3_digest(admission, "admission_sha256", f"{episode_id} admission")
+        _require_lm3_zero_authority(admission, f"{episode_id} admission")
+        required = admission.get("required_runtime_hashes")
+        if (
+            admission.get("schema") != STATE_POLICY_COLLISION_RUNTIME_ADMISSION_SCHEMA
+            or admission.get("status")
+            != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_RUNTIME_INPUT_REVALIDATION"
+            or admission.get("episode_id") != episode_id
+            or admission.get("target_id") != row.get("target_id")
+            or admission.get("request_sha256") != row.get("request_sha256")
+            or admission.get("admission_sha256") != row.get("admission_sha256")
+            or admission.get("bounded_sample_count") != row.get("bounded_sample_count")
+            or admission.get("source_collision_request_campaign_sha256")
+            != admission_campaign.get("source_collision_request_campaign_sha256")
+            or admission.get("runtime_files_revalidated") is not False
+            or admission.get("isaac_started") is not False
+            or admission.get("gpu_started") is not False
+            or admission.get("collision_diagnostic_executed") is not False
+            or admission.get("fresh_collision_diagnostic_required") is not True
+            or admission.get("prior_collision_result_reused") is not False
+            or not isinstance(required, dict)
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} runtime revalidation admission changed"
+            )
+        required_tuple = tuple(
+            required.get(key)
+            for key in (
+                "virtual_profile_sha256",
+                "robot_import_receipt_sha256",
+                "robot_usd_sha256",
+                "toolchain_lock_sha256",
+            )
+        )
+        if any(not isinstance(value, str) or len(value) != 64 for value in required_tuple):
+            raise MechanicsContractError(
+                f"{episode_id} runtime revalidation hashes are incomplete"
+            )
+        required_hash_sets.add(required_tuple)
+        total_bounded_samples += admission["bounded_sample_count"]
+    if (
+        len(required_hash_sets) != 1
+        or total_bounded_samples
+        != admission_campaign.get("total_bounded_sample_count")
+    ):
+        raise MechanicsContractError("runtime revalidation aggregate changed")
+
+    profile = json.loads(virtual_profile_bytes)
+    if (
+        profile.get("schema") != "rocell.virtual_commissioning_profile.v1"
+        or profile.get("status") != "UNMEASURED_SENSITIVITY_OVERLAY"
+        or profile.get("simulation_only") is not True
+        or profile.get("physical_release_effect") != "NONE"
+    ):
+        raise MechanicsContractError("virtual profile boundary changed")
+    _verify_lm3_digest(
+        robot_import_receipt,
+        "receipt_sha256",
+        "robot import receipt",
+    )
+    _require_lm3_zero_authority(robot_import_receipt, "robot import receipt")
+    robot_usd_hash = hashlib.sha256(robot_usd_bytes).hexdigest()
+    external_files = robot_import_receipt.get("external_files")
+    if (
+        robot_import_receipt.get("schema") != "tactevra.isaac_sim_urdf_import.v1"
+        or not isinstance(external_files, list)
+        or len(external_files) != 1
+        or external_files[0].get("sha256") != robot_usd_hash
+        or external_files[0].get("size_bytes") != len(robot_usd_bytes)
+    ):
+        raise MechanicsContractError("robot USD differs from its import receipt")
+    _require_lm3_zero_authority(toolchain_lock, "toolchain lock")
+    if (
+        toolchain_lock.get("schema") != "rocell.isaac_sim_toolchain_lock.v1"
+        or toolchain_lock.get("selection_status") != "SELECTED"
+        or toolchain_lock.get("hardware_access") is not False
+        or toolchain_lock.get("physical_authority") is not False
+        or toolchain_lock.get("wire_commands") != []
+    ):
+        raise MechanicsContractError("toolchain lock boundary changed")
+
+    actual_hashes = {
+        "virtual_profile_sha256": hashlib.sha256(virtual_profile_bytes).hexdigest(),
+        "robot_import_receipt_sha256": robot_import_receipt["receipt_sha256"],
+        "robot_usd_sha256": robot_usd_hash,
+        "toolchain_lock_sha256": _canonical_sha256(toolchain_lock),
+    }
+    required_hashes = dict(zip(
+        (
+            "virtual_profile_sha256",
+            "robot_import_receipt_sha256",
+            "robot_usd_sha256",
+            "toolchain_lock_sha256",
+        ),
+        next(iter(required_hash_sets)),
+    ))
+    if actual_hashes != required_hashes:
+        changed = sorted(
+            key for key in required_hashes if actual_hashes[key] != required_hashes[key]
+        )
+        raise MechanicsContractError(
+            "runtime file hash mismatch: " + ", ".join(changed)
+        )
+    file_evidence = {
+        "virtual_profile": {
+            "sha256": actual_hashes["virtual_profile_sha256"],
+            "hash_mode": "RAW_FILE_BYTES",
+        },
+        "robot_import_receipt": {
+            "sha256": actual_hashes["robot_import_receipt_sha256"],
+            "hash_mode": "CANONICAL_DOCUMENT_EXCLUDING_RECEIPT_SHA256",
+        },
+        "robot_usd": {
+            "sha256": actual_hashes["robot_usd_sha256"],
+            "hash_mode": "RAW_FILE_BYTES",
+            "size_bytes": len(robot_usd_bytes),
+        },
+        "toolchain_lock": {
+            "sha256": actual_hashes["toolchain_lock_sha256"],
+            "hash_mode": "CANONICAL_JSON_DOCUMENT",
+        },
+    }
+    receipts: dict[str, dict[str, Any]] = {}
+    receipt_rows = []
+    for episode_id, row in rows_by_id.items():
+        receipt: dict[str, Any] = {
+            "schema": STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_SCHEMA,
+            "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTIC_START",
+            "episode_id": episode_id,
+            "target_id": row["target_id"],
+            "source_runtime_admission_campaign_sha256": admission_campaign[
+                "campaign_sha256"
+            ],
+            "source_runtime_admission_sha256": row["admission_sha256"],
+            "request_sha256": row["request_sha256"],
+            "bounded_sample_count": row["bounded_sample_count"],
+            "runtime_files": file_evidence,
+            "runtime_files_revalidated": True,
+            "revalidated_file_count": 4,
+            "isaac_started": False,
+            "gpu_started": False,
+            "collision_diagnostic_executed": False,
+            "prior_collision_result_reused": False,
+            "fresh_collision_diagnostic_required": True,
+            "installed_collision_qualified": False,
+            "continuous_collision_proven": False,
+            "native_replay_authorized": False,
+            "hardware_access": False,
+            "hardware_writes": 0,
+            "physical_authority": False,
+            "physical_movements": 0,
+            "controller_commands": [],
+            "gate_promotions": [],
+            "limitations": [
+                "runtime_hash_match_does_not_prove_model_clearance",
+                "isaac_and_gpu_have_not_started",
+                "fresh_collision_diagnostic_remains_pending",
+                "native_and_physical_replay_remain_blocked",
+            ],
+        }
+        receipt["receipt_sha256"] = _canonical_sha256(receipt)
+        receipts[episode_id] = receipt
+        receipt_rows.append({
+            "episode_id": episode_id,
+            "target_id": row["target_id"],
+            "receipt_sha256": receipt["receipt_sha256"],
+            "source_runtime_admission_sha256": row["admission_sha256"],
+            "bounded_sample_count": row["bounded_sample_count"],
+        })
+
+    campaign: dict[str, Any] = {
+        "schema": STATE_POLICY_COLLISION_RUNTIME_REVALIDATION_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTIC_START",
+        "source_runtime_admission_campaign_sha256": admission_campaign[
+            "campaign_sha256"
+        ],
+        "source_dataset_sha256": admission_campaign["source_dataset_sha256"],
+        "source_model_sha256": admission_campaign["source_model_sha256"],
+        "source_proposal_campaign_sha256": admission_campaign[
+            "source_proposal_campaign_sha256"
+        ],
+        "source_collision_request_campaign_sha256": admission_campaign[
+            "source_collision_request_campaign_sha256"
+        ],
+        "revalidation_count": len(receipt_rows),
+        "target_environment_count": admission_campaign["target_environment_count"],
+        "total_bounded_sample_count": total_bounded_samples,
+        "revalidations": receipt_rows,
+        "runtime_files": file_evidence,
+        "runtime_files_revalidated": True,
+        "revalidated_file_count": 4,
+        "isaac_started": False,
+        "gpu_started": False,
+        "collision_diagnostics_executed": 0,
+        "prior_collision_results_reused": False,
+        "fresh_collision_diagnostics_required": len(receipt_rows),
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "START_FRESH_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTICS"
+        ),
+        "limitations": [
+            "revalidation_stops_before_isaac_and_gpu_start",
+            "runtime_hash_match_does_not_prove_model_clearance",
+            "all_fresh_collision_diagnostics_remain_pending",
+            "no_native_or_physical_replay_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign, receipts
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -12934,6 +13199,11 @@ def main() -> int:
         action="store_true",
         help="validate LM4 collision requests before runtime files or Isaac start",
     )
+    parser.add_argument(
+        "--revalidate-state-policy-collision-runtime-inputs",
+        action="store_true",
+        help="reload and hash LM4 runtime files without starting Isaac or a GPU",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -12945,6 +13215,9 @@ def main() -> int:
     parser.add_argument("--representative-native-admission-root", type=Path)
     parser.add_argument("--collision-request-output-dir", type=Path)
     parser.add_argument("--collision-admission-output-dir", type=Path)
+    parser.add_argument("--state-policy-runtime-admission-campaign", type=Path)
+    parser.add_argument("--collision-runtime-admission-root", type=Path)
+    parser.add_argument("--collision-runtime-revalidation-output-dir", type=Path)
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -13014,6 +13287,7 @@ def main() -> int:
         )
         if (
             not args.run_collision_diagnostic
+            and not args.revalidate_state_policy_collision_runtime_inputs
             and not args.propose_collision_pair_policy
             and not args.build_station_route_predicate
             and not args.plan_physical_blocker_experiment
@@ -13054,7 +13328,62 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.admit_state_policy_collision_request_campaign:
+        if args.revalidate_state_policy_collision_runtime_inputs:
+            required = (
+                args.state_policy_runtime_admission_campaign,
+                args.collision_runtime_admission_root,
+                args.collision_runtime_revalidation_output_dir,
+                args.virtual_profile,
+                args.robot_usd,
+                args.import_receipt,
+                args.toolchain_lock,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-219 runtime revalidation requires its admission "
+                    "campaign/root, four runtime files, and revalidation output "
+                    "directory"
+                )
+            admission_campaign = json.loads(
+                args.state_policy_runtime_admission_campaign
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            admission_root = args.collision_runtime_admission_root.resolve(
+                strict=True
+            )
+            runtime_admissions = {
+                row["episode_id"]: json.loads(
+                    (
+                        admission_root
+                        / row["episode_id"]
+                        / "runtime_admission.json"
+                    ).resolve(strict=True).read_bytes()
+                )
+                for row in admission_campaign.get("admissions", [])
+            }
+            result, runtime_revalidations = (
+                revalidate_state_policy_collision_runtime_inputs(
+                    admission_campaign,
+                    runtime_admissions,
+                    args.virtual_profile.resolve(strict=True).read_bytes(),
+                    json.loads(args.import_receipt.resolve(strict=True).read_bytes()),
+                    args.robot_usd.resolve(strict=True).read_bytes(),
+                    json.loads(args.toolchain_lock.resolve(strict=True).read_bytes()),
+                )
+            )
+            revalidation_root = (
+                args.collision_runtime_revalidation_output_dir.resolve()
+            )
+            revalidation_root.mkdir(parents=True, exist_ok=True)
+            for episode_id, receipt in runtime_revalidations.items():
+                episode_root = revalidation_root / episode_id
+                episode_root.mkdir(parents=True, exist_ok=True)
+                (episode_root / "runtime_revalidation.json").write_text(
+                    json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+        elif args.admit_state_policy_collision_request_campaign:
             required = (
                 args.state_policy_dataset_manifest,
                 args.state_policy_model,
@@ -14631,6 +14960,7 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_RUNTIME_INPUT_REVALIDATION",
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_DIAGNOSTIC_START",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2
