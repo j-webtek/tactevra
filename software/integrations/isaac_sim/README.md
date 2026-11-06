@@ -1985,6 +1985,21 @@ bounded interpolation rather than silent direct replay. Campaign status is
 therefore `READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION`.
 Native replay remains blocked until that fresh screen passes.
 
+The follow-on
+`tactevra.isaac_lm4_state_policy_collision_request_campaign.v1` compiler
+materializes fresh target-bound collision inputs without relabelling the
+planner's earlier collision outcome as learned-policy evidence. The retained
+campaign contains `523` bounded arm configurations across all nine episodes,
+with `90` inserted interpolation samples, `40` to `75` samples per episode,
+and a maximum adjacent arm-joint step of `0.0499945099 rad`. Its SHA-256 is
+`d4216d68e351335a6611cfc4ea0796cb8578c7dd01bc846e5a793f9ddee13d4d`.
+Each request binds the dataset, model, proposal campaign and trajectory, plus
+the matching ARM-216 collision geometry, placement, pair-policy, fixed-root,
+station-route, and toolchain lineage. The campaign is only
+`READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION`: all nine requests
+still require fresh Isaac diagnostics, and no native or physical replay is
+authorized.
+
 ### Native H-key contact replay
 
 ARM-186 implements the first native Isaac contact slice with the same governed
