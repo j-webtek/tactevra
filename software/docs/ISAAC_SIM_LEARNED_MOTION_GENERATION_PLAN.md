@@ -527,15 +527,23 @@ Train a behavior-cloning baseline from joint/proprioceptive observations,
 target pose, and phase. Compare it with the deterministic planner on identical
 held-out resets.
 
-The ARM-218 smoke trajectories prove mechanics and denominator handling, but
-their retained rows contain contact geometry rather than per-step
-proprioception. They must not be presented as behavior-cloning input. ARM-219
-therefore begins by versioning an LM4 trajectory row and recording, at every
-physics step, the observed six-joint positions and velocities, commanded
-six-joint target, target identity, motion phase, action/sequence identity, and
-existing tip/key contact geometry. The episode receipt binds that trajectory
-schema and governed joint order. A fresh simulation-only corpus using this
-schema is required before dataset normalization or training.
+The original ARM-218 smoke trajectories prove mechanics and denominator
+handling, but their retained rows contain contact geometry rather than
+per-step proprioception and must not be presented as behavior-cloning input.
+ARM-219 therefore versions an LM4 trajectory row and records, at every physics
+step, the observed six-joint positions and velocities, commanded six-joint
+target, target identity, motion phase, action/sequence identity, and existing
+tip/key contact geometry. The episode receipt binds that trajectory schema and
+governed joint order.
+
+The fresh state-policy corpus now contains all `24` attempted episodes and
+`33,984` validated rows. Its deterministic dataset manifest keeps the `6`
+failed episodes as rejection evidence, reserves passing validation/test rows
+for evaluation, and fits 23-feature normalization only from the `12,744`
+passing training rows. The manifest hash is
+`a5870894ce6e734542ea2cef5bef079b8ee73a147c3a1d528eff5e0e521479f1`.
+This closes dataset assembly only; baseline fitting and held-out comparison are
+still required.
 
 **Exit gate**
 
@@ -705,8 +713,11 @@ ScheduleGen. Neither is a physical success rate.
    manifest, bounded native execution, content-addressed trajectory retention,
    and fail-closed aggregation of all `18` passes and `6` failures without
    changing the attempted denominator.
-7. **LM4 baseline:** train and evaluate a state-based imitation policy.
-8. Expand only after each predecessor produces reviewable evidence.
+7. **LM4 dataset:** ARM-219 regenerated all `24` episodes with per-step state
+   and action capture, compiled `33,984` content-addressed rows without leakage,
+   and retained failures separately from `12,744` passing training rows.
+8. **LM4 baseline:** train and evaluate a state-based imitation policy.
+9. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

@@ -177,6 +177,9 @@ RANDOMIZED_DEMONSTRATION_RESULT_SCHEMA = (
 STATE_POLICY_TRAJECTORY_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_trajectory_row.v1"
 )
+STATE_POLICY_DATASET_MANIFEST_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_dataset_manifest.v1"
+)
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
     "train": 3,
     "validation": 2,
@@ -10934,6 +10937,288 @@ def aggregate_randomized_demonstration_campaign(
     return result
 
 
+def build_state_policy_dataset_manifest(
+    campaign: dict[str, Any],
+    result: dict[str, Any],
+    receipts: dict[str, dict[str, Any]],
+    trajectory_payloads: dict[str, bytes],
+) -> dict[str, Any]:
+    """Compile a deterministic, leakage-safe LM4 state-policy dataset manifest."""
+    validate_randomized_demonstration_campaign(campaign)
+    _verify_lm3_digest(result, "result_sha256", "randomized result")
+    _require_lm3_zero_authority(result, "randomized result")
+    if (
+        result.get("schema") != RANDOMIZED_DEMONSTRATION_RESULT_SCHEMA
+        or result.get("status") != "COMPLETE_RANDOMIZED_DEMONSTRATION_SMOKE"
+        or result.get("source_campaign_sha256") != campaign["campaign_sha256"]
+    ):
+        raise MechanicsContractError(
+            "randomized result is not a complete result for the supplied campaign"
+        )
+    recomputed_result = aggregate_randomized_demonstration_campaign(
+        campaign, receipts
+    )
+    if recomputed_result != result:
+        raise MechanicsContractError(
+            "randomized result does not reproduce from the supplied receipts"
+        )
+    episodes = {episode["episode_id"]: episode for episode in campaign["episodes"]}
+    if set(trajectory_payloads) != set(episodes):
+        missing = sorted(set(episodes) - set(trajectory_payloads))
+        extra = sorted(set(trajectory_payloads) - set(episodes))
+        raise MechanicsContractError(
+            "trajectory set must equal attempted denominator; "
+            f"missing={missing}, extra={extra}"
+        )
+
+    parameter_names = sorted(
+        campaign["randomization_contract"]["ranges"]
+    )
+    joint_order: list[str] | None = None
+    input_feature_names = [
+        *[f"joint_position_observed_rad[{index}]" for index in range(6)],
+        *[f"joint_velocity_observed_rad_s[{index}]" for index in range(6)],
+        "key_center_z_m",
+        "tip_center_z_m",
+        "tip_key_separation_m",
+        *[f"randomized_parameters.{name}" for name in parameter_names],
+        "randomized_key_center_board_xy_mm[0]",
+        "randomized_key_center_board_xy_mm[1]",
+    ]
+    training_feature_columns = [[] for _ in input_feature_names]
+    episode_entries = []
+    role_counts: Counter[str] = Counter()
+    partition_counts: dict[str, Counter[str]] = {
+        partition: Counter()
+        for partition in RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS
+    }
+    total_row_count = 0
+
+    for episode_id, episode in episodes.items():
+        receipt = receipts[episode_id]
+        payload = trajectory_payloads[episode_id]
+        if not isinstance(payload, bytes):
+            raise MechanicsContractError(
+                f"{episode_id} trajectory payload must be bytes"
+            )
+        if hashlib.sha256(payload).hexdigest() != receipt["trajectory_sha256"]:
+            raise MechanicsContractError(
+                f"{episode_id} trajectory digest does not match receipt"
+            )
+        if receipt.get("trajectory_schema") != STATE_POLICY_TRAJECTORY_SCHEMA:
+            raise MechanicsContractError(
+                f"{episode_id} trajectory is not an LM4 state-policy trajectory"
+            )
+        receipt_joint_order = receipt.get("joint_order")
+        if (
+            not isinstance(receipt_joint_order, list)
+            or len(receipt_joint_order) != 6
+            or not all(isinstance(item, str) and item for item in receipt_joint_order)
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} receipt must declare six ordered joints"
+            )
+        if joint_order is None:
+            joint_order = list(receipt_joint_order)
+        elif receipt_joint_order != joint_order:
+            raise MechanicsContractError(
+                f"{episode_id} joint order differs from the dataset contract"
+            )
+        key_center_xy = receipt.get("randomized_key_center_board_xy_mm")
+        if not isinstance(key_center_xy, list) or len(key_center_xy) != 2:
+            raise MechanicsContractError(
+                f"{episode_id} receipt lacks randomized key-center geometry"
+            )
+        key_center_xy = [
+            _finite_number(value, f"{episode_id} key-center coordinate")
+            for value in key_center_xy
+        ]
+
+        try:
+            text = payload.decode("utf-8")
+        except UnicodeDecodeError as exc:
+            raise MechanicsContractError(
+                f"{episode_id} trajectory is not UTF-8 JSONL"
+            ) from exc
+        lines = text.splitlines()
+        if not lines or any(not line.strip() for line in lines):
+            raise MechanicsContractError(
+                f"{episode_id} trajectory contains no rows or blank rows"
+            )
+        if receipt.get("native_trace_sample_count") != len(lines):
+            raise MechanicsContractError(
+                f"{episode_id} trajectory row count does not match receipt"
+            )
+        disposition = receipt["disposition"]
+        partition = episode["partition"]
+        role = (
+            "TRAINING"
+            if disposition == "PASS" and partition == "train"
+            else "EVALUATION"
+            if disposition == "PASS"
+            else "REJECTION_EVIDENCE"
+        )
+        previous_time = -math.inf
+        for row_index, line in enumerate(lines):
+            try:
+                row = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise MechanicsContractError(
+                    f"{episode_id} trajectory row {row_index} is invalid JSON"
+                ) from exc
+            if not isinstance(row, dict) or row.get("schema") != STATE_POLICY_TRAJECTORY_SCHEMA:
+                raise MechanicsContractError(
+                    f"{episode_id} trajectory row {row_index} schema mismatch"
+                )
+            if row.get("target_id") != episode["target_id"]:
+                raise MechanicsContractError(
+                    f"{episode_id} trajectory row {row_index} target mismatch"
+                )
+            if not isinstance(row.get("phase"), str) or not row["phase"]:
+                raise MechanicsContractError(
+                    f"{episode_id} trajectory row {row_index} lacks phase"
+                )
+            if row.get("action_index") is not None and not isinstance(
+                row["action_index"], int
+            ):
+                raise MechanicsContractError(
+                    f"{episode_id} trajectory row {row_index} action index is invalid"
+                )
+            if not isinstance(row.get("target_sequence"), int):
+                raise MechanicsContractError(
+                    f"{episode_id} trajectory row {row_index} sequence is invalid"
+                )
+            time_s = _finite_number(
+                row.get("time_s"), f"{episode_id} trajectory time"
+            )
+            if time_s <= previous_time:
+                raise MechanicsContractError(
+                    f"{episode_id} trajectory time must be strictly increasing"
+                )
+            previous_time = time_s
+            vectors = []
+            for field in (
+                "joint_position_observed_rad",
+                "joint_velocity_observed_rad_s",
+                "joint_position_target_rad",
+            ):
+                values = row.get(field)
+                if not isinstance(values, list) or len(values) != 6:
+                    raise MechanicsContractError(
+                        f"{episode_id} trajectory row {row_index} {field} must have six values"
+                    )
+                vectors.append([
+                    _finite_number(
+                        value, f"{episode_id} trajectory row {row_index} {field}"
+                    )
+                    for value in values
+                ])
+            geometry = [
+                _finite_number(
+                    row.get(field),
+                    f"{episode_id} trajectory row {row_index} {field}",
+                )
+                for field in (
+                    "key_center_z_m",
+                    "tip_center_z_m",
+                    "tip_key_separation_m",
+                )
+            ]
+            parameters = [
+                _finite_number(
+                    episode["randomized_parameters"][name],
+                    f"{episode_id} randomized parameter {name}",
+                )
+                for name in parameter_names
+            ]
+            features = [*vectors[0], *vectors[1], *geometry, *parameters, *key_center_xy]
+            if role == "TRAINING":
+                for column, value in zip(training_feature_columns, features, strict=True):
+                    column.append(value)
+
+        total_row_count += len(lines)
+        role_counts[role] += 1
+        partition_counts[partition][role] += 1
+        episode_entries.append({
+            "episode_id": episode_id,
+            "partition": partition,
+            "target_id": episode["target_id"],
+            "seed": episode["seed"],
+            "scene_id": episode["scene_id"],
+            "randomized_parameters": episode["randomized_parameters"],
+            "randomized_key_center_board_xy_mm": key_center_xy,
+            "role": role,
+            "disposition": disposition,
+            "failure_reason": receipt["failure_reason"],
+            "sample_count": len(lines),
+            "receipt_sha256": receipt["receipt_sha256"],
+            "trajectory_sha256": receipt["trajectory_sha256"],
+        })
+
+    training_row_count = len(training_feature_columns[0])
+    if training_row_count == 0:
+        raise MechanicsContractError("dataset has no passing training rows")
+    normalization = []
+    for name, values in zip(
+        input_feature_names, training_feature_columns, strict=True
+    ):
+        mean = math.fsum(values) / training_row_count
+        standard_deviation = math.sqrt(
+            math.fsum((value - mean) ** 2 for value in values)
+            / training_row_count
+        )
+        normalization.append({
+            "feature": name,
+            "mean": mean,
+            "population_standard_deviation": standard_deviation,
+            "scale": standard_deviation if standard_deviation > 0.0 else 1.0,
+        })
+
+    manifest = {
+        "schema": STATE_POLICY_DATASET_MANIFEST_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_DATASET",
+        "source_campaign_sha256": campaign["campaign_sha256"],
+        "source_result_sha256": result["result_sha256"],
+        "trajectory_schema": STATE_POLICY_TRAJECTORY_SCHEMA,
+        "joint_order": joint_order,
+        "feature_contract": {
+            "numeric_inputs": input_feature_names,
+            "categorical_context": ["target_id", "phase", "action_index"],
+            "action_target": "joint_position_target_rad",
+            "action_dimension": 6,
+        },
+        "normalization": {
+            "source_partition": "train",
+            "source_role": "TRAINING",
+            "sample_count": training_row_count,
+            "statistics": normalization,
+        },
+        "attempted_episode_count": len(episode_entries),
+        "total_row_count": total_row_count,
+        "training_row_count": training_row_count,
+        "role_counts": dict(sorted(role_counts.items())),
+        "partition_role_counts": {
+            partition: dict(sorted(counts.items()))
+            for partition, counts in partition_counts.items()
+        },
+        "episodes": episode_entries,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "simulation_only_behavior_cloning_dataset",
+            "failed_episodes_are_rejection_evidence_not_imitation_targets",
+            "normalization_is_fit_only_on_passing_training_rows",
+            "no_hardware_motion_or_physical_keyboard_authority",
+        ],
+    }
+    manifest["dataset_sha256"] = _canonical_sha256(manifest)
+    return manifest
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -11216,7 +11501,13 @@ def main() -> int:
         action="store_true",
         help="aggregate the complete ARM-218 attempted denominator",
     )
+    parser.add_argument(
+        "--build-state-policy-dataset-manifest",
+        action="store_true",
+        help="compile the content-addressed ARM-219 LM4 dataset contract",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
+    parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -11326,7 +11617,41 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.build_randomized_demonstration_campaign:
+        if args.build_state_policy_dataset_manifest:
+            required = (
+                args.randomized_campaign,
+                args.randomized_result,
+                args.randomized_receipt_root,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-219 dataset compilation requires its campaign, result, "
+                    "and receipt root"
+                )
+            campaign = json.loads(
+                args.randomized_campaign.resolve(strict=True).read_bytes()
+            )
+            randomized_result = json.loads(
+                args.randomized_result.resolve(strict=True).read_bytes()
+            )
+            receipt_root = args.randomized_receipt_root.resolve(strict=True)
+            receipts = {}
+            trajectory_payloads = {}
+            for episode in campaign.get("episodes", []):
+                episode_id = episode["episode_id"]
+                episode_root = receipt_root / episode_id
+                receipts[episode_id] = json.loads(
+                    (episode_root / "episode_receipt.json")
+                    .resolve(strict=True)
+                    .read_bytes()
+                )
+                trajectory_payloads[episode_id] = (
+                    episode_root / "trajectory.jsonl"
+                ).resolve(strict=True).read_bytes()
+            result = build_state_policy_dataset_manifest(
+                campaign, randomized_result, receipts, trajectory_payloads
+            )
+        elif args.build_randomized_demonstration_campaign:
             required = (args.source_result_campaign, args.source_artifact_root)
             if any(item is None for item in required):
                 raise MechanicsContractError(
@@ -12534,30 +12859,33 @@ def main() -> int:
             result = run_contract_campaign(args.layout.resolve(strict=True))
         args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
         evidence_sha256 = result.get(
-            "result_sha256",
+            "dataset_sha256",
             result.get(
-                "receipt_sha256",
+                "result_sha256",
                 result.get(
-                    "binding_sha256",
+                    "receipt_sha256",
                     result.get(
-                        "request_sha256",
+                        "binding_sha256",
                         result.get(
-                            "proposal_sha256",
+                            "request_sha256",
                             result.get(
-                                "policy_sha256",
+                                "proposal_sha256",
                                 result.get(
-                                    "predicate_sha256",
+                                    "policy_sha256",
                                     result.get(
-                                        "plan_sha256",
+                                        "predicate_sha256",
                                         result.get(
-                                            "screen_sha256",
+                                            "plan_sha256",
                                             result.get(
-                                                "manifest_sha256",
+                                                "screen_sha256",
                                                 result.get(
-                                                    "selection_sha256",
+                                                    "manifest_sha256",
                                                     result.get(
-                                                        "demonstration_sha256",
-                                                        result.get("campaign_sha256"),
+                                                        "selection_sha256",
+                                                        result.get(
+                                                            "demonstration_sha256",
+                                                            result.get("campaign_sha256"),
+                                                        ),
                                                     ),
                                                 ),
                                             ),
@@ -12576,6 +12904,8 @@ def main() -> int:
             "status": result["status"],
             "receipt_sha256": evidence_sha256,
         }
+        if "dataset_sha256" in result:
+            status_record["dataset_sha256"] = result["dataset_sha256"]
         if "proposal_sha256" in result:
             status_record["proposal_sha256"] = result["proposal_sha256"]
         if "policy_sha256" in result:
@@ -12621,6 +12951,7 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_REPRESENTATIVE_NATIVE_MECHANICS_REPLAY",
             "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN",
             "COMPLETE_RANDOMIZED_DEMONSTRATION_SMOKE",
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_DATASET",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2
