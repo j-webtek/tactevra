@@ -624,6 +624,22 @@ installed-geometry qualification, contact replay authority, or physical
 motion authority. The next stage is review of this LM4 result before any
 mechanics replay is proposed.
 
+ARM-221 now performs that review independently of the ARM-220 aggregation. The
+retained review at
+`C:\IsaacSim\artifacts\issue190\arm221-state-policy-native-collision-review-001`
+has SHA-256
+`44d76e941161d94280e04abe2956fe45b17d3a0d78bab4f6c0d1cb0ffa99ccab`.
+It reopens the exact manifest, campaign, and all nine native receipts; verifies
+the complete `523`-sample denominator; inspects every sample's raw and excluded
+pair sets; and rechecks the fixed-base invariant. All `523` samples contain
+exactly the five accepted adjacent-link diagnostic exclusions, with zero
+physical-solid, planning-envelope, or unreviewed blockers. The maximum observed
+root deltas are `0.0064012435 mm` and `0.0559529102 deg`, within their retained
+tolerances. Status
+`ACCEPTED_FOR_ZERO_AUTHORITY_MECHANICS_PLAN_COMPILATION` allows only compilation
+of the next LM4 mechanics plans. It does not start Isaac, authorize mechanics
+execution, prove continuous or installed clearance, or grant physical motion.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -800,9 +816,12 @@ ScheduleGen. Neither is a physical success rate.
    identical held-out resets through the unchanged simulation gates next.
 9. **LM4 runtime admission:** all nine learned-policy collision requests are
    bound to their ARM-216 environments and the four governed runtime files are
-   reloaded and rehashed. Isaac and the GPU remain stopped; nine fresh
-   diagnostics are the next boundary.
-10. Expand only after each predecessor produces reviewable evidence.
+   reloaded and rehashed. ARM-220 then completes all nine fresh native
+   diagnostics over `523` samples with no blocker episode.
+10. **LM4 collision review:** ARM-221 independently verifies the exact native
+    evidence and admits only zero-authority mechanics-plan compilation. Contact,
+    release, settling, tracking, and abstention evaluation remain pending.
+11. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
