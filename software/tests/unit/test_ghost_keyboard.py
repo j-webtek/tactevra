@@ -3094,6 +3094,46 @@ def _arm218_receipts(mechanics,campaign):
     return receipts
 
 
+def _arm219_dataset_inputs(mechanics,source,plans,source_receipts):
+    campaign=mechanics.build_randomized_demonstration_campaign(
+        source,plans,source_receipts,master_seed=218
+    )
+    receipts=_arm218_receipts(mechanics,campaign)
+    trajectories={}
+    for index,episode in enumerate(campaign['episodes']):
+        row={
+            'schema':mechanics.STATE_POLICY_TRAJECTORY_SCHEMA,
+            'time_s':0.01,
+            'target_id':episode['target_id'],
+            'phase':'CONTACT',
+            'action_index':0,
+            'target_sequence':1,
+            'joint_position_observed_rad':[index+joint/10 for joint in range(6)],
+            'joint_velocity_observed_rad_s':[joint/100 for joint in range(6)],
+            'joint_position_target_rad':[index+joint/20 for joint in range(6)],
+            'key_center_z_m':0.01,
+            'tip_center_z_m':0.02,
+            'tip_key_separation_m':0.001,
+        }
+        payload=(json.dumps(row,sort_keys=True,separators=(',',':'))+'\n').encode()
+        trajectories[episode['episode_id']]=payload
+        receipt=receipts[episode['episode_id']]
+        receipt.update({
+            'trajectory_schema':mechanics.STATE_POLICY_TRAJECTORY_SCHEMA,
+            'joint_order':['j1','j2','j3','j4','j5','j6'],
+            'native_trace_sample_count':1,
+            'randomized_key_center_board_xy_mm':[1.0,2.0],
+            'trajectory_sha256':hashlib.sha256(payload).hexdigest(),
+        })
+        receipt['receipt_sha256']=mechanics._canonical_sha256({
+            key:value for key,value in receipt.items() if key!='receipt_sha256'
+        })
+    result=mechanics.aggregate_randomized_demonstration_campaign(
+        campaign,receipts
+    )
+    return campaign,result,receipts,trajectories
+
+
 def test_arm218_campaign_is_deterministic_disjoint_and_balanced(arm218_contract):
     mechanics,source,plans,receipts=arm218_contract
     first=mechanics.build_randomized_demonstration_campaign(
@@ -3184,6 +3224,76 @@ def test_arm218_aggregate_rejects_partition_relabeling(arm218_contract):
     })
     with pytest.raises(mechanics.MechanicsContractError,match='partition'):
         mechanics.aggregate_randomized_demonstration_campaign(campaign,receipts)
+
+
+def test_arm219_dataset_manifest_is_deterministic_and_leakage_safe(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    inputs=_arm219_dataset_inputs(mechanics,source,plans,source_receipts)
+    first=mechanics.build_state_policy_dataset_manifest(*inputs)
+    second=mechanics.build_state_policy_dataset_manifest(*inputs)
+    assert first==second
+    assert first['schema']==mechanics.STATE_POLICY_DATASET_MANIFEST_SCHEMA
+    assert first['attempted_episode_count']==first['total_row_count']==24
+    assert first['role_counts']=={
+        'EVALUATION':11,'REJECTION_EVIDENCE':2,'TRAINING':11,
+    }
+    assert first['normalization']['source_partition']=='train'
+    assert first['normalization']['sample_count']==first['training_row_count']==11
+    assert len(first['feature_contract']['numeric_inputs'])==23
+    assert len(first['normalization']['statistics'])==23
+    assert all(
+        episode['role']=='TRAINING'
+        for episode in first['episodes']
+        if episode['role']=='TRAINING'
+    )
+    assert all(
+        episode['partition']=='train' and episode['disposition']=='PASS'
+        for episode in first['episodes']
+        if episode['role']=='TRAINING'
+    )
+    assert all(
+        episode['role']=='REJECTION_EVIDENCE'
+        for episode in first['episodes']
+        if episode['disposition']=='FAIL'
+    )
+    assert first['hardware_access'] is first['physical_authority'] is False
+
+
+def test_arm219_dataset_manifest_rejects_tampered_trajectory(arm218_contract):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    episode_id=campaign['episodes'][0]['episode_id']
+    trajectories[episode_id]+=b'{}\n'
+    with pytest.raises(mechanics.MechanicsContractError,match='digest'):
+        mechanics.build_state_policy_dataset_manifest(
+            campaign,result,receipts,trajectories
+        )
+
+
+def test_arm219_dataset_manifest_rejects_schema_and_joint_order_drift(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    episode_id=campaign['episodes'][0]['episode_id']
+    receipts[episode_id]['joint_order']=['wrong']*6
+    receipts[episode_id]['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipts[episode_id].items()
+        if key!='receipt_sha256'
+    })
+    result=mechanics.aggregate_randomized_demonstration_campaign(
+        campaign,receipts
+    )
+    with pytest.raises(mechanics.MechanicsContractError,match='joint order'):
+        mechanics.build_state_policy_dataset_manifest(
+            campaign,result,receipts,trajectories
+        )
 
 
 def test_arm218_rejects_undeclared_or_out_of_range_parameters(arm218_contract):

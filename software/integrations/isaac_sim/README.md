@@ -1943,11 +1943,22 @@ randomized native replays. Each physics-step row binds:
 - target, phase, action, sequence, and simulation time; and
 - key center, tool-tip center, and tip/key separation.
 
-This is a recorder prerequisite, not a trained policy. The 24-episode smoke
-must be regenerated under the new row schema before compiling normalization
-statistics or an LM4 dataset manifest. Existing ARM-218 evidence is not
-silently relabelled or inferred, and the recorder adds no hardware interface or
-physical authority.
+This is a recorder prerequisite, not a trained policy. A fresh 24-episode
+simulation-only corpus has now been regenerated under this schema: all `24`
+episodes and `33,984` rows passed content, shape, ordering, receipt, and digest
+validation. The result retains `18` passing episodes and `6` mechanics
+rejections without retry or denominator filtering.
+
+The LM4 dataset compiler emits
+`tactevra.isaac_lm4_state_policy_dataset_manifest.v1`. It assigns only passing
+`train` rows to `TRAINING`, passing `validation`/`test` rows to `EVALUATION`, and
+all failed episodes to `REJECTION_EVIDENCE`. It fits its 23-feature
+normalization exclusively on passing training rows, verifies the six-joint
+order across every receipt, and binds every trajectory by SHA-256. The retained
+smoke manifest contains `12,744` training rows and has dataset SHA-256
+`65d5b1f12a392a296ed484c0286d62ba6256d3c8c23bc6d98e952da4b0dc4a84`.
+Existing ARM-218 evidence is not silently relabelled or inferred, and neither
+the recorder nor compiler adds a hardware interface or physical authority.
 
 ### Native H-key contact replay
 
