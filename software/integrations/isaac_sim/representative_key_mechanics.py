@@ -217,6 +217,9 @@ STATE_POLICY_NATIVE_COLLISION_RECEIPT_SCHEMA = (
 STATE_POLICY_NATIVE_COLLISION_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_native_collision_campaign.v1"
 )
+STATE_POLICY_NATIVE_COLLISION_REVIEW_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_native_collision_review.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -13286,6 +13289,251 @@ def aggregate_state_policy_native_collision_campaign(
     return campaign
 
 
+def review_state_policy_native_collision_campaign(
+    campaign: dict[str, Any],
+    manifest: dict[str, Any],
+    receipts: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Independently review ARM-220 before mechanics-plan compilation."""
+    _verify_lm3_digest(campaign, "campaign_sha256", "native collision campaign")
+    _verify_lm3_digest(manifest, "manifest_sha256", "native collision manifest")
+    _require_lm3_zero_authority(campaign, "native collision campaign")
+    _require_lm3_zero_authority(manifest, "native collision manifest")
+    entries = manifest.get("entries")
+    results = campaign.get("results")
+    if (
+        campaign.get("schema") != STATE_POLICY_NATIVE_COLLISION_CAMPAIGN_SCHEMA
+        or campaign.get("status")
+        != "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_NO_BLOCKERS_OBSERVED"
+        or campaign.get("next_required_stage")
+        != "REVIEW_LM4_COLLISION_DIAGNOSTIC_RESULTS"
+        or campaign.get("source_manifest_sha256") != manifest["manifest_sha256"]
+        or campaign.get("blocker_episode_count") != 0
+        or campaign.get("collision_diagnostics_executed")
+        != campaign.get("episode_count")
+        or campaign.get("installed_collision_qualified") is not False
+        or campaign.get("continuous_collision_proven") is not False
+        or campaign.get("native_replay_authorized") is not False
+        or manifest.get("schema") != STATE_POLICY_NATIVE_COLLISION_MANIFEST_SCHEMA
+        or manifest.get("status")
+        != "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_COLLISION_DIAGNOSTICS"
+        or campaign.get("episode_count") != manifest.get("episode_count")
+        or campaign.get("total_bounded_sample_count")
+        != manifest.get("total_bounded_sample_count")
+        or campaign.get("source_runtime_revalidation_campaign_sha256")
+        != manifest.get("source_runtime_revalidation_campaign_sha256")
+        or campaign.get("source_dataset_sha256")
+        != manifest.get("source_dataset_sha256")
+        or campaign.get("source_model_sha256") != manifest.get("source_model_sha256")
+        or not isinstance(entries, list)
+        or not entries
+        or not isinstance(results, list)
+        or len(results) != len(entries)
+    ):
+        raise MechanicsContractError("LM4 collision review boundary changed")
+
+    entries_by_id = {
+        row.get("episode_id"): row for row in entries if isinstance(row, dict)
+    }
+    results_by_id = {
+        row.get("episode_id"): row for row in results if isinstance(row, dict)
+    }
+    if (
+        None in entries_by_id
+        or None in results_by_id
+        or len(entries_by_id) != len(entries)
+        or len(results_by_id) != len(results)
+        or set(entries_by_id) != set(results_by_id)
+        or set(entries_by_id) != set(receipts)
+    ):
+        raise MechanicsContractError("LM4 collision review denominator changed")
+
+    accepted_pairs = {
+        ("robot:base_link", "robot:link1"),
+        ("robot:gripper", "robot:link5"),
+        ("robot:link1", "robot:link2"),
+        ("robot:link2", "robot:link3"),
+        ("robot:link3", "robot:link4"),
+    }
+    reviewed = []
+    total_samples = 0
+    total_overlap_samples = 0
+    maximum_root_translation_delta_mm = 0.0
+    maximum_root_orientation_delta_deg = 0.0
+    target_episode_counts: Counter[str] = Counter()
+    for episode_id, entry in entries_by_id.items():
+        result = results_by_id[episode_id]
+        receipt = receipts[episode_id]
+        _verify_lm3_digest(receipt, "receipt_sha256", f"{episode_id} native receipt")
+        _require_lm3_zero_authority(receipt, f"{episode_id} native receipt")
+        root = receipt.get("root_pose_invariant")
+        samples = receipt.get("samples")
+        pair_observations = receipt.get("pair_observations")
+        observed_pairs = {
+            tuple(row.get("body_pair", []))
+            for row in pair_observations or []
+            if isinstance(row, dict)
+        }
+        if (
+            result.get("target_id") != entry.get("target_id")
+            or result.get("receipt_sha256") != receipt.get("receipt_sha256")
+            or result.get("bounded_sample_count") != entry.get("bounded_sample_count")
+            or result.get("bounded_sample_count") != receipt.get("bounded_sample_count")
+            or result.get("samples_with_overlaps")
+            != receipt.get("samples_with_overlaps")
+            or result.get("blocker_pair_count") != 0
+            or receipt.get("schema") != STATE_POLICY_NATIVE_COLLISION_RECEIPT_SCHEMA
+            or receipt.get("state_policy_episode_id") != episode_id
+            or receipt.get("state_policy_target_id") != entry.get("target_id")
+            or receipt.get("source_state_policy_request_sha256")
+            != entry.get("state_policy_request_sha256")
+            or receipt.get("source_runtime_revalidation_receipt_sha256")
+            != entry.get("runtime_revalidation_receipt_sha256")
+            or receipt.get("collision_screening_executed") is not True
+            or receipt.get("fixed_base_replay_applied") is not True
+            or receipt.get("status") not in {
+                "DIAGNOSTIC_OVERLAPS_OBSERVED",
+                "DIAGNOSTIC_NO_OVERLAPS_OBSERVED",
+            }
+            or receipt.get("physical_solid_blocker_pair_count") != 0
+            or receipt.get("planning_envelope_blocker_pair_count") != 0
+            or receipt.get("unreviewed_blocker_pair_count") != 0
+            or receipt.get("policy_excluded_pair_count") != len(accepted_pairs)
+            or observed_pairs != accepted_pairs
+            or any(
+                row.get("classification")
+                != "ACCEPTED_DIAGNOSTIC_KINEMATIC_NEIGHBOR_EXCLUSION"
+                for row in pair_observations or []
+            )
+            or not isinstance(root, dict)
+            or root.get("status") != "PASS"
+            or not isinstance(samples, list)
+            or len(samples) != entry.get("bounded_sample_count")
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} LM4 collision review evidence changed"
+            )
+        translation = _finite_number(
+            root.get("maximum_translation_delta_mm"),
+            f"{episode_id} review root translation",
+        )
+        orientation = _finite_number(
+            root.get("maximum_orientation_delta_deg"),
+            f"{episode_id} review root orientation",
+        )
+        if (
+            translation
+            > _finite_number(
+                root.get("translation_tolerance_mm"),
+                f"{episode_id} review translation tolerance",
+            )
+            or orientation
+            > _finite_number(
+                root.get("orientation_tolerance_deg"),
+                f"{episode_id} review orientation tolerance",
+            )
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} LM4 collision review root invariant changed"
+            )
+        for sequence, sample in enumerate(samples):
+            raw_pairs = {tuple(pair) for pair in sample.get("raw_collision_pairs", [])}
+            excluded_pairs = {
+                tuple(pair) for pair in sample.get("policy_excluded_pairs", [])
+            }
+            if (
+                sample.get("sample_sequence") != sequence
+                or raw_pairs != accepted_pairs
+                or excluded_pairs != accepted_pairs
+                or sample.get("raw_collision_pair_count") != len(accepted_pairs)
+                or sample.get("policy_excluded_pair_count") != len(accepted_pairs)
+                or sample.get("physical_solid_blocker_pairs") != []
+                or sample.get("planning_envelope_blocker_pairs") != []
+                or sample.get("unreviewed_blocker_pairs") != []
+                or sample.get("remaining_blocker_pair_count") != 0
+            ):
+                raise MechanicsContractError(
+                    f"{episode_id} LM4 collision review sample {sequence} changed"
+                )
+        total_samples += len(samples)
+        total_overlap_samples += receipt["samples_with_overlaps"]
+        maximum_root_translation_delta_mm = max(
+            maximum_root_translation_delta_mm, translation
+        )
+        maximum_root_orientation_delta_deg = max(
+            maximum_root_orientation_delta_deg, orientation
+        )
+        target_episode_counts[str(entry["target_id"])] += 1
+        reviewed.append({
+            "episode_id": episode_id,
+            "target_id": entry["target_id"],
+            "bounded_sample_count": len(samples),
+            "receipt_sha256": receipt["receipt_sha256"],
+            "accepted_policy_excluded_pair_count": len(accepted_pairs),
+            "blocker_pair_count": 0,
+            "root_pose_invariant_status": "PASS",
+        })
+    if (
+        total_samples != campaign.get("total_bounded_sample_count")
+        or total_overlap_samples != campaign.get("total_samples_with_overlaps")
+    ):
+        raise MechanicsContractError("LM4 collision review sample denominator changed")
+
+    review: dict[str, Any] = {
+        "schema": STATE_POLICY_NATIVE_COLLISION_REVIEW_SCHEMA,
+        "status": "ACCEPTED_FOR_ZERO_AUTHORITY_MECHANICS_PLAN_COMPILATION",
+        "source_campaign_sha256": campaign["campaign_sha256"],
+        "source_manifest_sha256": manifest["manifest_sha256"],
+        "source_runtime_revalidation_campaign_sha256": campaign[
+            "source_runtime_revalidation_campaign_sha256"
+        ],
+        "source_dataset_sha256": campaign["source_dataset_sha256"],
+        "source_model_sha256": campaign["source_model_sha256"],
+        "episode_count": len(reviewed),
+        "total_bounded_sample_count": total_samples,
+        "total_samples_with_accepted_exclusions": total_overlap_samples,
+        "target_episode_counts": dict(sorted(target_episode_counts.items())),
+        "accepted_policy_excluded_pairs": [
+            list(pair) for pair in sorted(accepted_pairs)
+        ],
+        "maximum_root_translation_delta_mm": maximum_root_translation_delta_mm,
+        "maximum_root_orientation_delta_deg": maximum_root_orientation_delta_deg,
+        "reviewed_episodes": reviewed,
+        "review_decision": {
+            "collision_diagnostic_denominator_complete": True,
+            "all_raw_pairs_exactly_accepted_exclusions": True,
+            "physical_solid_blockers_absent": True,
+            "planning_envelope_blockers_absent": True,
+            "unreviewed_blockers_absent": True,
+            "fixed_base_root_invariants_passed": True,
+            "mechanics_plan_compilation_allowed": True,
+            "mechanics_replay_execution_authorized": False,
+        },
+        "next_required_stage": "COMPILE_LM4_ZERO_AUTHORITY_MECHANICS_REPLAY_PLANS",
+        "isaac_started": False,
+        "gpu_started": False,
+        "mechanics_replay_executed": False,
+        "installed_collision_qualified": False,
+        "continuous_collision_proven": False,
+        "native_replay_authorized": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "limitations": [
+            "review_accepts_only_zero_authority_mechanics_plan_compilation",
+            "discrete_overlap_queries_are_not_continuous_collision_proof",
+            "exploratory_uninstalled_geometry_cannot_promote_installed_clearance",
+            "mechanics_contact_tracking_settling_and_release_remain_unevaluated",
+            "no_native_replay_or_physical_motion_authority",
+        ],
+    }
+    review["review_sha256"] = _canonical_sha256(review)
+    return review
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -13608,6 +13856,11 @@ def main() -> int:
         action="store_true",
         help="verify the complete LM4 native collision diagnostic denominator",
     )
+    parser.add_argument(
+        "--review-state-policy-native-collision-campaign",
+        action="store_true",
+        help="review ARM-220 evidence before LM4 mechanics-plan compilation",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -13625,6 +13878,7 @@ def main() -> int:
     parser.add_argument("--state-policy-runtime-revalidation-campaign", type=Path)
     parser.add_argument("--state-policy-runtime-revalidation-root", type=Path)
     parser.add_argument("--state-policy-native-manifest", type=Path)
+    parser.add_argument("--state-policy-native-campaign", type=Path)
     parser.add_argument("--state-policy-native-output-dir", type=Path)
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
@@ -13736,7 +13990,34 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.materialize_state_policy_native_collision_inputs:
+        if args.review_state_policy_native_collision_campaign:
+            required = (
+                args.state_policy_native_campaign,
+                args.state_policy_native_manifest,
+                args.state_policy_native_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-221 collision review requires the ARM-220 campaign, "
+                    "manifest, and receipt root"
+                )
+            campaign = json.loads(
+                args.state_policy_native_campaign.resolve(strict=True).read_bytes()
+            )
+            manifest = json.loads(
+                args.state_policy_native_manifest.resolve(strict=True).read_bytes()
+            )
+            native_root = args.state_policy_native_output_dir.resolve(strict=True)
+            receipts = {
+                row["episode_id"]: json.loads((
+                    native_root / row["episode_id"] / "native_receipt.json"
+                ).resolve(strict=True).read_bytes())
+                for row in manifest.get("entries", [])
+            }
+            result = review_state_policy_native_collision_campaign(
+                campaign, manifest, receipts
+            )
+        elif args.materialize_state_policy_native_collision_inputs:
             required = (
                 args.state_policy_runtime_revalidation_campaign,
                 args.state_policy_runtime_revalidation_root,
@@ -15408,6 +15689,8 @@ def main() -> int:
                 ),
             ),
         )
+        if "review_sha256" in result:
+            evidence_sha256 = result["review_sha256"]
         if not isinstance(evidence_sha256, str):
             raise MechanicsContractError("result lacks an evidence digest")
         status_record = {
@@ -15436,6 +15719,8 @@ def main() -> int:
             status_record["demonstration_sha256"] = result["demonstration_sha256"]
         if "campaign_sha256" in result:
             status_record["campaign_sha256"] = result["campaign_sha256"]
+        if "review_sha256" in result:
+            status_record["review_sha256"] = result["review_sha256"]
         args.status_output.write_text(
             json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
         )
@@ -15473,6 +15758,7 @@ def main() -> int:
             "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_COLLISION_DIAGNOSTICS",
             "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_WITH_BLOCKERS",
             "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_NO_BLOCKERS_OBSERVED",
+            "ACCEPTED_FOR_ZERO_AUTHORITY_MECHANICS_PLAN_COMPILATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

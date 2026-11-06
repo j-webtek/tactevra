@@ -3655,6 +3655,93 @@ def _arm219_native_start_sources(arm218_contract):
     return mechanics,revalidation,revalidations,requests,native_inputs
 
 
+def _arm220_complete_collision_sources(arm218_contract):
+    mechanics,revalidation,revalidations,requests,native_inputs=(
+        _arm219_native_start_sources(arm218_contract)
+    )
+    manifest,bundles=mechanics.materialize_state_policy_native_collision_inputs(
+        revalidation,revalidations,requests,native_inputs
+    )
+    accepted_pairs=[
+        ['robot:base_link','robot:link1'],
+        ['robot:gripper','robot:link5'],
+        ['robot:link1','robot:link2'],
+        ['robot:link2','robot:link3'],
+        ['robot:link3','robot:link4'],
+    ]
+    native_receipts={}
+    for entry in manifest['entries']:
+        samples=[]
+        for sequence in range(entry['bounded_sample_count']):
+            samples.append({
+                'sample_id':f'proposal-sample-{sequence:04d}',
+                'sample_sequence':sequence,
+                'raw_collision_pair_count':5,
+                'raw_collision_pairs':accepted_pairs,
+                'policy_excluded_pair_count':5,
+                'policy_excluded_pairs':accepted_pairs,
+                'physical_solid_blocker_pairs':[],
+                'planning_envelope_blocker_pairs':[],
+                'unreviewed_blocker_pairs':[],
+                'remaining_blocker_pair_count':0,
+            })
+        receipt={
+            'schema':mechanics.STATE_POLICY_NATIVE_COLLISION_RECEIPT_SCHEMA,
+            'status':'DIAGNOSTIC_OVERLAPS_OBSERVED',
+            'state_policy_episode_id':entry['episode_id'],
+            'state_policy_target_id':entry['target_id'],
+            'source_state_policy_request_sha256':(
+                entry['state_policy_request_sha256']
+            ),
+            'source_runtime_revalidation_receipt_sha256':(
+                entry['runtime_revalidation_receipt_sha256']
+            ),
+            'source_bindings':{
+                'request_sha256':entry['native_collision_request_sha256'],
+                'fixed_base_replay_plan_sha256':(
+                    entry['native_fixed_base_replay_plan_sha256']
+                ),
+            },
+            'bounded_sample_count':entry['bounded_sample_count'],
+            'samples_with_overlaps':entry['bounded_sample_count'],
+            'unique_collision_pair_count':5,
+            'policy_excluded_pair_count':5,
+            'physical_solid_blocker_pair_count':0,
+            'planning_envelope_blocker_pair_count':0,
+            'unreviewed_blocker_pair_count':0,
+            'pair_observations':[
+                {
+                    'body_pair':pair,
+                    'classification':(
+                        'ACCEPTED_DIAGNOSTIC_KINEMATIC_NEIGHBOR_EXCLUSION'
+                    ),
+                    'persistent_across_all_samples':True,
+                    'sample_count':entry['bounded_sample_count'],
+                }
+                for pair in accepted_pairs
+            ],
+            'samples':samples,
+            'collision_screening_executed':True,
+            'fixed_base_replay_applied':True,
+            'root_pose_invariant':{
+                'status':'PASS',
+                'maximum_translation_delta_mm':0.01,
+                'maximum_orientation_delta_deg':0.06,
+                'translation_tolerance_mm':0.05,
+                'orientation_tolerance_deg':0.1,
+            },
+            'hardware_access':False,'hardware_writes':0,
+            'physical_authority':False,'physical_movements':0,
+            'controller_commands':[],'gate_promotions':[],
+        }
+        receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+        native_receipts[entry['episode_id']]=receipt
+    campaign=mechanics.aggregate_state_policy_native_collision_campaign(
+        manifest,native_receipts
+    )
+    return mechanics,manifest,campaign,native_receipts
+
+
 def test_arm219_collision_samples_interpolate_jumps_and_preserve_phase():
     mechanics=_load_key_mechanics()
     rows=[]
@@ -4034,6 +4121,69 @@ def test_arm220_native_campaign_aggregates_only_complete_receipts(arm218_contrac
     with pytest.raises(mechanics.MechanicsContractError,match='denominator'):
         mechanics.aggregate_state_policy_native_collision_campaign(
             manifest,native_receipts
+        )
+
+
+def test_arm221_collision_review_accepts_only_mechanics_plan_compilation(
+    arm218_contract,
+):
+    mechanics,manifest,campaign,receipts=(
+        _arm220_complete_collision_sources(arm218_contract)
+    )
+    first=mechanics.review_state_policy_native_collision_campaign(
+        campaign,manifest,receipts
+    )
+    second=mechanics.review_state_policy_native_collision_campaign(
+        campaign,manifest,receipts
+    )
+    assert first==second
+    assert first['schema']==mechanics.STATE_POLICY_NATIVE_COLLISION_REVIEW_SCHEMA
+    assert first['status']==(
+        'ACCEPTED_FOR_ZERO_AUTHORITY_MECHANICS_PLAN_COMPILATION'
+    )
+    assert first['episode_count']==manifest['episode_count']
+    assert first['total_bounded_sample_count']==(
+        manifest['total_bounded_sample_count']
+    )
+    assert first['review_decision']['mechanics_plan_compilation_allowed'] is True
+    assert first['review_decision']['mechanics_replay_execution_authorized'] is False
+    assert first['mechanics_replay_executed'] is False
+    assert first['native_replay_authorized'] is False
+    assert first['hardware_access'] is first['physical_authority'] is False
+    assert first['next_required_stage']==(
+        'COMPILE_LM4_ZERO_AUTHORITY_MECHANICS_REPLAY_PLANS'
+    )
+
+
+def test_arm221_collision_review_rejects_changed_pair_disposition(arm218_contract):
+    mechanics,manifest,campaign,receipts=(
+        _arm220_complete_collision_sources(arm218_contract)
+    )
+    episode_id=next(iter(receipts))
+    receipts[episode_id]['samples'][0]['policy_excluded_pairs']=(
+        receipts[episode_id]['samples'][0]['policy_excluded_pairs'][:-1]
+    )
+    receipts[episode_id]['receipt_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in receipts[episode_id].items()
+        if key!='receipt_sha256'
+    })
+    campaign=mechanics.aggregate_state_policy_native_collision_campaign(
+        manifest,receipts
+    )
+    with pytest.raises(mechanics.MechanicsContractError,match='sample 0 changed'):
+        mechanics.review_state_policy_native_collision_campaign(
+            campaign,manifest,receipts
+        )
+
+
+def test_arm221_collision_review_rejects_incomplete_denominator(arm218_contract):
+    mechanics,manifest,campaign,receipts=(
+        _arm220_complete_collision_sources(arm218_contract)
+    )
+    receipts.pop(next(iter(receipts)))
+    with pytest.raises(mechanics.MechanicsContractError,match='denominator'):
+        mechanics.review_state_policy_native_collision_campaign(
+            campaign,manifest,receipts
         )
 
 

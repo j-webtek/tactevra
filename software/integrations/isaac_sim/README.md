@@ -2041,6 +2041,31 @@ pairs. Fixed-base root invariants pass for every episode. The result remains
 zero hardware authority and explicitly leaves installed qualification,
 continuous collision proof, contact replay, and physical replay blocked.
 
+ARM-221 independently reviews that complete native result before mechanics
+planning. The retained review is
+`C:\IsaacSim\artifacts\issue190\arm221-state-policy-native-collision-review-001\review.json`
+with SHA-256
+`44d76e941161d94280e04abe2956fe45b17d3a0d78bab4f6c0d1cb0ffa99ccab`.
+It reloads the ARM-220 manifest, campaign, and all nine receipts; verifies the
+`9`-episode / `523`-sample denominator; checks every per-sample disposition; and
+rechecks each fixed-base root invariant. The result admits only compilation of
+zero-authority LM4 mechanics replay plans. Isaac/GPU start, mechanics execution,
+installed clearance, continuous clearance, native replay, and physical motion
+remain false or blocked.
+
+Reproduce the non-starting review with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/ghost_keyboard_v1.json `
+  --output C:/IsaacSim/artifacts/issue190/arm221-state-policy-native-collision-review-001/review.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm221-state-policy-native-collision-review-001/status.json `
+  --review-state-policy-native-collision-campaign `
+  --state-policy-native-campaign C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001/campaign.json `
+  --state-policy-native-manifest C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001/manifest.json `
+  --state-policy-native-output-dir C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001
+```
+
 Recreate the non-starting native input manifest with:
 
 ```powershell
