@@ -3502,6 +3502,78 @@ def _arm219_collision_sources(mechanics,proposal_campaign):
     return campaign,inputs
 
 
+def _arm219_runtime_admission_sources(mechanics,proposal_campaign):
+    native,inputs=_arm219_collision_sources(mechanics,proposal_campaign)
+    entries=[]
+    common={
+        'virtual_profile_sha256':'v'*64,
+        'robot_import_receipt_sha256':'i'*64,
+        'robot_usd_sha256':'u'*64,
+        'toolchain_lock_sha256':'t'*64,
+    }
+    for target,target_inputs in inputs.items():
+        collision=target_inputs['collision_request']
+        fixed=target_inputs['fixed_base_replay_plan']
+        predicate=target_inputs['station_route_predicate']
+        receipt={
+            'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_COLLISION_RECEIPT_SCHEMA,
+            'status':'DIAGNOSTIC_OVERLAPS_OBSERVED',
+            'representative_target_id':target,
+            'collision_screening_executed':True,
+            'fixed_base_replay_applied':True,
+            'root_pose_invariant':{'status':'PASS'},
+            'source_bindings':{
+                'request_sha256':collision['request_sha256'],
+                'fixed_base_replay_plan_sha256':fixed['plan_sha256'],
+                'station_route_predicate_sha256':predicate['predicate_sha256'],
+                'collision_candidate_sha256':collision[
+                    'collision_candidate_sha256'
+                ],
+                'collision_pair_policy_sha256':collision[
+                    'collision_pair_policy_sha256'
+                ],
+                **common,
+            },
+            'hardware_access':False,'hardware_writes':0,
+            'physical_authority':False,'physical_movements':0,
+            'controller_commands':[],'gate_promotions':[],
+        }
+        receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+        target_inputs['native_receipt']=receipt
+        entries.append({
+            'target_id':target,'directory':target.lower(),
+            'source_arm215_target_plan_sha256':fixed[
+                'source_arm215_target_plan_sha256'
+            ],
+            'document_hashes':{
+                'collision_request.json':collision['request_sha256'],
+                'fixed_base_replay_plan.json':fixed['plan_sha256'],
+                'station_route_predicate.json':predicate['predicate_sha256'],
+            },
+        })
+        result=next(row for row in native['results'] if row['target_id']==target)
+        result.update({
+            'receipt_sha256':receipt['receipt_sha256'],
+            'unreviewed_blocker_pair_count':0,
+            'physical_solid_blocker_pair_count':0,
+            'planning_envelope_blocker_pair_count':0,
+        })
+    manifest={
+        'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_COLLISION_MANIFEST_SCHEMA,
+        'status':'READY_FOR_SELECTED_ZERO_AUTHORITY_NATIVE_REPLAY',
+        'entries':entries,
+        'hardware_access':False,'hardware_writes':0,
+        'physical_authority':False,'physical_movements':0,
+        'controller_commands':[],'gate_promotions':[],
+    }
+    manifest['manifest_sha256']=mechanics._canonical_sha256(manifest)
+    native['source_manifest_sha256']=manifest['manifest_sha256']
+    native['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in native.items() if key!='campaign_sha256'
+    })
+    return manifest,native,inputs
+
+
 def test_arm219_collision_samples_interpolate_jumps_and_preserve_phase():
     mechanics=_load_key_mechanics()
     rows=[]
@@ -3589,6 +3661,90 @@ def test_arm219_collision_request_campaign_rejects_tampered_proposal(
     with pytest.raises(mechanics.MechanicsContractError,match='digest'):
         mechanics.build_state_policy_collision_request_campaign(
             proposal,payloads,native,native_inputs
+        )
+
+
+def test_arm219_collision_runtime_admission_is_deterministic_and_stops_early(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    dataset=mechanics.build_state_policy_dataset_manifest(
+        campaign,result,receipts,trajectories
+    )
+    model=mechanics.fit_state_policy_baseline(dataset,trajectories)
+    evaluation={
+        episode['episode_id']:trajectories[episode['episode_id']]
+        for episode in dataset['episodes'] if episode['role']=='EVALUATION'
+    }
+    proposal,payloads=mechanics.build_state_policy_proposal_replay_campaign(
+        dataset,model,evaluation
+    )
+    native_manifest,native,native_inputs=_arm219_runtime_admission_sources(
+        mechanics,proposal
+    )
+    request_campaign,requests=mechanics.build_state_policy_collision_request_campaign(
+        proposal,payloads,native,native_inputs
+    )
+    first,first_admissions=mechanics.admit_state_policy_collision_request_campaign(
+        dataset,model,proposal,request_campaign,requests,
+        native_manifest,native,native_inputs
+    )
+    second,second_admissions=mechanics.admit_state_policy_collision_request_campaign(
+        dataset,model,proposal,request_campaign,requests,
+        native_manifest,native,native_inputs
+    )
+    assert first==second and first_admissions==second_admissions
+    assert first['schema']==(
+        mechanics.STATE_POLICY_COLLISION_RUNTIME_ADMISSION_CAMPAIGN_SCHEMA
+    )
+    assert first['admission_count']==request_campaign['episode_count']
+    assert first['total_bounded_sample_count']==(
+        request_campaign['total_bounded_sample_count']
+    )
+    assert first['runtime_files_revalidated'] is False
+    assert first['isaac_started'] is first['gpu_started'] is False
+    assert first['collision_diagnostics_executed']==0
+    assert first['fresh_collision_diagnostics_required']==first['admission_count']
+    assert set(first_admissions)==set(requests)
+    for admission in first_admissions.values():
+        assert admission['runtime_files_revalidated'] is False
+        assert admission['collision_diagnostic_executed'] is False
+        assert admission['prior_collision_result_reused'] is False
+        assert admission['hardware_access'] is admission['physical_authority'] is False
+
+
+def test_arm219_collision_runtime_admission_rejects_tampered_model(
+    arm218_contract,
+):
+    mechanics,source,plans,source_receipts=arm218_contract
+    campaign,result,receipts,trajectories=_arm219_dataset_inputs(
+        mechanics,source,plans,source_receipts
+    )
+    dataset=mechanics.build_state_policy_dataset_manifest(
+        campaign,result,receipts,trajectories
+    )
+    model=mechanics.fit_state_policy_baseline(dataset,trajectories)
+    evaluation={
+        episode['episode_id']:trajectories[episode['episode_id']]
+        for episode in dataset['episodes'] if episode['role']=='EVALUATION'
+    }
+    proposal,payloads=mechanics.build_state_policy_proposal_replay_campaign(
+        dataset,model,evaluation
+    )
+    native_manifest,native,native_inputs=_arm219_runtime_admission_sources(
+        mechanics,proposal
+    )
+    request_campaign,requests=mechanics.build_state_policy_collision_request_campaign(
+        proposal,payloads,native,native_inputs
+    )
+    model['weights_by_output_joint'][0][0]+=0.001
+    with pytest.raises(mechanics.MechanicsContractError,match='model_sha256'):
+        mechanics.admit_state_policy_collision_request_campaign(
+            dataset,model,proposal,request_campaign,requests,
+            native_manifest,native,native_inputs
         )
 
 
