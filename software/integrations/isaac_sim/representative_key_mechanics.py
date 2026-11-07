@@ -9971,6 +9971,66 @@ def build_state_policy_native_mechanics_failure_receipt(
     return receipt
 
 
+def build_state_policy_native_execution_progress(
+    *,
+    plan: dict[str, Any],
+    attempted_joint_target_count: int,
+    native_trace_row_count: int,
+    failure_reason: str | None = None,
+    stopped_target: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Describe a complete run or a fail-closed run with retained telemetry."""
+
+    targets = plan.get("joint_targets")
+    planned_count = plan.get("sample_count")
+    if (
+        not isinstance(targets, list)
+        or not isinstance(planned_count, int)
+        or isinstance(planned_count, bool)
+        or planned_count != len(targets)
+    ):
+        raise MechanicsContractError("state-policy target denominator is invalid")
+    for value, label in (
+        (attempted_joint_target_count, "attempted joint target count"),
+        (native_trace_row_count, "native trace row count"),
+    ):
+        if not isinstance(value, int) or isinstance(value, bool) or value < 0:
+            raise MechanicsContractError(f"{label} is invalid")
+    if attempted_joint_target_count > planned_count:
+        raise MechanicsContractError("attempted target count exceeds plan")
+    if failure_reason is None:
+        if stopped_target is not None or attempted_joint_target_count != planned_count:
+            raise MechanicsContractError("complete execution progress is inconsistent")
+        return {
+            "complete": True,
+            "failure_reason": None,
+            "stopped_at_sequence": None,
+            "stopped_phase": None,
+            "stopped_action_index": None,
+            "planned_joint_target_count": planned_count,
+            "attempted_joint_target_count": attempted_joint_target_count,
+            "native_trace_row_count": native_trace_row_count,
+            "native_trace_retained": True,
+            "automatic_retry_performed": False,
+        }
+    if failure_reason != "ROOT_INVARIANT" or not isinstance(stopped_target, dict):
+        raise MechanicsContractError("retained execution failure is unsupported")
+    if stopped_target not in targets or attempted_joint_target_count == 0:
+        raise MechanicsContractError("stopped target is inconsistent with the plan")
+    return {
+        "complete": False,
+        "failure_reason": failure_reason,
+        "stopped_at_sequence": stopped_target.get("sequence"),
+        "stopped_phase": stopped_target.get("phase"),
+        "stopped_action_index": stopped_target.get("action_index"),
+        "planned_joint_target_count": planned_count,
+        "attempted_joint_target_count": attempted_joint_target_count,
+        "native_trace_row_count": native_trace_row_count,
+        "native_trace_retained": True,
+        "automatic_retry_performed": False,
+    }
+
+
 def run_drive_controlled_robot_h_replay(
     *,
     replay_plan_path: Path,
@@ -10437,6 +10497,8 @@ def run_drive_controlled_robot_h_replay(
         root_records = []
         tracking = []
         native_trace = []
+        runtime_failure_reason = None
+        stopped_target = None
         previous_ns = int(targets[0]["time_from_start_ns"])
         elapsed_steps = 0
         for target in targets:
@@ -10499,20 +10561,27 @@ def run_drive_controlled_robot_h_replay(
             root["sequence"] = target["sequence"]
             root_records.append(root)
             if not root["passed"]:
+                if state_policy_plan:
+                    runtime_failure_reason = "ROOT_INVARIANT"
+                    stopped_target = target
+                    break
                 raise RuntimeError(f"root invariant failed at sequence {target['sequence']}")
         timeline.stop()
 
         action_assessments = []
-        for action_index in (0, 1):
-            rows = [row for row in native_trace if row["action_index"] == action_index]
-            assessment = assess_native_key_trace(
-                profile,
-                rows,
-                rest_key_z_m=settled_z,
-                target_id=target_id,
-            )
-            action_assessments.append({"action_index": action_index, "assessment": assessment})
-        maximum_tracking_error = max(row["maximum_joint_error_rad"] for row in tracking)
+        if runtime_failure_reason is None:
+            for action_index in (0, 1):
+                rows = [row for row in native_trace if row["action_index"] == action_index]
+                assessment = assess_native_key_trace(
+                    profile,
+                    rows,
+                    rest_key_z_m=settled_z,
+                    target_id=target_id,
+                )
+                action_assessments.append({"action_index": action_index, "assessment": assessment})
+        maximum_tracking_error = max(
+            (row["maximum_joint_error_rad"] for row in tracking), default=0.0
+        )
         maximum_tracking_error_allowed = (
             _finite_number(
                 plan["execution_contract"].get("maximum_joint_tracking_error_rad"),
@@ -10530,7 +10599,8 @@ def run_drive_controlled_robot_h_replay(
             else None
         )
         passed = (
-            all(item["assessment"]["accepted"] for item in action_assessments)
+            runtime_failure_reason is None
+            and all(item["assessment"]["accepted"] for item in action_assessments)
             and all(
                 item["assessment"]["resolved_key"] == target_id
                 for item in action_assessments
@@ -10585,7 +10655,11 @@ def run_drive_controlled_robot_h_replay(
                     )
                 )
             ),
-            "evidence_class": "PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT",
+            "evidence_class": (
+                "PROVISIONAL_NATIVE_EXECUTION_FAILURE_WITH_PARTIAL_TRACE"
+                if runtime_failure_reason is not None
+                else "PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT"
+            ),
             "source_plan_sha256": plan_hash,
             "target_id": target_id,
             "physics_dt_s": dt,
@@ -10661,6 +10735,21 @@ def run_drive_controlled_robot_h_replay(
                 "fresh_mechanics_replay": True,
                 "prior_mechanics_result_reused": False,
             })
+            receipt.update(
+                build_state_policy_native_execution_progress(
+                    plan=plan,
+                    attempted_joint_target_count=len(tracking),
+                    native_trace_row_count=len(native_trace),
+                    failure_reason=runtime_failure_reason,
+                    stopped_target=stopped_target,
+                )
+            )
+            if runtime_failure_reason is not None:
+                receipt["limitations"] += [
+                    "execution_stopped_before_complete_native_mechanics_assessment",
+                    "partial_trace_contains_only_steps_observed_before_fail_closed_stop",
+                    "failure_receipt_does_not_authorize_retry",
+                ]
         if randomized_episode is not None:
             receipt["randomized_episode_id"] = randomized_episode["episode_id"]
             receipt["randomized_parameters"] = dict(randomized_parameters)

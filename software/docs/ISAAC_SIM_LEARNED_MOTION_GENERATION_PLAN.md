@@ -679,6 +679,17 @@ wrapper now preserves the same fail-closed receipt shape for future runtime
 errors. The next bounded increment is root-drift diagnosis with retained step
 telemetry; it is not permission to replay this episode automatically.
 
+ARM-226 implements that retained-telemetry path without starting Isaac or
+replaying the failed episode. A future separately authorized state-policy run
+that crosses the fixed-base tolerance now stops cleanly and signs the partial
+native trace, joint-tracking records, and root-pose observations through the
+failing target. Its receipt records the planned and attempted denominators and
+the exact stop sequence, phase, and action, remains blocked and incomplete,
+skips incomplete action scoring, and records no automatic retry. The ARM-225
+receipt remains unchanged and error-only; its discarded trace cannot be
+recovered retroactively. This instrumentation makes the next failure
+diagnosable but is not authority for another attempt.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -884,7 +895,12 @@ ScheduleGen. Neither is a physical success rate.
     endpoints. The signed blocked receipt retains input lineage and the error
     but not the discarded in-memory trace. Root-drift telemetry and diagnosis
     are required before another governed episode attempt.
-15. Expand only after each predecessor produces reviewable evidence.
+15. **LM4 partial telemetry retention:** ARM-226 changes only the future
+    state-policy failure path. A root-invariant stop now retains and signs the
+    partial native trace, joint tracking, root observations, attempted target
+    count, and exact stop location while remaining incomplete, blocked, and
+    non-retrying. It does not rerun or alter the ARM-225 result.
+16. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
