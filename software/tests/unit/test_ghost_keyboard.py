@@ -4795,3 +4795,62 @@ def test_arm225_runtime_failure_receipt_retains_lineage_without_claiming_trace()
     mechanics._verify_lm3_digest(
         receipt,'receipt_sha256','state-policy failure receipt'
     )
+
+
+def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    _,native_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    plan=next(iter(native_plans.values()))
+    progress=mechanics.build_state_policy_native_execution_progress(
+        plan=plan,
+        attempted_joint_target_count=2,
+        native_trace_row_count=7,
+        failure_reason='ROOT_INVARIANT',
+        stopped_target=plan['joint_targets'][1],
+    )
+    assert progress=={
+        'complete':False,
+        'failure_reason':'ROOT_INVARIANT',
+        'stopped_at_sequence':1,
+        'stopped_phase':'CONTACT',
+        'stopped_action_index':1,
+        'planned_joint_target_count':2,
+        'attempted_joint_target_count':2,
+        'native_trace_row_count':7,
+        'native_trace_retained':True,
+        'automatic_retry_performed':False,
+    }
+
+
+def test_arm226_complete_progress_requires_full_target_denominator():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    _,native_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    plan=next(iter(native_plans.values()))
+    with pytest.raises(
+        mechanics.MechanicsContractError,match='complete execution progress'
+    ):
+        mechanics.build_state_policy_native_execution_progress(
+            plan=plan,
+            attempted_joint_target_count=1,
+            native_trace_row_count=3,
+        )

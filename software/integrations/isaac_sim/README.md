@@ -2112,6 +2112,20 @@ failures instead of leaving only an unsigned error status. This result is a
 real simulator failure, not a passing mechanics result, and grants no hardware
 access or physical authority.
 
+ARM-226 prepares retained telemetry for the next separately authorized
+state-policy mechanics attempt; it does not rerun ARM-225. On a future
+fixed-base root-invariant failure, the state-policy runner now stops the
+timeline without throwing away its in-memory evidence and writes a signed,
+blocked `PROVISIONAL_NATIVE_EXECUTION_FAILURE_WITH_PARTIAL_TRACE` receipt. The
+receipt preserves every native trajectory row, per-target joint tracking
+record, and root-pose observation through the failing target, together with
+the planned and attempted target counts and exact stop sequence, phase, and
+action. It marks the run incomplete, performs no partial action assessment,
+and explicitly records that no automatic retry occurred. Other replay modes
+retain their existing exception behavior. The historical ARM-225 receipt
+remains error-only because discarded telemetry cannot be reconstructed after
+the fact.
+
 Reproduce the non-starting input materialization with:
 
 ```powershell
