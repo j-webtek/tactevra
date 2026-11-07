@@ -10243,6 +10243,7 @@ def run_drive_controlled_robot_h_replay(
     randomized_source_receipt_sha256: str | None = None,
     randomized_trajectory_path: Path | None = None,
     state_policy_manifest_sha256: str | None = None,
+    state_policy_request_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Replay selected joint targets against one native key in Isaac."""
 
@@ -10291,9 +10292,27 @@ def run_drive_controlled_robot_h_replay(
         == "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_KEY_MECHANICS_REPLAY"
     )
     state_policy_plan = (
-        plan.get("schema") == STATE_POLICY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
-        and plan.get("status")
-        == "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_STATE_POLICY_MECHANICS_REPLAY"
+        (
+            plan.get("schema") == STATE_POLICY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+            and plan.get("status")
+            == "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_STATE_POLICY_MECHANICS_REPLAY"
+        )
+        or (
+            plan.get("schema")
+            == STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+            and plan.get("status")
+            == "READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW"
+            and plan.get("fixed_fixture_correction_applied") is True
+            and plan.get("fixed_fixture_configuration") == {
+                "fixed_joint_enabled_explicitly": True,
+                "solver_position_iteration_count": (
+                    FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
+                ),
+                "solver_velocity_iteration_count": (
+                    FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT
+                ),
+            }
+        )
     )
     target_id = (
         plan.get("target_id")
@@ -10939,6 +10958,10 @@ def run_drive_controlled_robot_h_replay(
                 "fresh_mechanics_replay": True,
                 "prior_mechanics_result_reused": False,
             })
+            if state_policy_request_sha256 is not None:
+                receipt["source_single_replay_request_sha256"] = (
+                    state_policy_request_sha256
+                )
             receipt.update(
                 build_state_policy_native_execution_progress(
                     plan=plan,
@@ -11012,6 +11035,12 @@ def run_drive_controlled_robot_h_replay(
                 error_type=type(exc).__name__,
                 error_message=str(exc),
             )
+            if state_policy_request_sha256 is not None:
+                receipt["source_single_replay_request_sha256"] = (
+                    state_policy_request_sha256
+                )
+                receipt.pop("receipt_sha256", None)
+                receipt["receipt_sha256"] = _canonical_sha256(receipt)
             output_path.write_text(
                 json.dumps(receipt, indent=2, sort_keys=True) + "\n",
                 encoding="utf-8",
@@ -11885,6 +11914,101 @@ def run_state_policy_native_mechanics_episode(
         raise MechanicsContractError(
             "state-policy native mechanics receipt boundary changed"
         )
+    return receipt
+
+
+def run_state_policy_fixed_fixture_single_replay(
+    *,
+    request_path: Path,
+    authorization_statement: str,
+    correction_review_path: Path,
+    corrected_manifest_path: Path,
+    replay_plan_path: Path,
+    layout_path: Path,
+    drive_profile_path: Path,
+    virtual_profile_path: Path,
+    robot_import_receipt_path: Path,
+    robot_usd_path: Path,
+    output_path: Path,
+    status_path: Path,
+) -> dict[str, Any]:
+    """Execute the one ARM-232 attempt only after exact offline admission."""
+
+    request = json.loads(request_path.resolve(strict=True).read_bytes())
+    request_hash = _require_canonical_hash(
+        request, "request_sha256", "ARM-232 single replay request"
+    )
+    correction_review = json.loads(
+        correction_review_path.resolve(strict=True).read_bytes()
+    )
+    corrected_manifest = json.loads(
+        corrected_manifest_path.resolve(strict=True).read_bytes()
+    )
+    corrected_plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
+    episode_id = request.get("episode_id")
+    expected_request = build_state_policy_fixed_fixture_single_replay_request(
+        correction_review, corrected_manifest, corrected_plan, episode_id
+    )
+    attempt = request.get("attempt_contract", {})
+    if (
+        request != expected_request
+        or authorization_statement != request.get("required_authorization_statement")
+        or attempt.get("maximum_attempt_count") != 1
+        or attempt.get("automatic_retry_allowed") is not False
+        or attempt.get("fresh_runtime_file_revalidation_required") is not True
+        or attempt.get("hardware_or_physical_authority_allowed") is not False
+        or request.get("native_replay_authorized") is not False
+        or request.get("mechanics_replays_executed") != 0
+    ):
+        raise MechanicsContractError("ARM-232 authorization boundary changed")
+
+    runtime = request["runtime_files"]
+    layout_profile = build_profile(layout_path.resolve(strict=True))
+    drive_bytes = drive_profile_path.resolve(strict=True).read_bytes()
+    virtual_bytes = virtual_profile_path.resolve(strict=True).read_bytes()
+    robot_bytes = robot_usd_path.resolve(strict=True).read_bytes()
+    import_receipt = json.loads(
+        robot_import_receipt_path.resolve(strict=True).read_bytes()
+    )
+    import_hash = _require_canonical_hash(
+        import_receipt, "receipt_sha256", "robot import receipt"
+    )
+    if (
+        runtime.get("key_mechanics_profile", {}).get("sha256")
+        != layout_profile.get("profile_sha256")
+        or runtime.get("drive_profile", {}).get("sha256")
+        != hashlib.sha256(drive_bytes).hexdigest()
+        or runtime.get("virtual_profile", {}).get("sha256")
+        != hashlib.sha256(virtual_bytes).hexdigest()
+        or runtime.get("robot_usd", {}).get("sha256")
+        != hashlib.sha256(robot_bytes).hexdigest()
+        or runtime.get("robot_usd", {}).get("size_bytes") != len(robot_bytes)
+        or runtime.get("robot_import_receipt", {}).get("sha256") != import_hash
+    ):
+        raise MechanicsContractError("ARM-232 fresh runtime revalidation failed")
+
+    receipt = run_drive_controlled_robot_h_replay(
+        replay_plan_path=replay_plan_path,
+        layout_path=layout_path,
+        drive_profile_path=drive_profile_path,
+        robot_usd_path=robot_usd_path,
+        output_path=output_path,
+        status_path=status_path,
+        state_policy_manifest_sha256=corrected_manifest["manifest_sha256"],
+        state_policy_request_sha256=request_hash,
+    )
+    if (
+        receipt.get("schema") != STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+        or receipt.get("episode_id") != episode_id
+        or receipt.get("source_manifest_sha256")
+        != corrected_manifest["manifest_sha256"]
+        or receipt.get("source_plan_sha256") != corrected_plan["plan_sha256"]
+        or receipt.get("source_single_replay_request_sha256") != request_hash
+        or receipt.get("automatic_retry_performed") is not False
+        or receipt.get("hardware_access") is not False
+        or receipt.get("physical_authority") is not False
+    ):
+        raise MechanicsContractError("ARM-232 native receipt boundary changed")
     return receipt
 
 
