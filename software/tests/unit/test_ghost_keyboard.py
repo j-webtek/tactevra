@@ -4797,6 +4797,91 @@ def test_arm225_runtime_failure_receipt_retains_lineage_without_claiming_trace()
     )
 
 
+def test_arm227_root_drift_plan_is_exact_bounded_and_nonexecuting():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    native_plan=next(iter(native_plans.values()))
+    failure=mechanics.build_state_policy_native_mechanics_failure_receipt(
+        manifest_sha256=manifest['manifest_sha256'],
+        plan=native_plan,
+        error_type='RuntimeError',
+        error_message='root invariant failed at sequence 0',
+    )
+    first=mechanics.build_state_policy_root_drift_diagnostic_plan(
+        manifest,native_plan,failure
+    )
+    second=mechanics.build_state_policy_root_drift_diagnostic_plan(
+        manifest,native_plan,failure
+    )
+    assert first==second
+    assert first['schema']==(
+        mechanics.STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_PLAN_SCHEMA
+    )
+    assert first['source_manifest_sha256']==manifest['manifest_sha256']
+    assert first['source_plan_sha256']==native_plan['plan_sha256']
+    assert first['source_failure_receipt_sha256']==failure['receipt_sha256']
+    assert first['observed_failure']['failure_preceded_contact'] is True
+    comparison=first['fixture_comparison']
+    assert comparison['failed_state_policy_path']=={
+        'solver_position_iteration_count':64,
+        'solver_velocity_iteration_count_authored':False,
+        'fixed_joint_enabled_explicitly':False,
+    }
+    assert comparison['known_passing_fixed_base_path']=={
+        'solver_position_iteration_count':64,
+        'solver_velocity_iteration_count':8,
+        'fixed_joint_enabled_explicitly':True,
+    }
+    probe=first['probe_contract']
+    assert probe['trajectory_playback'] is probe['key_contact'] is False
+    assert probe['joint_target_commands']==0
+    assert len(probe['checkpoints'])==4
+    assert first['isaac_started'] is first['gpu_started'] is False
+    assert first['diagnostics_executed']==0
+    assert first['hardware_access'] is first['physical_authority'] is False
+    mechanics._require_canonical_hash(first,'plan_sha256','root drift plan')
+
+
+def test_arm227_root_drift_plan_rejects_failure_lineage_drift():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    native_plan=next(iter(native_plans.values()))
+    failure=mechanics.build_state_policy_native_mechanics_failure_receipt(
+        manifest_sha256=manifest['manifest_sha256'],
+        plan=native_plan,
+        error_type='RuntimeError',
+        error_message='root invariant failed at sequence 0',
+    )
+    changed=json.loads(json.dumps(failure))
+    changed['source_plan_sha256']='0'*64
+    changed.pop('receipt_sha256')
+    changed['receipt_sha256']=mechanics._canonical_sha256(changed)
+    with pytest.raises(mechanics.MechanicsContractError,match='lineage changed'):
+        mechanics.build_state_policy_root_drift_diagnostic_plan(
+            manifest,native_plan,changed
+        )
+
+
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
     mechanics,sources,runtime=_arm222_compilation_sources()
     mechanics_campaign,plans=(

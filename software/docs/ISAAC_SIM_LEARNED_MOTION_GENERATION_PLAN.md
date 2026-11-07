@@ -690,6 +690,18 @@ receipt remains unchanged and error-only; its discarded trace cannot be
 recovered retroactively. This instrumentation makes the next failure
 diagnosable but is not authority for another attempt.
 
+ARM-227 turns that diagnosis boundary into a signed, non-executing plan. It
+binds the exact ARM-224 manifest and `SPACE` plan to the ARM-225 blocked
+receipt, preserving the stop at sequence `723` before first contact at `1061`.
+The plan records the concrete fixture difference: the failed LM4 path authored
+64 solver-position iterations but omitted the known-passing path's eight
+solver-velocity iterations and explicit fixed-joint enable. Its proposed probe
+uses the known-passing fixture and observes the root at four lifecycle
+checkpoints through five settle updates, with no trajectory playback, joint
+targets, key contact, retry, hardware access, or physical authority. Planning
+does not start Isaac or a GPU; executing the diagnostic remains a separate
+authorization boundary.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -900,7 +912,12 @@ ScheduleGen. Neither is a physical success rate.
     partial native trace, joint tracking, root observations, attempted target
     count, and exact stop location while remaining incomplete, blocked, and
     non-retrying. It does not rerun or alter the ARM-225 result.
-16. Expand only after each predecessor produces reviewable evidence.
+16. **LM4 root-fixture diagnostic planning:** ARM-227 signs the exact failed
+    episode lineage and the fixed-fixture delta, then defines a four-checkpoint
+    static-root probe using the known-passing fixture configuration. Plan
+    generation starts no simulator/GPU, emits no trajectory or joint command,
+    and does not authorize the probe or another mechanics replay.
+17. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

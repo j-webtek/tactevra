@@ -241,6 +241,9 @@ STATE_POLICY_NATIVE_MECHANICS_MANIFEST_SCHEMA = (
 STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_native_mechanics_receipt.v1"
 )
+STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_PLAN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_root_drift_diagnostic_plan.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -9872,6 +9875,130 @@ def validate_state_policy_native_mechanics_episode(
     return entry
 
 
+def build_state_policy_root_drift_diagnostic_plan(
+    manifest: dict[str, Any],
+    plan: dict[str, Any],
+    failure_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind one failed LM4 attempt into a non-executing root-fixture probe."""
+    episode_id = failure_receipt.get("episode_id")
+    if not isinstance(episode_id, str) or not episode_id:
+        raise MechanicsContractError("root-drift failure episode is missing")
+    entry = validate_state_policy_native_mechanics_episode(
+        manifest, plan, episode_id
+    )
+    _verify_lm3_digest(
+        failure_receipt, "receipt_sha256", "root-drift failure receipt"
+    )
+    _require_lm3_zero_authority(failure_receipt, "root-drift failure receipt")
+    stopped_sequence = failure_receipt.get("stopped_at_sequence")
+    stopped_target = next(
+        (
+            target
+            for target in plan.get("joint_targets", [])
+            if target.get("sequence") == stopped_sequence
+        ),
+        None,
+    )
+    contact_endpoints = plan.get("contact_endpoint_sequences")
+    if (
+        failure_receipt.get("schema")
+        != STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+        or failure_receipt.get("status")
+        != "BLOCKED_STATE_POLICY_NATIVE_MECHANICS_REPLAY"
+        or failure_receipt.get("complete") is not False
+        or failure_receipt.get("failure_reason") != "ROOT_INVARIANT"
+        or failure_receipt.get("source_manifest_sha256")
+        != manifest.get("manifest_sha256")
+        or failure_receipt.get("source_plan_sha256") != plan.get("plan_sha256")
+        or failure_receipt.get("source_mechanics_plan_sha256")
+        != plan.get("source_mechanics_plan_sha256")
+        or failure_receipt.get("target_id") != entry.get("target_id")
+        or failure_receipt.get("automatic_retry_performed") is not False
+        or not isinstance(stopped_sequence, int)
+        or not isinstance(stopped_target, dict)
+        or failure_receipt.get("stopped_phase") != stopped_target.get("phase")
+        or failure_receipt.get("stopped_action_index")
+        != stopped_target.get("action_index")
+        or not isinstance(contact_endpoints, list)
+        or len(contact_endpoints) != 2
+        or stopped_sequence > min(contact_endpoints)
+    ):
+        raise MechanicsContractError("root-drift failure lineage changed")
+
+    diagnostic: dict[str, Any] = {
+        "schema": STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_PLAN_SCHEMA,
+        "status": "READY_FOR_SEPARATELY_AUTHORIZED_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
+        "episode_id": episode_id,
+        "target_id": entry["target_id"],
+        "source_manifest_sha256": manifest["manifest_sha256"],
+        "source_plan_sha256": plan["plan_sha256"],
+        "source_failure_receipt_sha256": failure_receipt["receipt_sha256"],
+        "observed_failure": {
+            "reason": "ROOT_INVARIANT",
+            "stopped_at_sequence": stopped_sequence,
+            "stopped_phase": stopped_target["phase"],
+            "stopped_action_index": stopped_target.get("action_index"),
+            "first_contact_endpoint_sequence": min(contact_endpoints),
+            "failure_preceded_contact": True,
+        },
+        "fixture_comparison": {
+            "failed_state_policy_path": {
+                "solver_position_iteration_count": (
+                    FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
+                ),
+                "solver_velocity_iteration_count_authored": False,
+                "fixed_joint_enabled_explicitly": False,
+            },
+            "known_passing_fixed_base_path": {
+                "solver_position_iteration_count": (
+                    FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
+                ),
+                "solver_velocity_iteration_count": (
+                    FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT
+                ),
+                "fixed_joint_enabled_explicitly": True,
+            },
+            "diagnostic_fixture": "KNOWN_PASSING_FIXED_BASE_CONFIGURATION",
+        },
+        "probe_contract": {
+            "trajectory_playback": False,
+            "joint_target_commands": 0,
+            "key_contact": False,
+            "settle_update_count": FIXED_BASE_SETTLE_UPDATE_COUNT,
+            "checkpoints": [
+                "AFTER_FIXTURE_AUTHORING",
+                "AFTER_PHYSICS_INITIALIZATION",
+                "AFTER_TIMELINE_START",
+                "AFTER_BOUNDED_SETTLE",
+            ],
+            "capture_root_translation_and_rotation_at_each_checkpoint": True,
+            "stop_on_first_root_invariant_failure": True,
+            "automatic_retry_allowed": False,
+        },
+        "isaac_started": False,
+        "gpu_started": False,
+        "diagnostics_executed": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "SEPARATELY_AUTHORIZE_ONE_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC"
+        ),
+        "limitations": [
+            "plan_generation_does_not_start_isaac_or_a_gpu",
+            "diagnostic_does_not_replay_the_failed_trajectory",
+            "diagnostic_does_not_command_joints_or_contact_a_key",
+            "diagnostic_result_cannot_authorize_physical_motion",
+        ],
+    }
+    diagnostic["plan_sha256"] = _canonical_sha256(diagnostic)
+    return diagnostic
+
+
 def build_state_policy_native_mechanics_failure_receipt(
     *,
     manifest_sha256: str,
@@ -15316,6 +15443,14 @@ def main() -> int:
             "without retry or physical authority"
         ),
     )
+    parser.add_argument(
+        "--build-state-policy-root-drift-diagnostic-plan",
+        action="store_true",
+        help=(
+            "bind one stopped LM4 attempt into a non-executing fixed-root "
+            "diagnostic plan"
+        ),
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -15345,6 +15480,7 @@ def main() -> int:
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
+    parser.add_argument("--source-failure-receipt", type=Path)
     parser.add_argument("--trajectory-output", type=Path)
     parser.add_argument("--source-result-campaign", type=Path)
     parser.add_argument("--source-artifact-root", type=Path)
@@ -16158,6 +16294,28 @@ def main() -> int:
             }
             result = aggregate_randomized_demonstration_campaign(
                 campaign, receipts
+            )
+        elif args.build_state_policy_root_drift_diagnostic_plan:
+            required = (
+                args.state_policy_native_mechanics_manifest,
+                args.replay_plan,
+                args.source_failure_receipt,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-227 planning requires the ARM-224 manifest and plan "
+                    "plus the ARM-225 failure receipt"
+                )
+            result = build_state_policy_root_drift_diagnostic_plan(
+                json.loads(
+                    args.state_policy_native_mechanics_manifest.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.replay_plan.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.source_failure_receipt.resolve(strict=True).read_bytes()
+                ),
             )
         elif args.run_state_policy_native_mechanics_episode:
             required = (
@@ -17455,6 +17613,7 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_RUNTIME_ADMISSION",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_INPUT_MATERIALIZATION",
             "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_STATE_POLICY_MECHANICS_REPLAYS",
+            "READY_FOR_SEPARATELY_AUTHORIZED_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

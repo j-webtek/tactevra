@@ -2126,6 +2126,34 @@ retain their existing exception behavior. The historical ARM-225 receipt
 remains error-only because discarded telemetry cannot be reconstructed after
 the fact.
 
+ARM-227 prepares the separately authorized root-fixture diagnostic without
+starting Isaac or replaying ARM-225. The signed plan is retained at
+`C:\IsaacSim\artifacts\issue190\arm227-state-policy-root-drift-diagnostic-plan-001\plan.json`
+with SHA-256
+`03af9907a6e3e3c071d6fc23d515c999345ff675005196a3268a37686617c107`.
+It binds the exact ARM-224 manifest/episode plan and ARM-225 failure receipt,
+records that the stop at sequence `723` preceded contact at sequence `1061`,
+and captures the fixture mismatch: the failed LM4 path omitted the known-
+passing path's eight solver-velocity iterations and explicit fixed-joint
+enable. A future separately authorized diagnostic may observe the root after
+fixture authoring, physics initialization, timeline start, and five bounded
+settle updates using the known-passing fixture configuration. It commands no
+joint targets, plays no trajectory, contacts no key, retries nothing, and
+grants no physical authority.
+
+Reproduce the non-starting ARM-227 diagnostic planning with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output C:/IsaacSim/artifacts/issue190/arm227-state-policy-root-drift-diagnostic-plan-001/plan.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm227-state-policy-root-drift-diagnostic-plan-001/status.json `
+  --build-state-policy-root-drift-diagnostic-plan `
+  --state-policy-native-mechanics-manifest C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001/manifest.json `
+  --replay-plan C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --source-failure-receipt C:/IsaacSim/artifacts/issue190/arm225-state-policy-native-mechanics-episode-001/episode-ef340d0ad2740c118d87/receipt.json
+```
+
 Reproduce the non-starting input materialization with:
 
 ```powershell
