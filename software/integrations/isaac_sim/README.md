@@ -2344,6 +2344,52 @@ python software/integrations/isaac_sim/representative_key_mechanics.py `
   --representative-cartesian-request C:/IsaacSim/artifacts/issue190/arm216-representative-native-admission-001/space/cartesian_request.json
 ```
 
+ARM-238 materializes that dependency through the existing ICQ-1 contract. The
+selected `stylus_attachment` manifest inventories all 19 required collision
+bodies and the clearance policy, but leaves every row `PENDING`: the supplied
+ruler and layout photos do not establish accepted local-frame 3D primitives,
+pose/geometry uncertainty, or a depressed SPACE-key envelope. Twelve unique
+photos are nevertheless content-addressed in the receipt as
+`REFERENCE_ONLY_NOT_ACCEPTED_MEASUREMENT`, so later accepted measurements can
+trace back to the exact available evidence without silently promoting it. The
+separate `no_attachment` contract remains independently testable with 18
+bodies and a different base-contract hash. No profile, route, IK, collision
+screen, replay, hardware access, or physical authority is produced.
+
+The authoritative retained package is:
+
+`C:\IsaacSim\artifacts\issue190\arm238-installed-collision-measurement-intake-002`
+
+- manifest file SHA-256:
+  `0cd9b2f1509b23990549e046d7c42d9265a74f749290333d2e61d946684966cb`
+- validation report SHA-256:
+  `0a11ebe2d0ad1233916ed4aea5279e67bc5dc194fca139e1abcf42aa170cc556`
+- receipt SHA-256:
+  `15b475de072a2d28d38c3f453eee2eb4e57e0e68d7962418ba646d6d1033c68a`
+
+Rebuild with the exact photo files named and hashed in `receipt.json`:
+
+```powershell
+$out = 'C:/IsaacSim/artifacts/issue190/arm238-installed-collision-measurement-intake-002'
+$args = @(
+  'software/integrations/isaac_sim/installed_collision_measurement_intake.py',
+  '--workspace', (Get-Location).Path,
+  '--arm237-plan', 'C:/IsaacSim/artifacts/issue190/arm237-state-policy-lifted-route-geometry-intake-001/plan.json',
+  '--output-dir', $out,
+  '--captured-at-utc', '2026-11-07T21:15:00Z',
+  '--attachment-profile', 'stylus_attachment'
+)
+foreach ($path in $referencePhotoPaths) {
+  $args += @('--reference-artifact', $path)
+}
+python @args
+```
+
+The next bounded dependency is to replace only supported `PENDING` rows with
+accepted measured primitives, source hashes, instrument resolution, and
+uncertainty. Missing rows remain blockers; the provisional SPACE footprint and
+photo readings are not enough by themselves.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
