@@ -5550,6 +5550,75 @@ def test_arm235_plans_bounded_offline_transit_clearance_correction():
         )
 
 
+def test_arm236_blocks_reuse_of_noncontact_route_that_compresses_key():
+    mechanics,source_plan,receipt,_=_arm234_synthetic_review_sources()
+    for row in source_plan['joint_targets']:
+        row['source_target_sequence']=27+row['sequence']
+    source_plan.pop('plan_sha256')
+    source_plan['plan_sha256']=mechanics._canonical_sha256(source_plan)
+    receipt['source_plan_sha256']=source_plan['plan_sha256']
+    receipt.pop('receipt_sha256')
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    review=mechanics.review_state_policy_premature_transit_contact(receipt)
+    correction=mechanics.build_state_policy_transit_clearance_correction_plan(
+        review,receipt,source_plan
+    )
+    representative_plan={
+        'target_id':'SPACE',
+        'joint_targets':[{'sequence':sequence} for sequence in range(29,33)],
+    }
+    representative_plan['plan_sha256']=mechanics._canonical_sha256(
+        representative_plan
+    )
+    native_trace=[]
+    for sequence,separation_mm,key_z_m in (
+        (29,22.0,0.018),(30,7.0,0.018),(31,0.004,0.01784),
+        (32,0.004,0.01780),
+    ):
+        native_trace.append({
+            'target_sequence':sequence,
+            'tip_key_separation_m':separation_mm/1000.0,
+            'key_center_z_m':key_z_m,
+        })
+    representative_receipt={
+        'target_id':'SPACE',
+        'source_plan_sha256':representative_plan['plan_sha256'],
+        'native_trace':native_trace,
+    }
+    representative_receipt['receipt_sha256']=mechanics._canonical_sha256(
+        representative_receipt
+    )
+
+    first=mechanics.review_state_policy_transit_clearance_materialization_readiness(
+        correction,source_plan,representative_plan,representative_receipt
+    )
+    second=mechanics.review_state_policy_transit_clearance_materialization_readiness(
+        correction,source_plan,representative_plan,representative_receipt
+    )
+    assert first==second
+    assert first['status']==(
+        'BLOCKED_SOURCE_ROUTE_VIOLATES_NONCONTACT_CONTRACT'
+    )
+    assert first['audited_source_target_sequences']==[29,30,31,32]
+    assert first['failing_source_target_sequences']==[31,32]
+    assert first['source_route_reusable'] is False
+    assert first['materialization_decision'][
+        'generate_new_lifted_board_frame_route'
+    ] is True
+    assert first['corrected_joint_targets_materialized'] is False
+    assert first['continuous_clearance_proven'] is False
+    assert first['isaac_started'] is first['physical_authority'] is False
+
+    changed=json.loads(json.dumps(representative_receipt))
+    changed['target_id']='H'
+    changed.pop('receipt_sha256')
+    changed['receipt_sha256']=mechanics._canonical_sha256(changed)
+    with pytest.raises(mechanics.MechanicsContractError,match='lineage changed'):
+        mechanics.review_state_policy_transit_clearance_materialization_readiness(
+            correction,source_plan,representative_plan,changed
+        )
+
+
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
     mechanics,sources,runtime=_arm222_compilation_sources()
     mechanics_campaign,plans=(
