@@ -2431,6 +2431,42 @@ geometry and uncertainty. A body may move from `PENDING` only when its source,
 instrument resolution, primitive envelope, and uncertainty satisfy ICQ-1; the
 gap matrix itself is not measurement evidence.
 
+ARM-240 reduces the robot portion of that backlog without weakening ICQ-1. It
+hash-verifies ARM-239 and the retained upstream mesh-reduction receipt, then
+packages the existing `14` conservative oriented boxes for `base_link`, links
+1–5, and `gripper_link` as seven link-local review candidates. Exact mesh
+hashes, upstream commit, partition method, containment result, watertightness,
+and known reduction blockers remain attached to every candidate. All seven
+rows remain `PENDING` because physical model identity, uncertainty, conservative
+box quality, and the link5 whole-envelope fallback still require review.
+
+The retained report is:
+
+`C:\IsaacSim\artifacts\issue190\arm240-robot-geometry-review-candidates-001\report.json`
+
+- report content SHA-256:
+  `c3a389ebf0dcccd2d00c4cacc02551b07f2402a56d82876d6aadf478ae9ccca3`
+- report file SHA-256:
+  `70c9db64cf5e27a68ac96b4ab0dd5533fab1099c022cfbf43195786cf0e30a76`
+- candidates: `7` bodies / `14` primitives; accepted bodies: `0`
+
+Reproduce the offline package with:
+
+```powershell
+$arm239 = 'C:/IsaacSim/artifacts/issue190/arm239-installed-measurement-gap-matrix-002/report.json'
+$mesh = 'software/integrations/isaac_sim/evidence/roarm_m3_link_mesh_reduction_20261004.json'
+$out = 'C:/IsaacSim/artifacts/issue190/arm240-robot-geometry-review-candidates-001/report.json'
+python software/integrations/isaac_sim/robot_geometry_review_candidates.py `
+  --arm239-report $arm239 `
+  --mesh-reduction $mesh `
+  --output $out
+```
+
+Next, review the seven candidates against the installed RoArm identity and a
+documented uncertainty policy. Candidate approval may then populate only the
+robot rows of a new ICQ-1 manifest; the remaining 12 non-robot bodies stay
+separate and pending.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
