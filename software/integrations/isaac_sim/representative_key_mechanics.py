@@ -249,6 +249,9 @@ STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_PLAN_SCHEMA = (
 STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_RECEIPT_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_root_drift_diagnostic_receipt.v1"
 )
+STATE_POLICY_ROOT_FIXTURE_DIAGNOSTIC_REVIEW_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_root_fixture_diagnostic_review.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -11314,6 +11317,181 @@ def run_state_policy_root_drift_diagnostic(
     return receipt
 
 
+def review_state_policy_root_fixture_diagnostic(
+    receipt: dict[str, Any],
+    diagnostic_plan: dict[str, Any],
+    manifest: dict[str, Any],
+    source_plan: dict[str, Any],
+    failure_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Independently review one retained ARM-228 static fixture probe."""
+    _verify_lm3_digest(receipt, "receipt_sha256", "root fixture receipt")
+    _verify_lm3_digest(diagnostic_plan, "plan_sha256", "root fixture plan")
+    _verify_lm3_digest(manifest, "manifest_sha256", "mechanics manifest")
+    _verify_lm3_digest(source_plan, "plan_sha256", "mechanics plan")
+    _verify_lm3_digest(
+        failure_receipt, "receipt_sha256", "source failure receipt"
+    )
+    _require_lm3_zero_authority(receipt, "root fixture receipt")
+    _require_lm3_zero_authority(diagnostic_plan, "root fixture plan")
+
+    records = receipt.get("checkpoint_records")
+    expected_checkpoints = diagnostic_plan.get("probe_contract", {}).get(
+        "checkpoints"
+    )
+    if (
+        receipt.get("schema")
+        != STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_RECEIPT_SCHEMA
+        or receipt.get("status") != "PASS_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC"
+        or receipt.get("complete") is not True
+        or receipt.get("root_invariant_all_passed") is not True
+        or receipt.get("next_required_stage") != "REVIEW_ROOT_FIXTURE_DIAGNOSTIC"
+        or receipt.get("source_diagnostic_plan_sha256")
+        != diagnostic_plan["plan_sha256"]
+        or receipt.get("source_manifest_sha256") != manifest["manifest_sha256"]
+        or receipt.get("source_plan_sha256") != source_plan["plan_sha256"]
+        or receipt.get("source_failure_receipt_sha256")
+        != failure_receipt["receipt_sha256"]
+        or diagnostic_plan.get("source_manifest_sha256")
+        != manifest["manifest_sha256"]
+        or diagnostic_plan.get("source_plan_sha256") != source_plan["plan_sha256"]
+        or diagnostic_plan.get("source_failure_receipt_sha256")
+        != failure_receipt["receipt_sha256"]
+        or receipt.get("fixture_configuration")
+        != diagnostic_plan.get("fixture_comparison", {}).get(
+            "known_passing_fixed_base_path"
+        )
+        or receipt.get("trajectory_playback") is not False
+        or receipt.get("joint_target_commands") != 0
+        or receipt.get("key_contact") is not False
+        or receipt.get("automatic_retry_performed") is not False
+        or receipt.get("diagnostics_executed") != 1
+        or receipt.get("isaac_started") is not True
+        or receipt.get("gpu_started") is not True
+        or receipt.get("gate_promotions") != []
+        or not isinstance(records, list)
+        or not isinstance(expected_checkpoints, list)
+        or receipt.get("checkpoint_count") != len(expected_checkpoints)
+        or len(records) != len(expected_checkpoints)
+    ):
+        raise MechanicsContractError("root fixture diagnostic review boundary changed")
+
+    translation_tolerance = _finite_number(
+        receipt.get("translation_tolerance_mm"),
+        "root fixture translation tolerance",
+    )
+    orientation_tolerance = _finite_number(
+        receipt.get("orientation_tolerance_deg"),
+        "root fixture orientation tolerance",
+    )
+    if (
+        translation_tolerance != FIXED_BASE_ROOT_TRANSLATION_TOLERANCE_MM
+        or orientation_tolerance != FIXED_BASE_ROOT_ORIENTATION_TOLERANCE_DEG
+    ):
+        raise MechanicsContractError("root fixture diagnostic tolerance changed")
+
+    translations = []
+    orientations = []
+    reviewed_checkpoints = []
+    for expected_checkpoint, record in zip(expected_checkpoints, records):
+        if not isinstance(record, dict):
+            raise MechanicsContractError("root fixture checkpoint record changed")
+        translation = _finite_number(
+            record.get("translation_delta_mm"),
+            f"{expected_checkpoint} translation delta",
+        )
+        orientation = _finite_number(
+            record.get("orientation_delta_deg"),
+            f"{expected_checkpoint} orientation delta",
+        )
+        position = record.get("observed_position_m")
+        quaternion = record.get("observed_quaternion_wxyz")
+        if (
+            record.get("checkpoint") != expected_checkpoint
+            or record.get("passed") is not True
+            or record.get("translation_tolerance_mm") != translation_tolerance
+            or record.get("orientation_tolerance_deg") != orientation_tolerance
+            or translation > translation_tolerance
+            or orientation > orientation_tolerance
+            or not isinstance(position, list)
+            or len(position) != 3
+            or not isinstance(quaternion, list)
+            or len(quaternion) != 4
+        ):
+            raise MechanicsContractError(
+                f"{expected_checkpoint} root fixture checkpoint changed"
+            )
+        for index, value in enumerate(position):
+            _finite_number(value, f"{expected_checkpoint} position {index}")
+        for index, value in enumerate(quaternion):
+            _finite_number(value, f"{expected_checkpoint} quaternion {index}")
+        translations.append(translation)
+        orientations.append(orientation)
+        reviewed_checkpoints.append({
+            "checkpoint": expected_checkpoint,
+            "translation_delta_mm": translation,
+            "orientation_delta_deg": orientation,
+            "passed": True,
+        })
+
+    maximum_translation = max(translations)
+    maximum_orientation = max(orientations)
+    if (
+        receipt.get("maximum_translation_delta_mm") != maximum_translation
+        or receipt.get("maximum_orientation_delta_deg") != maximum_orientation
+    ):
+        raise MechanicsContractError("root fixture diagnostic maximum changed")
+
+    review: dict[str, Any] = {
+        "schema": STATE_POLICY_ROOT_FIXTURE_DIAGNOSTIC_REVIEW_SCHEMA,
+        "status": "ACCEPTED_FOR_ZERO_AUTHORITY_STATE_POLICY_FIXTURE_CORRECTION",
+        "source_receipt_sha256": receipt["receipt_sha256"],
+        "source_diagnostic_plan_sha256": diagnostic_plan["plan_sha256"],
+        "source_manifest_sha256": manifest["manifest_sha256"],
+        "source_plan_sha256": source_plan["plan_sha256"],
+        "source_failure_receipt_sha256": failure_receipt["receipt_sha256"],
+        "checkpoint_count": len(reviewed_checkpoints),
+        "reviewed_checkpoints": reviewed_checkpoints,
+        "fixture_configuration": receipt["fixture_configuration"],
+        "maximum_translation_delta_mm": maximum_translation,
+        "maximum_orientation_delta_deg": maximum_orientation,
+        "translation_tolerance_mm": translation_tolerance,
+        "orientation_tolerance_deg": orientation_tolerance,
+        "review_decision": {
+            "checkpoint_denominator_complete": True,
+            "all_root_invariants_passed": True,
+            "known_passing_fixture_stable": True,
+            "fixture_configuration_is_leading_root_drift_explanation": True,
+            "offline_fixture_correction_allowed": True,
+            "mechanics_replay_authorized": False,
+        },
+        "isaac_started": False,
+        "gpu_started": False,
+        "diagnostics_executed": 0,
+        "trajectory_playback": False,
+        "joint_target_commands": 0,
+        "key_contact": False,
+        "automatic_retry_performed": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "IMPLEMENT_AND_REVIEW_STATE_POLICY_FIXED_FIXTURE_CORRECTION"
+        ),
+        "limitations": [
+            "static_fixture_stability_does_not_clear_trajectory_replay",
+            "diagnostic_does_not_prove_contact_or_installed_geometry",
+            "fixture_correction_requires_fresh_input_materialization",
+            "future_native_execution_requires_separate_authorization",
+        ],
+    }
+    review["review_sha256"] = _canonical_sha256(review)
+    return review
+
+
 def run_state_policy_native_mechanics_episode(
     *,
     manifest_path: Path,
@@ -15775,6 +15953,11 @@ def main() -> int:
         action="store_true",
         help="execute one static zero-authority ARM-227 root-fixture probe",
     )
+    parser.add_argument(
+        "--review-state-policy-root-fixture-diagnostic",
+        action="store_true",
+        help="review retained ARM-228 evidence without starting Isaac or a GPU",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -15794,6 +15977,7 @@ def main() -> int:
     parser.add_argument("--state-policy-native-manifest", type=Path)
     parser.add_argument("--state-policy-native-campaign", type=Path)
     parser.add_argument("--state-policy-native-review", type=Path)
+    parser.add_argument("--root-drift-diagnostic-receipt", type=Path)
     parser.add_argument("--state-policy-native-output-dir", type=Path)
     parser.add_argument("--state-policy-mechanics-output-dir", type=Path)
     parser.add_argument("--state-policy-mechanics-campaign", type=Path)
@@ -16619,6 +16803,43 @@ def main() -> int:
             }
             result = aggregate_randomized_demonstration_campaign(
                 campaign, receipts
+            )
+        elif args.review_state_policy_root_fixture_diagnostic:
+            required = (
+                args.root_drift_diagnostic_receipt,
+                args.root_drift_diagnostic_plan,
+                args.state_policy_native_mechanics_manifest,
+                args.replay_plan,
+                args.source_failure_receipt,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-230 review requires the ARM-228 receipt, ARM-227 "
+                    "plan, ARM-224 manifest and episode plan, and ARM-225 "
+                    "failure receipt"
+                )
+            result = review_state_policy_root_fixture_diagnostic(
+                json.loads(
+                    args.root_drift_diagnostic_receipt.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.root_drift_diagnostic_plan.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(
+                    args.state_policy_native_mechanics_manifest.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
+                json.loads(args.replay_plan.resolve(strict=True).read_bytes()),
+                json.loads(
+                    args.source_failure_receipt.resolve(
+                        strict=True
+                    ).read_bytes()
+                ),
             )
         elif args.run_state_policy_root_drift_diagnostic:
             required = (
@@ -17965,6 +18186,7 @@ def main() -> int:
             "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_STATE_POLICY_MECHANICS_REPLAYS",
             "READY_FOR_SEPARATELY_AUTHORIZED_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
             "PASS_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
+            "ACCEPTED_FOR_ZERO_AUTHORITY_STATE_POLICY_FIXTURE_CORRECTION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

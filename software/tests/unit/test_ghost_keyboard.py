@@ -4962,6 +4962,98 @@ def test_arm229_root_drift_receipt_is_persisted_before_fast_app_close():
     assert source.index('finally:', status_write) < app_close
 
 
+def test_arm230_reviews_exact_static_fixture_denominator_and_rejects_drift():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    native_plan=next(iter(native_plans.values()))
+    failure=mechanics.build_state_policy_native_mechanics_failure_receipt(
+        manifest_sha256=manifest['manifest_sha256'],
+        plan=native_plan,
+        error_type='RuntimeError',
+        error_message='root invariant failed at sequence 0',
+    )
+    diagnostic=mechanics.build_state_policy_root_drift_diagnostic_plan(
+        manifest,native_plan,failure
+    )
+    records=[]
+    for index,checkpoint in enumerate(diagnostic['probe_contract']['checkpoints']):
+        records.append({
+            'checkpoint':checkpoint,
+            'observed_position_m':[0.385,0.532,0.0701],
+            'observed_quaternion_wxyz':[1.0,0.0,0.0,0.0],
+            'translation_delta_mm':index*0.001,
+            'orientation_delta_deg':0.0,
+            'translation_tolerance_mm':0.05,
+            'orientation_tolerance_deg':0.1,
+            'passed':True,
+        })
+    receipt={
+        'schema':mechanics.STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_RECEIPT_SCHEMA,
+        'status':'PASS_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC',
+        'complete':True,
+        'root_invariant_all_passed':True,
+        'checkpoint_records':records,
+        'checkpoint_count':4,
+        'source_diagnostic_plan_sha256':diagnostic['plan_sha256'],
+        'source_manifest_sha256':manifest['manifest_sha256'],
+        'source_plan_sha256':native_plan['plan_sha256'],
+        'source_failure_receipt_sha256':failure['receipt_sha256'],
+        'fixture_configuration':diagnostic['fixture_comparison'][
+            'known_passing_fixed_base_path'
+        ],
+        'translation_tolerance_mm':0.05,
+        'orientation_tolerance_deg':0.1,
+        'maximum_translation_delta_mm':0.003,
+        'maximum_orientation_delta_deg':0.0,
+        'trajectory_playback':False,
+        'joint_target_commands':0,
+        'key_contact':False,
+        'automatic_retry_performed':False,
+        'isaac_started':True,
+        'gpu_started':True,
+        'diagnostics_executed':1,
+        'hardware_access':False,
+        'hardware_writes':0,
+        'physical_authority':False,
+        'physical_movements':0,
+        'controller_commands':[],
+        'gate_promotions':[],
+        'next_required_stage':'REVIEW_ROOT_FIXTURE_DIAGNOSTIC',
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    first=mechanics.review_state_policy_root_fixture_diagnostic(
+        receipt,diagnostic,manifest,native_plan,failure
+    )
+    second=mechanics.review_state_policy_root_fixture_diagnostic(
+        receipt,diagnostic,manifest,native_plan,failure
+    )
+    assert first==second
+    assert first['status']==(
+        'ACCEPTED_FOR_ZERO_AUTHORITY_STATE_POLICY_FIXTURE_CORRECTION'
+    )
+    assert first['checkpoint_count']==4
+    assert first['maximum_translation_delta_mm']==0.003
+    assert first['review_decision']['mechanics_replay_authorized'] is False
+    changed=json.loads(json.dumps(receipt))
+    changed['checkpoint_records'][2]['passed']=False
+    changed.pop('receipt_sha256')
+    changed['receipt_sha256']=mechanics._canonical_sha256(changed)
+    with pytest.raises(mechanics.MechanicsContractError,match='checkpoint changed'):
+        mechanics.review_state_policy_root_fixture_diagnostic(
+            changed,diagnostic,manifest,native_plan,failure
+        )
+
+
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
     mechanics,sources,runtime=_arm222_compilation_sources()
     mechanics_campaign,plans=(
