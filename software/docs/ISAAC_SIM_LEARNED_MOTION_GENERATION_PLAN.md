@@ -772,6 +772,17 @@ IK validity, and the existing `0.05 rad` adjacent-joint limit. The plan contains
 no replacement targets and grants no replay authority. SHA-256 is
 `5dd11d86f30884e116ce8c0300af97100285cddaf4f90902b0e590e6ea59580d`.
 
+ARM-236 independently audits the representative `SPACE` approach before any
+replacement targets are generated. Source targets 29–31 remain separated, but
+targets 32–34 fall to about `0.004 mm` sampled separation and move the key by
+`0.164–0.205 mm`. The prior route is therefore not a valid seed for ARM-235.
+The next materializer must generate a lifted board-frame
+ascent/traverse/descent route and bind canonical IK to conservative swept
+envelopes for every adjacent segment. Exact target-key and installed collision
+geometry remain required; no simulation is started and no replay is authorized.
+Review SHA-256 is
+`e7d6de796cff936be7200d4e159d4b4a9654bf9a01530ba90683ef1a77f2d539`.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -1025,7 +1036,13 @@ ScheduleGen. Neither is a physical success rate.
     preserves source timing, phases, fixed fixture, first contact, and both
     contact endpoints while requiring continuous clearance and zero-contact
     evidence before a candidate may be retained. No targets are changed yet.
-25. Expand only after each predecessor produces reviewable evidence.
+25. **LM4 correction-materialization readiness:** ARM-236 proves that the old
+    representative route is not reusable under ARM-235: its last three
+    noncontact targets already touch and displace the key. It requires a newly
+    lifted board-frame route, canonical IK, exact installed collision geometry,
+    and conservative evidence for every adjacent segment. It remains offline
+    and grants no replay, hardware, or physical authority.
+26. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

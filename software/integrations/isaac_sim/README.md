@@ -2295,6 +2295,31 @@ python software/integrations/isaac_sim/representative_key_mechanics.py `
   --replay-plan C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json
 ```
 
+ARM-236 audits whether the representative `SPACE` route can seed that
+materialization. It cannot: source targets 32–34 have only about `0.004 mm`
+minimum sampled separation and displace the key by `0.164–0.205 mm`, so they
+violate both ARM-235 noncontact limits. The review therefore blocks route
+copying and requires a new board-frame ascent/traverse/descent route, canonical
+IK, an exact target-key collision body, an installed collision profile, and a
+conservative swept-envelope proof for every adjacent segment. Discrete native
+samples are not promoted into a continuous-clearance claim. Review SHA-256 is
+`e7d6de796cff936be7200d4e159d4b4a9654bf9a01530ba90683ef1a77f2d539`.
+
+Reproduce the non-starting ARM-236 review with:
+
+```powershell
+$review = 'C:/IsaacSim/artifacts/issue190/arm236-state-policy-transit-clearance-readiness-001'
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output "$review/review.json" `
+  --status-output "$review/status.json" `
+  --review-state-policy-transit-clearance-materialization-readiness `
+  --state-policy-transit-clearance-correction-plan C:/IsaacSim/artifacts/issue190/arm235-state-policy-transit-clearance-correction-plan-001/plan.json `
+  --replay-plan C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --representative-native-mechanics-plan C:/IsaacSim/artifacts/issue190/arm217-representative-native-mechanics-refined-002/space/native_mechanics_plan.json `
+  --representative-native-mechanics-receipt C:/IsaacSim/artifacts/issue190/arm217-representative-native-mechanics-refined-002/space/native_mechanics_receipt.json
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

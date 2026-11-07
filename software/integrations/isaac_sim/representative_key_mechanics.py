@@ -270,6 +270,9 @@ STATE_POLICY_PREMATURE_TRANSIT_CONTACT_REVIEW_SCHEMA = (
 STATE_POLICY_TRANSIT_CLEARANCE_CORRECTION_PLAN_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_transit_clearance_correction_plan.v1"
 )
+STATE_POLICY_TRANSIT_CLEARANCE_MATERIALIZATION_READINESS_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_transit_clearance_materialization_readiness.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -12317,6 +12320,205 @@ def build_state_policy_transit_clearance_correction_plan(
     return plan
 
 
+def review_state_policy_transit_clearance_materialization_readiness(
+    correction_plan: dict[str, Any],
+    source_plan: dict[str, Any],
+    representative_plan: dict[str, Any],
+    representative_receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Audit whether the prior representative route may seed ARM-235.
+
+    This is deliberately an offline, fail-closed evidence review.  It does not
+    run IK, start Isaac, or manufacture a continuous-clearance claim from
+    discrete native trace samples.
+    """
+
+    correction_hash = _require_canonical_hash(
+        correction_plan, "plan_sha256", "ARM-235 correction plan"
+    )
+    source_hash = _require_canonical_hash(
+        source_plan, "plan_sha256", "ARM-231 corrected mechanics plan"
+    )
+    representative_plan_hash = _require_canonical_hash(
+        representative_plan, "plan_sha256", "representative SPACE plan"
+    )
+    representative_receipt_hash = _require_canonical_hash(
+        representative_receipt,
+        "receipt_sha256",
+        "representative SPACE receipt",
+    )
+    source_targets = source_plan.get("joint_targets")
+    representative_targets = representative_plan.get("joint_targets")
+    native_trace = representative_receipt.get("native_trace")
+    window = correction_plan.get("correction_window", {})
+    contract = correction_plan.get("materialization_contract", {})
+    if (
+        correction_plan.get("schema")
+        != STATE_POLICY_TRANSIT_CLEARANCE_CORRECTION_PLAN_SCHEMA
+        or correction_plan.get("status")
+        != "READY_FOR_OFFLINE_TRANSIT_CLEARANCE_CORRECTION_MATERIALIZATION"
+        or correction_plan.get("source_corrected_plan_sha256") != source_hash
+        or source_plan.get("schema")
+        != STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+        or representative_receipt.get("source_plan_sha256")
+        != representative_plan_hash
+        or representative_plan.get("target_id") != correction_plan.get("target_id")
+        or representative_receipt.get("target_id")
+        != correction_plan.get("target_id")
+        or not isinstance(source_targets, list)
+        or not isinstance(representative_targets, list)
+        or not isinstance(native_trace, list)
+        or not native_trace
+    ):
+        raise MechanicsContractError("ARM-236 materialization lineage changed")
+
+    first_sequence = window.get("first_sequence_to_regenerate")
+    last_sequence = window.get("last_sequence_to_regenerate")
+    required_clearance_mm = contract.get(
+        "minimum_noncontact_tool_key_clearance_mm"
+    )
+    maximum_displacement_mm = contract.get(
+        "maximum_noncontact_key_displacement_mm"
+    )
+    if (
+        not isinstance(first_sequence, int)
+        or not isinstance(last_sequence, int)
+        or first_sequence > last_sequence
+        or not isinstance(required_clearance_mm, (int, float))
+        or isinstance(required_clearance_mm, bool)
+        or not isinstance(maximum_displacement_mm, (int, float))
+        or isinstance(maximum_displacement_mm, bool)
+    ):
+        raise MechanicsContractError("ARM-236 correction contract changed")
+
+    correction_rows = [
+        row
+        for row in source_targets
+        if first_sequence <= row.get("sequence", -1) <= last_sequence
+    ]
+    source_sequences = sorted(
+        {row.get("source_target_sequence") for row in correction_rows}
+    )
+    representative_sequences = {
+        row.get("sequence") for row in representative_targets
+    }
+    baseline_key_z_m = native_trace[0].get("key_center_z_m")
+    if (
+        len(correction_rows) != last_sequence - first_sequence + 1
+        or not source_sequences
+        or any(not isinstance(sequence, int) for sequence in source_sequences)
+        or any(sequence not in representative_sequences for sequence in source_sequences)
+        or not isinstance(baseline_key_z_m, (int, float))
+        or isinstance(baseline_key_z_m, bool)
+    ):
+        raise MechanicsContractError("ARM-236 source route mapping changed")
+
+    metrics: list[dict[str, Any]] = []
+    for sequence in source_sequences:
+        rows = [
+            row for row in native_trace if row.get("target_sequence") == sequence
+        ]
+        separations = [row.get("tip_key_separation_m") for row in rows]
+        key_heights = [row.get("key_center_z_m") for row in rows]
+        if (
+            not rows
+            or any(
+                not isinstance(value, (int, float)) or isinstance(value, bool)
+                for value in separations + key_heights
+            )
+        ):
+            raise MechanicsContractError("ARM-236 representative trace changed")
+        minimum_separation_mm = min(separations) * 1000.0
+        maximum_displacement_observed_mm = max(
+            abs(value - baseline_key_z_m) * 1000.0 for value in key_heights
+        )
+        metrics.append(
+            {
+                "source_target_sequence": sequence,
+                "native_trace_sample_count": len(rows),
+                "minimum_tip_key_separation_mm": minimum_separation_mm,
+                "maximum_absolute_key_displacement_mm": (
+                    maximum_displacement_observed_mm
+                ),
+                "meets_noncontact_contract": (
+                    minimum_separation_mm >= required_clearance_mm
+                    and maximum_displacement_observed_mm
+                    <= maximum_displacement_mm
+                ),
+            }
+        )
+
+    failing_sequences = [
+        row["source_target_sequence"]
+        for row in metrics
+        if row["meets_noncontact_contract"] is not True
+    ]
+    if not failing_sequences:
+        raise MechanicsContractError(
+            "ARM-236 expected the reviewed source route to require correction"
+        )
+
+    review: dict[str, Any] = {
+        "schema": STATE_POLICY_TRANSIT_CLEARANCE_MATERIALIZATION_READINESS_SCHEMA,
+        "status": "BLOCKED_SOURCE_ROUTE_VIOLATES_NONCONTACT_CONTRACT",
+        "source_correction_plan_sha256": correction_hash,
+        "source_corrected_plan_sha256": source_hash,
+        "source_representative_plan_sha256": representative_plan_hash,
+        "source_representative_receipt_sha256": representative_receipt_hash,
+        "episode_id": correction_plan["episode_id"],
+        "target_id": correction_plan["target_id"],
+        "audited_source_target_sequences": source_sequences,
+        "observed_source_route_metrics": metrics,
+        "failing_source_target_sequences": failing_sequences,
+        "source_route_reusable": False,
+        "materialization_decision": {
+            "copy_prior_representative_route": False,
+            "generate_new_lifted_board_frame_route": True,
+            "run_canonical_ik_with_previous_joint_seed": True,
+            "require_every_adjacent_segment_clearance_proof": True,
+            "preserve_arm235_rows_timestamps_phases_and_endpoints": True,
+            "reject_indeterminate_segments": True,
+        },
+        "required_route_shape": [
+            "ASCEND_FROM_PRESERVED_SEQUENCE_AT_FIXED_BOARD_XY",
+            "TRAVERSE_ABOVE_TARGET_AT_PROVEN_CLEARANCE",
+            "DESCEND_TO_NONCONTACT_HOVER_WITH_PROVEN_CLEARANCE",
+        ],
+        "required_new_evidence": [
+            "exact_target_key_collision_body",
+            "installed_robot_tool_and_workcell_collision_profile",
+            "canonical_ik_solution_for_every_regenerated_row",
+            "conservative_swept_envelope_for_every_adjacent_segment",
+        ],
+        "corrected_joint_targets_materialized": False,
+        "canonical_ik_executed": False,
+        "continuous_clearance_proven": False,
+        "trajectory_playback_authorized": False,
+        "native_replay_authorized": False,
+        "isaac_started": False,
+        "gpu_started": False,
+        "mechanics_replays_executed": 0,
+        "automatic_retry_performed": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "GENERATE_LIFTED_ROUTE_AND_CONSERVATIVE_SEGMENT_EVIDENCE"
+        ),
+        "limitations": [
+            "discrete_native_trace_does_not_prove_continuous_clearance",
+            "nominal_geometry_is_not_an_installed_collision_profile",
+            "readiness_review_does_not_materialize_joint_targets",
+            "review_does_not_authorize_replay_hardware_or_physical_motion",
+        ],
+    }
+    review["review_sha256"] = _canonical_sha256(review)
+    return review
+
+
 def _write_randomized_trajectory(
     trajectory_path: Path, rows: list[dict[str, Any]]
 ) -> str:
@@ -16778,6 +16980,16 @@ def main() -> int:
         action="store_true",
         help="plan an offline ARM-235 transit-clearance correction",
     )
+    parser.add_argument(
+        "--review-state-policy-transit-clearance-materialization-readiness",
+        action="store_true",
+        help="audit ARM-236 source-route evidence without starting Isaac",
+    )
+    parser.add_argument(
+        "--state-policy-transit-clearance-correction-plan", type=Path
+    )
+    parser.add_argument("--representative-native-mechanics-plan", type=Path)
+    parser.add_argument("--representative-native-mechanics-receipt", type=Path)
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -16924,7 +17136,43 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.build_state_policy_transit_clearance_correction_plan:
+        if args.review_state_policy_transit_clearance_materialization_readiness:
+            required = (
+                args.state_policy_transit_clearance_correction_plan,
+                args.replay_plan,
+                args.representative_native_mechanics_plan,
+                args.representative_native_mechanics_receipt,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-236 review requires the ARM-235 plan, ARM-231 plan, "
+                    "and representative SPACE plan and receipt"
+                )
+            correction_plan = json.loads(
+                args.state_policy_transit_clearance_correction_plan
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            source_plan = json.loads(
+                args.replay_plan.resolve(strict=True).read_bytes()
+            )
+            representative_plan = json.loads(
+                args.representative_native_mechanics_plan
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            representative_receipt = json.loads(
+                args.representative_native_mechanics_receipt
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            result = review_state_policy_transit_clearance_materialization_readiness(
+                correction_plan,
+                source_plan,
+                representative_plan,
+                representative_receipt,
+            )
+        elif args.build_state_policy_transit_clearance_correction_plan:
             required = (
                 args.state_policy_premature_contact_review,
                 args.source_native_receipt,
