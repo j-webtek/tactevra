@@ -2095,6 +2095,23 @@ runtime-file hashes while binding back to its ARM-222 plan and ARM-223
 admission receipt. No prior mechanics result is reused. Isaac/GPU start,
 mechanics execution, hardware access, and physical authority remain false.
 
+ARM-225 admits one exact ARM-224 episode at a time and runs it through the
+existing governed Isaac key-mechanics runner with no automatic retry. The first
+precommitted episode, `episode-ef340d0ad2740c118d87` for `SPACE`, started Isaac
+6.1 and the GPU and stopped at target sequence `723` when the fixed-base root
+invariant failed during `TRANSIT`. This was before the two planned contact
+endpoints at sequences `1061` and `1299`, so no contact, release, settling, or
+action success is claimed. The retained error-only receipt is
+`C:\IsaacSim\artifacts\issue190\arm225-state-policy-native-mechanics-episode-001\episode-ef340d0ad2740c118d87\receipt.json`
+with SHA-256
+`22eea1a8998855c6af120cbec4a8916dc6885b8630159b9460bd05ce02e309d2`.
+It binds the exact manifest and plan, records `ROOT_INVARIANT`, explicitly says
+that the in-memory trace was not retained, and records that no retry occurred.
+The runner now emits the same signed blocked-receipt shape for future runtime
+failures instead of leaving only an unsigned error status. This result is a
+real simulator failure, not a passing mechanics result, and grants no hardware
+access or physical authority.
+
 Reproduce the non-starting input materialization with:
 
 ```powershell

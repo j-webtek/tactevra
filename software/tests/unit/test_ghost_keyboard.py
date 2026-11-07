@@ -4704,3 +4704,94 @@ def test_arm224_native_mechanics_materialization_rejects_lineage_and_denominator
         mechanics.materialize_state_policy_native_mechanics_inputs(
             admission_campaign,admissions,mechanics_campaign,{}
         )
+
+
+def test_arm225_native_mechanics_episode_admission_accepts_exact_arm224_plan():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=(
+        mechanics.materialize_state_policy_native_mechanics_inputs(
+            admission_campaign,admissions,mechanics_campaign,plans
+        )
+    )
+    episode_id=next(iter(native_plans))
+    entry=mechanics.validate_state_policy_native_mechanics_episode(
+        manifest,native_plans[episode_id],episode_id
+    )
+    assert entry['episode_id']==episode_id
+    assert entry['joint_target_count']==2
+    assert entry['contact_endpoint_sequences']==[0,1]
+    assert manifest['isaac_started'] is manifest['gpu_started'] is False
+
+
+def test_arm225_native_mechanics_episode_admission_rejects_wrong_plan_and_manifest():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=(
+        mechanics.materialize_state_policy_native_mechanics_inputs(
+            admission_campaign,admissions,mechanics_campaign,plans
+        )
+    )
+    episode_id=next(iter(native_plans))
+    changed_plan=json.loads(json.dumps(native_plans[episode_id]))
+    changed_plan['sample_count']=3
+    with pytest.raises(mechanics.MechanicsContractError,match='sha256 mismatch'):
+        mechanics.validate_state_policy_native_mechanics_episode(
+            manifest,changed_plan,episode_id
+        )
+    with pytest.raises(
+        mechanics.MechanicsContractError,match='absent or duplicated'
+    ):
+        mechanics.validate_state_policy_native_mechanics_episode(
+            manifest,native_plans[episode_id],'episode-not-declared'
+        )
+
+
+def test_arm225_runtime_failure_receipt_retains_lineage_without_claiming_trace():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=(
+        mechanics.materialize_state_policy_native_mechanics_inputs(
+            admission_campaign,admissions,mechanics_campaign,plans
+        )
+    )
+    episode_id=next(iter(native_plans))
+    plan=native_plans[episode_id]
+    receipt=mechanics.build_state_policy_native_mechanics_failure_receipt(
+        manifest_sha256=manifest['manifest_sha256'],
+        plan=plan,
+        error_type='RuntimeError',
+        error_message='root invariant failed at sequence 1',
+    )
+    assert receipt['status']=='BLOCKED_STATE_POLICY_NATIVE_MECHANICS_REPLAY'
+    assert receipt['failure_reason']=='ROOT_INVARIANT'
+    assert receipt['stopped_at_sequence']==1
+    assert receipt['stopped_phase']=='CONTACT'
+    assert receipt['source_plan_sha256']==plan['plan_sha256']
+    assert receipt['native_trace_retained'] is False
+    assert receipt['automatic_retry_performed'] is False
+    assert receipt['hardware_access'] is receipt['physical_authority'] is False
+    mechanics._verify_lm3_digest(
+        receipt,'receipt_sha256','state-policy failure receipt'
+    )
