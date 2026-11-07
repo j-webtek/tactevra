@@ -742,6 +742,17 @@ offline planning action and starts neither Isaac nor a GPU. The retained
 request SHA-256 is
 `f2d1f9708dc361c3f592f07d78eccd029dab4ccf5333def5cddc8f145e7caa65`.
 
+ARM-233 executed that request exactly once after fresh runtime revalidation.
+The fixed-fixture correction removed the prior configuration ambiguity but did
+not clear the governed root-orientation invariant. The replay stopped at
+sequence 723 after 724 of 1,416 targets when orientation reached
+`0.1046783125 deg` versus the `0.1 deg` limit; translation remained within its
+limit. The signed failure receipt retains the 724-row partial trace and has
+SHA-256
+`b40dfc8946324883a2cfb907845ba4c79b57303b878a94f9cdc182fc5734dab6`.
+This is evidence for offline diagnosis only. It grants neither retry authority
+nor hardware or physical authority.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;

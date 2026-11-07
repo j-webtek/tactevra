@@ -5309,6 +5309,113 @@ def test_arm232_rejects_review_plan_or_episode_drift():
         )
 
 
+def test_arm233_admits_exact_authorization_once_after_fresh_hashes(
+    tmp_path, monkeypatch
+):
+    mechanics=_load_key_mechanics()
+    episode_id='episode-test'
+    authorization=(
+        'I authorize exactly one ARM-232 zero-authority native mechanics '
+        'replay for episode-test (SPACE), with no automatic retry and no '
+        'hardware or physical authority.'
+    )
+    drive=b'drive'; virtual=b'virtual'; robot=b'robot'
+    paths={name:tmp_path/name for name in (
+        'request.json','review.json','manifest.json','plan.json','layout.json',
+        'drive.json','virtual.json','import.json','robot.usda','receipt.json',
+        'status.json',
+    )}
+    paths['drive.json'].write_bytes(drive)
+    paths['virtual.json'].write_bytes(virtual)
+    paths['robot.usda'].write_bytes(robot)
+    import_receipt={'value':1}
+    import_receipt['receipt_sha256']=mechanics._canonical_sha256(import_receipt)
+    paths['import.json'].write_text(json.dumps(import_receipt))
+    manifest={'manifest_sha256':'a'*64}
+    plan={'plan_sha256':'b'*64}
+    for name,value in (
+        ('review.json',{}),('manifest.json',manifest),('plan.json',plan),
+        ('layout.json',{}),
+    ):
+        paths[name].write_text(json.dumps(value))
+    request={
+        'episode_id':episode_id,
+        'required_authorization_statement':authorization,
+        'attempt_contract':{
+            'maximum_attempt_count':1,
+            'automatic_retry_allowed':False,
+            'fresh_runtime_file_revalidation_required':True,
+            'hardware_or_physical_authority_allowed':False,
+        },
+        'native_replay_authorized':False,
+        'mechanics_replays_executed':0,
+        'runtime_files':{
+            'key_mechanics_profile':{'sha256':'c'*64},
+            'drive_profile':{'sha256':hashlib.sha256(drive).hexdigest()},
+            'virtual_profile':{'sha256':hashlib.sha256(virtual).hexdigest()},
+            'robot_usd':{
+                'sha256':hashlib.sha256(robot).hexdigest(),
+                'size_bytes':len(robot),
+            },
+            'robot_import_receipt':{
+                'sha256':import_receipt['receipt_sha256']
+            },
+        },
+    }
+    request['request_sha256']=mechanics._canonical_sha256(request)
+    paths['request.json'].write_text(json.dumps(request))
+    monkeypatch.setattr(
+        mechanics,'build_state_policy_fixed_fixture_single_replay_request',
+        lambda *args:request,
+    )
+    monkeypatch.setattr(
+        mechanics,'build_profile',lambda path:{'profile_sha256':'c'*64}
+    )
+    calls=[]
+    def replay(**kwargs):
+        calls.append(kwargs)
+        return {
+            'schema':mechanics.STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA,
+            'episode_id':episode_id,
+            'source_manifest_sha256':'a'*64,
+            'source_plan_sha256':'b'*64,
+            'source_single_replay_request_sha256':request['request_sha256'],
+            'automatic_retry_performed':False,
+            'hardware_access':False,
+            'physical_authority':False,
+        }
+    monkeypatch.setattr(mechanics,'run_drive_controlled_robot_h_replay',replay)
+    result=mechanics.run_state_policy_fixed_fixture_single_replay(
+        request_path=paths['request.json'],
+        authorization_statement=authorization,
+        correction_review_path=paths['review.json'],
+        corrected_manifest_path=paths['manifest.json'],
+        replay_plan_path=paths['plan.json'],
+        layout_path=paths['layout.json'],
+        drive_profile_path=paths['drive.json'],
+        virtual_profile_path=paths['virtual.json'],
+        robot_import_receipt_path=paths['import.json'],
+        robot_usd_path=paths['robot.usda'],
+        output_path=paths['receipt.json'],status_path=paths['status.json'],
+    )
+    assert len(calls)==1
+    assert result['source_single_replay_request_sha256']==request['request_sha256']
+
+    with pytest.raises(mechanics.MechanicsContractError,match='authorization boundary'):
+        mechanics.run_state_policy_fixed_fixture_single_replay(
+            request_path=paths['request.json'],authorization_statement='wrong',
+            correction_review_path=paths['review.json'],
+            corrected_manifest_path=paths['manifest.json'],
+            replay_plan_path=paths['plan.json'],layout_path=paths['layout.json'],
+            drive_profile_path=paths['drive.json'],
+            virtual_profile_path=paths['virtual.json'],
+            robot_import_receipt_path=paths['import.json'],
+            robot_usd_path=paths['robot.usda'],output_path=paths['receipt.json'],
+            status_path=paths['status.json'],
+        )
+    assert len(calls)==1
+
+
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
     mechanics,sources,runtime=_arm222_compilation_sources()
     mechanics_campaign,plans=(

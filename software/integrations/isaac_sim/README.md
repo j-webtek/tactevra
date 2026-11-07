@@ -2234,6 +2234,19 @@ authorization statement recorded in the request. The retained request is
 with SHA-256
 `f2d1f9708dc361c3f592f07d78eccd029dab4ccf5333def5cddc8f145e7caa65`.
 
+ARM-233 consumed that exact authorization once on 2026-11-07. Fresh hashes
+for the mechanics profile, drive profile, virtual profile, import receipt, and
+robot USD all reproduced before Isaac started. The corrected 64/8/explicit
+fixed-joint replay advanced through 724 of 1,416 targets and then stopped
+fail-closed at sequence 723 in `TRANSIT`: root orientation was
+`0.1046783125 deg` against the retained `0.1 deg` limit. Translation at the
+stop was `0.0037838412 mm` against `0.05 mm`. The retained partial trace has
+724 rows and receipt SHA-256
+`b40dfc8946324883a2cfb907845ba4c79b57303b878a94f9cdc182fc5734dab6`.
+No retry, hardware access, hardware write, physical authority, or physical
+movement occurred. The result remains blocked and does not authorize another
+attempt or any physical action.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
