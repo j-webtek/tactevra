@@ -821,7 +821,15 @@ ScheduleGen. Neither is a physical success rate.
 10. **LM4 collision review:** ARM-221 independently verifies the exact native
     evidence and admits only zero-authority mechanics-plan compilation. Contact,
     release, settling, tracking, and abstention evaluation remain pending.
-11. Expand only after each predecessor produces reviewable evidence.
+11. **LM4 mechanics-plan compilation:** ARM-222 compiles all `12,744`
+    learned-policy targets from the nine held-out episodes into hash-bound,
+    non-executing mechanics plans. It preserves each randomized reset, marks
+    both contact endpoints per episode, carries the accepted per-target ARM-217
+    mechanics lineage, and retains the exact `523`-sample collision-screen
+    denominator. Runtime admission and file revalidation are next; mechanics
+    execution and its contact, release, settling, tracking, and abstention
+    measurements have not occurred.
+12. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

@@ -2053,6 +2053,43 @@ zero-authority LM4 mechanics replay plans. Isaac/GPU start, mechanics execution,
 installed clearance, continuous clearance, native replay, and physical motion
 remain false or blocked.
 
+ARM-222 compiles the admitted learned-policy proposals into mechanics replay
+plans without starting Isaac or a GPU. The retained campaign is
+`C:\IsaacSim\artifacts\issue190\arm222-state-policy-mechanics-plans-001\campaign.json`
+with SHA-256
+`1cf3097071ead2ff0d4e9da2cc6702cce43592343e3338d4b48861ff87acdb3e`.
+It contains all nine held-out episodes and all `12,744` proposal targets,
+preserves the `523` collision-screen samples as lineage rather than promoting
+interpolated screening samples to commands, and marks two contact endpoints in
+each episode. Target coverage is `1: 1`, `SPACE: 3`, `ENTER: 3`, and
+`PERIOD: 2`. The compiler accepts the exact successful ARM-217 source plan for
+each target: the contact-refined plans for `1`, `SPACE`, and `PERIOD`, and the
+already-passing feedback-adapted plan for `ENTER`. The campaign remains zero
+authority. Runtime admission and immediate runtime-file revalidation are the
+next boundary; native mechanics execution and contact, release, settling,
+tracking, and abstention results remain unevaluated.
+
+Reproduce the non-starting mechanics-plan compilation with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/ghost_keyboard_v1.json `
+  --output C:/IsaacSim/artifacts/issue190/arm222-state-policy-mechanics-plans-001/campaign.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm222-state-policy-mechanics-plans-001/status.json `
+  --compile-state-policy-mechanics-replay-campaign `
+  --state-policy-native-review C:/IsaacSim/artifacts/issue190/arm221-state-policy-native-collision-review-001/review.json `
+  --state-policy-dataset-manifest C:/IsaacSim/artifacts/issue190/arm219-state-policy-smoke-001/dataset_manifest.json `
+  --state-policy-proposal-campaign C:/IsaacSim/artifacts/issue190/arm219-state-policy-proposal-replay-001/campaign.json `
+  --proposal-output-dir C:/IsaacSim/artifacts/issue190/arm219-state-policy-proposal-replay-001 `
+  --state-policy-collision-request-campaign C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-request-001/campaign.json `
+  --collision-request-output-dir C:/IsaacSim/artifacts/issue190/arm219-state-policy-collision-request-001 `
+  --state-policy-native-manifest C:/IsaacSim/artifacts/issue190/arm220-state-policy-native-collision-001/manifest.json `
+  --representative-native-mechanics-campaign C:/IsaacSim/artifacts/issue190/arm217-representative-native-mechanics-refined-002/campaign.json `
+  --representative-native-mechanics-result-campaign C:/IsaacSim/artifacts/issue190/arm217-representative-native-mechanics-refined-002/result_campaign.json `
+  --representative-native-mechanics-output-dir C:/IsaacSim/artifacts/issue190/arm217-representative-native-mechanics-refined-002 `
+  --state-policy-mechanics-output-dir C:/IsaacSim/artifacts/issue190/arm222-state-policy-mechanics-plans-001
+```
+
 Reproduce the non-starting review with:
 
 ```powershell

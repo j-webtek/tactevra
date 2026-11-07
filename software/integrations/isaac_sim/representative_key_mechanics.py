@@ -220,6 +220,12 @@ STATE_POLICY_NATIVE_COLLISION_CAMPAIGN_SCHEMA = (
 STATE_POLICY_NATIVE_COLLISION_REVIEW_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_native_collision_review.v1"
 )
+STATE_POLICY_MECHANICS_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_mechanics_replay_plan.v1"
+)
+STATE_POLICY_MECHANICS_REPLAY_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_mechanics_replay_campaign.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -13534,6 +13540,520 @@ def review_state_policy_native_collision_campaign(
     return review
 
 
+def compile_state_policy_mechanics_replay_campaign(
+    review: dict[str, Any],
+    dataset_manifest: dict[str, Any],
+    proposal_campaign: dict[str, Any],
+    proposal_payloads: dict[str, bytes],
+    collision_request_campaign: dict[str, Any],
+    collision_requests: dict[str, dict[str, Any]],
+    native_collision_manifest: dict[str, Any],
+    source_mechanics_campaign: dict[str, Any],
+    source_mechanics_result: dict[str, Any],
+    source_mechanics_receipts: dict[str, dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    """Compile collision-reviewed LM4 proposals into non-executing mechanics plans."""
+    for document, digest_key, label in (
+        (review, "review_sha256", "ARM-221 collision review"),
+        (dataset_manifest, "dataset_sha256", "state-policy dataset"),
+        (proposal_campaign, "campaign_sha256", "state-policy proposal campaign"),
+        (
+            collision_request_campaign,
+            "campaign_sha256",
+            "state-policy collision request campaign",
+        ),
+        (
+            native_collision_manifest,
+            "manifest_sha256",
+            "state-policy native collision manifest",
+        ),
+        (
+            source_mechanics_campaign,
+            "campaign_sha256",
+            "representative mechanics campaign",
+        ),
+        (
+            source_mechanics_result,
+            "campaign_sha256",
+            "representative mechanics result",
+        ),
+    ):
+        _verify_lm3_digest(document, digest_key, label)
+        _require_lm3_zero_authority(document, label)
+    if (
+        review.get("schema") != STATE_POLICY_NATIVE_COLLISION_REVIEW_SCHEMA
+        or review.get("status")
+        != "ACCEPTED_FOR_ZERO_AUTHORITY_MECHANICS_PLAN_COMPILATION"
+        or review.get("next_required_stage")
+        != "COMPILE_LM4_ZERO_AUTHORITY_MECHANICS_REPLAY_PLANS"
+        or review.get("review_decision", {}).get(
+            "mechanics_plan_compilation_allowed"
+        )
+        is not True
+        or review.get("review_decision", {}).get(
+            "mechanics_replay_execution_authorized"
+        )
+        is not False
+        or dataset_manifest.get("schema") != STATE_POLICY_DATASET_MANIFEST_SCHEMA
+        or dataset_manifest.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_DATASET"
+        or dataset_manifest.get("dataset_sha256")
+        != review.get("source_dataset_sha256")
+        or proposal_campaign.get("schema")
+        != STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN_SCHEMA
+        or proposal_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION"
+        or proposal_campaign.get("source_dataset_sha256")
+        != dataset_manifest.get("dataset_sha256")
+        or proposal_campaign.get("source_model_sha256")
+        != review.get("source_model_sha256")
+        or collision_request_campaign.get("schema")
+        != STATE_POLICY_COLLISION_REQUEST_CAMPAIGN_SCHEMA
+        or collision_request_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION"
+        or collision_request_campaign.get("source_dataset_sha256")
+        != dataset_manifest.get("dataset_sha256")
+        or collision_request_campaign.get("source_model_sha256")
+        != proposal_campaign.get("source_model_sha256")
+        or collision_request_campaign.get("source_proposal_campaign_sha256")
+        != proposal_campaign.get("campaign_sha256")
+        or native_collision_manifest.get("schema")
+        != STATE_POLICY_NATIVE_COLLISION_MANIFEST_SCHEMA
+        or native_collision_manifest.get("manifest_sha256")
+        != review.get("source_manifest_sha256")
+        or source_mechanics_campaign.get("schema")
+        != REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_CAMPAIGN_SCHEMA
+        or source_mechanics_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_MECHANICS_REPLAY"
+        or source_mechanics_result.get("schema")
+        != REPRESENTATIVE_KEY_NATIVE_MECHANICS_RESULT_CAMPAIGN_SCHEMA
+        or source_mechanics_result.get("status")
+        != "PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN"
+        or source_mechanics_result.get("source_replay_campaign_sha256")
+        != source_mechanics_campaign.get("campaign_sha256")
+        or source_mechanics_result.get("accepted_action_count") != 8
+    ):
+        raise MechanicsContractError("LM4 mechanics compilation boundary changed")
+
+    proposal_rows = proposal_campaign.get("episodes")
+    request_rows = collision_request_campaign.get("requests")
+    native_entries = native_collision_manifest.get("entries")
+    review_rows = review.get("reviewed_episodes")
+    dataset_rows = dataset_manifest.get("episodes")
+    source_plans = source_mechanics_campaign.get("plans")
+    source_results = source_mechanics_result.get("results")
+    if not all(
+        isinstance(rows, list) and rows
+        for rows in (
+            proposal_rows,
+            request_rows,
+            native_entries,
+            review_rows,
+            dataset_rows,
+            source_plans,
+            source_results,
+        )
+    ):
+        raise MechanicsContractError("LM4 mechanics compilation sources are incomplete")
+
+    def by_identity(rows: list[dict[str, Any]], key: str, label: str) -> dict[str, dict[str, Any]]:
+        mapped = {
+            row.get(key): row for row in rows if isinstance(row, dict)
+        }
+        if None in mapped or len(mapped) != len(rows):
+            raise MechanicsContractError(f"{label} identities changed")
+        return mapped
+
+    proposals_by_id = by_identity(proposal_rows, "episode_id", "proposal episode")
+    requests_by_id = by_identity(request_rows, "episode_id", "collision request")
+    native_by_id = by_identity(native_entries, "episode_id", "native collision")
+    review_by_id = by_identity(review_rows, "episode_id", "collision review")
+    dataset_by_id = by_identity(dataset_rows, "episode_id", "dataset episode")
+    source_plans_by_target = by_identity(
+        source_plans, "target_id", "source mechanics plan"
+    )
+    source_results_by_target = by_identity(
+        source_results, "target_id", "source mechanics result"
+    )
+    episode_ids = set(proposals_by_id)
+    if (
+        episode_ids != set(requests_by_id)
+        or episode_ids != set(native_by_id)
+        or episode_ids != set(review_by_id)
+        or episode_ids != set(proposal_payloads)
+        or episode_ids != set(collision_requests)
+        or len(episode_ids) != review.get("episode_count")
+        or len(episode_ids) != proposal_campaign.get("held_out_episode_count")
+        or set(source_plans_by_target) != set(REPRESENTATIVE_KEYS[1:])
+        or set(source_results_by_target) != set(REPRESENTATIVE_KEYS[1:])
+        or set(source_mechanics_receipts) != set(REPRESENTATIVE_KEYS[1:])
+    ):
+        raise MechanicsContractError("LM4 mechanics compilation denominator changed")
+
+    plans: dict[str, dict[str, Any]] = {}
+    entries = []
+    total_targets = 0
+    target_episode_counts: Counter[str] = Counter()
+    maximum_adjacent_step = 0.0
+    for episode in proposal_rows:
+        episode_id = episode["episode_id"]
+        target_id = episode["target_id"]
+        request_row = requests_by_id[episode_id]
+        native_entry = native_by_id[episode_id]
+        review_row = review_by_id[episode_id]
+        dataset_row = dataset_by_id.get(episode_id)
+        request = collision_requests[episode_id]
+        source_plan = source_plans_by_target.get(target_id)
+        source_result = source_results_by_target.get(target_id)
+        source_receipt = source_mechanics_receipts.get(target_id)
+        if not all(
+            isinstance(item, dict)
+            for item in (dataset_row, source_plan, source_result, source_receipt)
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} LM4 mechanics source evidence is absent"
+            )
+        for document, digest_key, label in (
+            (request, "request_sha256", "state-policy collision request"),
+            (source_plan, "plan_sha256", "source mechanics plan"),
+            (source_receipt, "receipt_sha256", "source mechanics receipt"),
+        ):
+            _verify_lm3_digest(document, digest_key, f"{episode_id} {label}")
+            _require_lm3_zero_authority(document, f"{episode_id} {label}")
+        payload = proposal_payloads[episode_id]
+        if hashlib.sha256(payload).hexdigest() != episode.get(
+            "proposal_trajectory_sha256"
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} LM4 mechanics proposal digest changed"
+            )
+        rows = [json.loads(line) for line in payload.decode("utf-8").splitlines()]
+        if (
+            target_id not in REPRESENTATIVE_KEYS
+            or request_row.get("target_id") != target_id
+            or native_entry.get("target_id") != target_id
+            or review_row.get("target_id") != target_id
+            or dataset_row.get("target_id") != target_id
+            or dataset_row.get("role") != "EVALUATION"
+            or dataset_row.get("disposition") != "PASS"
+            or dataset_row.get("partition") != episode.get("partition")
+            or dataset_row.get("scene_id") != episode.get("scene_id")
+            or dataset_row.get("seed") != episode.get("seed")
+            or dataset_row.get("receipt_sha256")
+            != episode.get("source_receipt_sha256")
+            or request.get("schema") != STATE_POLICY_COLLISION_REQUEST_SCHEMA
+            or request.get("request_sha256") != request_row.get("request_sha256")
+            or request.get("request_sha256")
+            != native_entry.get("state_policy_request_sha256")
+            or request.get("source_dataset_sha256")
+            != dataset_manifest.get("dataset_sha256")
+            or request.get("source_model_sha256")
+            != proposal_campaign.get("source_model_sha256")
+            or request.get("source_proposal_campaign_sha256")
+            != proposal_campaign.get("campaign_sha256")
+            or request.get("source_proposal_trajectory_sha256")
+            != episode.get("proposal_trajectory_sha256")
+            or (
+                source_plan.get("schema"), source_plan.get("status")
+            )
+            not in {
+                (
+                    REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_REPLAY_PLAN_SCHEMA,
+                    "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_KEY_MECHANICS_REPLAY",
+                ),
+                (
+                    REPRESENTATIVE_KEY_FEEDBACK_ADAPTED_MECHANICS_REPLAY_PLAN_SCHEMA,
+                    "READY_FOR_ZERO_AUTHORITY_FEEDBACK_ADAPTED_KEY_MECHANICS_REPLAY",
+                ),
+            }
+            or source_receipt.get("schema")
+            != REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+            or source_receipt.get("status") != "PASS"
+            or source_receipt.get("source_plan_sha256")
+            != source_plan.get("plan_sha256")
+            or source_result.get("plan_sha256") != source_plan.get("plan_sha256")
+            or source_result.get("receipt_sha256")
+            != source_receipt.get("receipt_sha256")
+            or source_result.get("action_count") != 2
+            or source_result.get("root_pose_invariant_passed") is not True
+            or len(rows) != episode.get("proposal_sample_count")
+            or len(rows) != dataset_row.get("sample_count")
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} LM4 mechanics lineage changed"
+            )
+        randomized_parameters = _validate_randomized_replay_parameters(
+            dataset_row.get("randomized_parameters")
+        )
+        randomized_key_center = dataset_row.get("randomized_key_center_board_xy_mm")
+        if (
+            not isinstance(randomized_key_center, list)
+            or len(randomized_key_center) != 2
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} LM4 randomized key center changed"
+            )
+        randomized_key_center = [
+            _finite_number(value, f"{episode_id} randomized key center")
+            for value in randomized_key_center
+        ]
+
+        previous_time = -math.inf
+        previous_action: list[float] | None = None
+        episode_maximum_step = 0.0
+        contact_indices: dict[int, list[int]] = {0: [], 1: []}
+        joint_targets = []
+        for sequence, row in enumerate(rows):
+            action = row.get("joint_position_proposal_rad")
+            time_s = _finite_number(row.get("time_s"), f"{episode_id} proposal time")
+            action_index = row.get("action_index")
+            phase = row.get("phase")
+            target_sequence = row.get("target_sequence")
+            if (
+                row.get("schema") != STATE_POLICY_PROPOSAL_ROW_SCHEMA
+                or row.get("source_episode_id") != episode_id
+                or row.get("source_row_index") != sequence
+                or row.get("target_id") != target_id
+                or phase not in STATE_POLICY_PHASES
+                or action_index not in (None, 0, 1)
+                or not isinstance(target_sequence, int)
+                or isinstance(target_sequence, bool)
+                or not isinstance(action, list)
+                or len(action) != 6
+                or time_s <= previous_time
+            ):
+                raise MechanicsContractError(
+                    f"{episode_id} LM4 mechanics proposal row {sequence} changed"
+                )
+            action = [
+                _finite_number(value, f"{episode_id} proposal joint")
+                for value in action
+            ]
+            if previous_action is not None:
+                episode_maximum_step = max(
+                    episode_maximum_step,
+                    max(
+                        abs(right - left)
+                        for left, right in zip(previous_action, action, strict=True)
+                    ),
+                )
+            if phase == "CONTACT":
+                if action_index not in (0, 1):
+                    raise MechanicsContractError(
+                        f"{episode_id} contact row lacks an action identity"
+                    )
+                contact_indices[action_index].append(sequence)
+            joint_targets.append({
+                "sequence": sequence,
+                "time_from_start_ns": round(time_s * 1e9),
+                "phase": phase,
+                "target_id": target_id,
+                "action_index": action_index,
+                "source_target_sequence": target_sequence,
+                "phase_endpoint": False,
+                "joint_position_target_rad": action,
+            })
+            previous_time = time_s
+            previous_action = action
+        if any(not indices for indices in contact_indices.values()):
+            raise MechanicsContractError(
+                f"{episode_id} LM4 mechanics contact endpoints are incomplete"
+            )
+        contact_endpoints = [
+            contact_indices[action_index][-1] for action_index in (0, 1)
+        ]
+        for endpoint in contact_endpoints:
+            joint_targets[endpoint]["phase_endpoint"] = True
+
+        source_bindings = source_plan.get("source_bindings")
+        if (
+            not isinstance(source_bindings, dict)
+            or source_plan.get("joint_order") != dataset_manifest.get("joint_order")
+            or source_plan.get("target_id") != target_id
+            or not isinstance(source_plan.get("target_region"), dict)
+            or not isinstance(source_plan.get("robot_placement_matrix_row_major"), list)
+            or source_plan.get("execution_contract", {}).get(
+                "maximum_joint_tracking_error_rad"
+            )
+            != 0.05
+        ):
+            raise MechanicsContractError(
+                f"{episode_id} LM4 mechanics source contract changed"
+            )
+        plan: dict[str, Any] = {
+            "schema": STATE_POLICY_MECHANICS_REPLAY_PLAN_SCHEMA,
+            "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_RUNTIME_ADMISSION",
+            "episode_id": episode_id,
+            "target_id": target_id,
+            "partition": episode["partition"],
+            "scene_id": episode["scene_id"],
+            "seed": episode["seed"],
+            "joint_order": list(dataset_manifest["joint_order"]),
+            "sample_count": len(joint_targets),
+            "action_count": 2,
+            "contact_endpoint_sequences": contact_endpoints,
+            "joint_targets": joint_targets,
+            "maximum_uninterpolated_adjacent_joint_step_rad": episode_maximum_step,
+            "collision_screened_bounded_sample_count": request[
+                "bounded_sample_count"
+            ],
+            "target_region": dict(source_plan["target_region"]),
+            "robot_placement_matrix_row_major": list(
+                source_plan["robot_placement_matrix_row_major"]
+            ),
+            "randomized_parameters": randomized_parameters,
+            "randomized_key_center_board_xy_mm": randomized_key_center,
+            "source_bindings": {
+                "arm221_collision_review_sha256": review["review_sha256"],
+                "arm220_native_manifest_sha256": native_collision_manifest[
+                    "manifest_sha256"
+                ],
+                "arm220_native_receipt_sha256": review_row["receipt_sha256"],
+                "state_policy_dataset_sha256": dataset_manifest["dataset_sha256"],
+                "state_policy_model_sha256": proposal_campaign[
+                    "source_model_sha256"
+                ],
+                "state_policy_proposal_campaign_sha256": proposal_campaign[
+                    "campaign_sha256"
+                ],
+                "state_policy_proposal_trajectory_sha256": episode[
+                    "proposal_trajectory_sha256"
+                ],
+                "state_policy_collision_request_sha256": request[
+                    "request_sha256"
+                ],
+                "representative_mechanics_campaign_sha256": (
+                    source_mechanics_campaign["campaign_sha256"]
+                ),
+                "representative_mechanics_result_sha256": source_mechanics_result[
+                    "campaign_sha256"
+                ],
+                "representative_mechanics_plan_schema": source_plan["schema"],
+                "representative_mechanics_plan_status": source_plan["status"],
+                "representative_mechanics_plan_sha256": source_plan["plan_sha256"],
+                "representative_mechanics_receipt_sha256": source_receipt[
+                    "receipt_sha256"
+                ],
+                **{
+                    key: source_bindings[key]
+                    for key in (
+                        "key_mechanics_profile_sha256",
+                        "virtual_profile_sha256",
+                        "drive_profile_file_sha256",
+                        "robot_import_receipt_sha256",
+                        "robot_usd_sha256",
+                    )
+                },
+            },
+            "proposal_semantics": {
+                "proposal_targets_preserved_without_interpolation": True,
+                "collision_interpolation_not_promoted_to_motion_commands": True,
+                "source_contact_refinement_reapplied": False,
+                "randomized_reset_preserved": True,
+            },
+            "execution_contract": {
+                "initial_joint_state_placement_count": 1,
+                "post_initialization_state_teleports": 0,
+                "subsequent_joint_commands": "ARTICULATION_POSITION_TARGETS_ONLY",
+                "key_motion_source": "NATIVE_CONTACT_ONLY",
+                "root_pose_invariant_required_after_every_sample": True,
+                "maximum_joint_tracking_error_rad": 0.05,
+                "randomized_key_mechanics_required": True,
+            },
+            "runtime_admission_required": True,
+            "native_mechanics_replay_executed": False,
+            "native_replay_authorized": False,
+            "hardware_access": False,
+            "hardware_writes": 0,
+            "physical_authority": False,
+            "physical_movements": 0,
+            "controller_commands": [],
+            "gate_promotions": [],
+            "limitations": [
+                "compiled_plan_does_not_start_isaac_or_a_gpu",
+                "proposal_targets_require_fresh_runtime_file_revalidation",
+                "contact_release_settling_tracking_and_abstention_are_unevaluated",
+                "collision_screen_is_discrete_not_continuous_clearance_proof",
+                "exploratory_uninstalled_geometry_cannot_authorize_physical_motion",
+            ],
+        }
+        plan["plan_sha256"] = _canonical_sha256(plan)
+        plans[episode_id] = plan
+        total_targets += len(joint_targets)
+        target_episode_counts[target_id] += 1
+        maximum_adjacent_step = max(maximum_adjacent_step, episode_maximum_step)
+        entries.append({
+            "episode_id": episode_id,
+            "target_id": target_id,
+            "partition": episode["partition"],
+            "scene_id": episode["scene_id"],
+            "sample_count": len(joint_targets),
+            "collision_screened_bounded_sample_count": request[
+                "bounded_sample_count"
+            ],
+            "contact_endpoint_sequences": contact_endpoints,
+            "maximum_uninterpolated_adjacent_joint_step_rad": episode_maximum_step,
+            "proposal_trajectory_sha256": episode["proposal_trajectory_sha256"],
+            "collision_request_sha256": request["request_sha256"],
+            "mechanics_plan_sha256": plan["plan_sha256"],
+        })
+    if (
+        total_targets != proposal_campaign.get("proposal_sample_count")
+        or sum(
+            row["collision_screened_bounded_sample_count"] for row in entries
+        )
+        != review.get("total_bounded_sample_count")
+    ):
+        raise MechanicsContractError("LM4 mechanics compiled sample denominator changed")
+    campaign: dict[str, Any] = {
+        "schema": STATE_POLICY_MECHANICS_REPLAY_CAMPAIGN_SCHEMA,
+        "status": "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_RUNTIME_ADMISSION",
+        "source_review_sha256": review["review_sha256"],
+        "source_dataset_sha256": dataset_manifest["dataset_sha256"],
+        "source_model_sha256": proposal_campaign["source_model_sha256"],
+        "source_proposal_campaign_sha256": proposal_campaign["campaign_sha256"],
+        "source_collision_request_campaign_sha256": collision_request_campaign[
+            "campaign_sha256"
+        ],
+        "source_native_collision_manifest_sha256": native_collision_manifest[
+            "manifest_sha256"
+        ],
+        "source_representative_mechanics_campaign_sha256": (
+            source_mechanics_campaign["campaign_sha256"]
+        ),
+        "source_representative_mechanics_result_sha256": source_mechanics_result[
+            "campaign_sha256"
+        ],
+        "episode_count": len(entries),
+        "total_joint_target_count": total_targets,
+        "total_collision_screened_bounded_sample_count": sum(
+            row["collision_screened_bounded_sample_count"] for row in entries
+        ),
+        "target_episode_counts": dict(sorted(target_episode_counts.items())),
+        "maximum_uninterpolated_adjacent_joint_step_rad": maximum_adjacent_step,
+        "entries": entries,
+        "runtime_admissions_completed": 0,
+        "runtime_files_revalidated": False,
+        "isaac_started": False,
+        "gpu_started": False,
+        "native_mechanics_replays_executed": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": "ADMIT_AND_REVALIDATE_LM4_MECHANICS_RUNTIME_INPUTS",
+        "limitations": [
+            "plans_are_compiled_but_not_runtime_admitted_or_executed",
+            "all_nine_mechanics_replays_remain_pending",
+            "no_native_replay_or_physical_motion_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign, plans
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -13798,6 +14318,9 @@ def main() -> int:
         help="refine excessive contacts while preserving passing ARM-217 plans",
     )
     parser.add_argument("--representative-native-mechanics-campaign", type=Path)
+    parser.add_argument(
+        "--representative-native-mechanics-result-campaign", type=Path
+    )
     parser.add_argument("--representative-native-mechanics-output-dir", type=Path)
     parser.add_argument("--feedback-adapted-mechanics-output-dir", type=Path)
     parser.add_argument("--contact-refined-mechanics-output-dir", type=Path)
@@ -13861,6 +14384,11 @@ def main() -> int:
         action="store_true",
         help="review ARM-220 evidence before LM4 mechanics-plan compilation",
     )
+    parser.add_argument(
+        "--compile-state-policy-mechanics-replay-campaign",
+        action="store_true",
+        help="compile reviewed LM4 proposals into non-executing mechanics plans",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -13879,7 +14407,9 @@ def main() -> int:
     parser.add_argument("--state-policy-runtime-revalidation-root", type=Path)
     parser.add_argument("--state-policy-native-manifest", type=Path)
     parser.add_argument("--state-policy-native-campaign", type=Path)
+    parser.add_argument("--state-policy-native-review", type=Path)
     parser.add_argument("--state-policy-native-output-dir", type=Path)
+    parser.add_argument("--state-policy-mechanics-output-dir", type=Path)
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -13990,7 +14520,100 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.review_state_policy_native_collision_campaign:
+        if args.compile_state_policy_mechanics_replay_campaign:
+            required = (
+                args.state_policy_native_review,
+                args.state_policy_dataset_manifest,
+                args.state_policy_proposal_campaign,
+                args.proposal_output_dir,
+                args.state_policy_collision_request_campaign,
+                args.collision_request_output_dir,
+                args.state_policy_native_manifest,
+                args.representative_native_mechanics_campaign,
+                args.representative_native_mechanics_result_campaign,
+                args.representative_native_mechanics_output_dir,
+                args.state_policy_mechanics_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-222 mechanics compilation requires the ARM-221 review, "
+                    "dataset, proposals, collision requests, native manifest, "
+                    "accepted representative mechanics sources, and output root"
+                )
+            review = json.loads(
+                args.state_policy_native_review.resolve(strict=True).read_bytes()
+            )
+            dataset = json.loads(
+                args.state_policy_dataset_manifest.resolve(strict=True).read_bytes()
+            )
+            proposals = json.loads(
+                args.state_policy_proposal_campaign.resolve(strict=True).read_bytes()
+            )
+            proposal_root = args.proposal_output_dir.resolve(strict=True)
+            proposal_payloads = {
+                row["episode_id"]: (
+                    proposal_root / row["episode_id"] / "policy_proposal.jsonl"
+                ).resolve(strict=True).read_bytes()
+                for row in proposals.get("episodes", [])
+            }
+            request_campaign = json.loads(
+                args.state_policy_collision_request_campaign
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            request_root = args.collision_request_output_dir.resolve(strict=True)
+            requests = {
+                row["episode_id"]: json.loads((
+                    request_root / row["episode_id"] / "collision_request.json"
+                ).resolve(strict=True).read_bytes())
+                for row in request_campaign.get("requests", [])
+            }
+            native_manifest = json.loads(
+                args.state_policy_native_manifest.resolve(strict=True).read_bytes()
+            )
+            mechanics_campaign = json.loads(
+                args.representative_native_mechanics_campaign
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            mechanics_result = json.loads(
+                args.representative_native_mechanics_result_campaign
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            mechanics_root = (
+                args.representative_native_mechanics_output_dir.resolve(strict=True)
+            )
+            mechanics_receipts = {
+                plan["target_id"]: json.loads((
+                    mechanics_root
+                    / plan["target_id"].lower()
+                    / "native_mechanics_receipt.json"
+                ).resolve(strict=True).read_bytes())
+                for plan in mechanics_campaign.get("plans", [])
+            }
+            result, mechanics_plans = compile_state_policy_mechanics_replay_campaign(
+                review,
+                dataset,
+                proposals,
+                proposal_payloads,
+                request_campaign,
+                requests,
+                native_manifest,
+                mechanics_campaign,
+                mechanics_result,
+                mechanics_receipts,
+            )
+            output_root = args.state_policy_mechanics_output_dir.resolve()
+            output_root.mkdir(parents=True, exist_ok=True)
+            for episode_id, plan in mechanics_plans.items():
+                episode_root = output_root / episode_id
+                episode_root.mkdir(parents=True, exist_ok=True)
+                (episode_root / "mechanics_plan.json").write_text(
+                    json.dumps(plan, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+        elif args.review_state_policy_native_collision_campaign:
             required = (
                 args.state_policy_native_campaign,
                 args.state_policy_native_manifest,
@@ -15759,6 +16382,7 @@ def main() -> int:
             "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_WITH_BLOCKERS",
             "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_NO_BLOCKERS_OBSERVED",
             "ACCEPTED_FOR_ZERO_AUTHORITY_MECHANICS_PLAN_COMPILATION",
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_RUNTIME_ADMISSION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

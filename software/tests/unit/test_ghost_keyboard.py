@@ -4364,3 +4364,198 @@ def test_arm218_episode_worker_records_runtime_failure_without_retry(
     assert result['disposition']=='FAIL'
     assert result['failure_reason']=='UNEXPECTED_RUNTIME_ERROR'
     assert trajectory.read_bytes()==b''
+
+
+def _arm222_compilation_sources():
+    mechanics=_load_key_mechanics()
+    def signed(value,field):
+        value[field]=mechanics._canonical_sha256(value)
+        return value
+    zero={
+        'hardware_access':False,'hardware_writes':0,
+        'physical_authority':False,'physical_movements':0,
+        'controller_commands':[],'gate_promotions':[],
+    }
+    episode_id='episode-arm222-contract'
+    target_id='1'
+    source_receipt_sha='d'*64
+    randomized={
+        'key_stiffness_n_per_m':100.0,'key_damping_n_s_per_m':0.5,
+        'key_mass_kg':0.01,'keyboard_offset_x_mm':1.0,
+        'keyboard_offset_y_mm':-1.0,'keyboard_yaw_deg':0.25,
+    }
+    dataset=signed({
+        'schema':mechanics.STATE_POLICY_DATASET_MANIFEST_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_STATE_POLICY_DATASET',
+        'joint_order':['j1','j2','j3','j4','j5','j6'],
+        'episodes':[{
+            'episode_id':episode_id,'target_id':target_id,
+            'role':'EVALUATION','disposition':'PASS','partition':'test',
+            'scene_id':'scene-arm222','seed':222,
+            'receipt_sha256':source_receipt_sha,'sample_count':2,
+            'randomized_parameters':randomized,
+            'randomized_key_center_board_xy_mm':[10.0,20.0],
+        }],**zero,
+    },'dataset_sha256')
+    rows=[]
+    for index,action_index in enumerate((0,1)):
+        rows.append({
+            'schema':mechanics.STATE_POLICY_PROPOSAL_ROW_SCHEMA,
+            'source_episode_id':episode_id,'source_row_index':index,
+            'target_id':target_id,'time_s':0.01*(index+1),
+            'phase':'CONTACT','action_index':action_index,
+            'target_sequence':index+1,
+            'joint_position_proposal_rad':[0.01*(index+joint) for joint in range(6)],
+        })
+    payload=('\n'.join(
+        json.dumps(row,sort_keys=True,separators=(',',':')) for row in rows
+    )+'\n').encode()
+    proposal=signed({
+        'schema':mechanics.STATE_POLICY_PROPOSAL_REPLAY_CAMPAIGN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_QUALIFICATION',
+        'source_dataset_sha256':dataset['dataset_sha256'],
+        'source_model_sha256':'m'*64,'held_out_episode_count':1,
+        'proposal_sample_count':2,'episodes':[{
+            'episode_id':episode_id,'target_id':target_id,'partition':'test',
+            'scene_id':'scene-arm222','seed':222,
+            'source_receipt_sha256':source_receipt_sha,
+            'proposal_sample_count':2,
+            'proposal_trajectory_sha256':hashlib.sha256(payload).hexdigest(),
+        }],**zero,
+    },'campaign_sha256')
+    request=signed({
+        'schema':mechanics.STATE_POLICY_COLLISION_REQUEST_SCHEMA,
+        'source_dataset_sha256':dataset['dataset_sha256'],
+        'source_model_sha256':proposal['source_model_sha256'],
+        'source_proposal_campaign_sha256':proposal['campaign_sha256'],
+        'source_proposal_trajectory_sha256':hashlib.sha256(payload).hexdigest(),
+        'bounded_sample_count':2,**zero,
+    },'request_sha256')
+    request_campaign=signed({
+        'schema':mechanics.STATE_POLICY_COLLISION_REQUEST_CAMPAIGN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_STATE_POLICY_COLLISION_ADMISSION',
+        'source_dataset_sha256':dataset['dataset_sha256'],
+        'source_model_sha256':proposal['source_model_sha256'],
+        'source_proposal_campaign_sha256':proposal['campaign_sha256'],
+        'requests':[{
+            'episode_id':episode_id,'target_id':target_id,
+            'request_sha256':request['request_sha256'],
+        }],**zero,
+    },'campaign_sha256')
+    native=signed({
+        'schema':mechanics.STATE_POLICY_NATIVE_COLLISION_MANIFEST_SCHEMA,
+        'entries':[{
+            'episode_id':episode_id,'target_id':target_id,
+            'state_policy_request_sha256':request['request_sha256'],
+        }],**zero,
+    },'manifest_sha256')
+    review=signed({
+        'schema':mechanics.STATE_POLICY_NATIVE_COLLISION_REVIEW_SCHEMA,
+        'status':'ACCEPTED_FOR_ZERO_AUTHORITY_MECHANICS_PLAN_COMPILATION',
+        'next_required_stage':'COMPILE_LM4_ZERO_AUTHORITY_MECHANICS_REPLAY_PLANS',
+        'source_dataset_sha256':dataset['dataset_sha256'],
+        'source_model_sha256':proposal['source_model_sha256'],
+        'source_manifest_sha256':native['manifest_sha256'],
+        'episode_count':1,'total_bounded_sample_count':2,
+        'review_decision':{
+            'mechanics_plan_compilation_allowed':True,
+            'mechanics_replay_execution_authorized':False,
+        },
+        'reviewed_episodes':[{
+            'episode_id':episode_id,'target_id':target_id,
+            'receipt_sha256':'n'*64,
+        }],**zero,
+    },'review_sha256')
+    bindings={
+        'key_mechanics_profile_sha256':'k'*64,
+        'virtual_profile_sha256':'v'*64,
+        'drive_profile_file_sha256':'f'*64,
+        'robot_import_receipt_sha256':'i'*64,
+        'robot_usd_sha256':'u'*64,
+    }
+    plans=[]
+    receipts={}
+    results=[]
+    for target in mechanics.REPRESENTATIVE_KEYS[1:]:
+        plan=signed({
+            'schema':(
+                mechanics.REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_REPLAY_PLAN_SCHEMA
+            ),
+            'status':'READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_KEY_MECHANICS_REPLAY',
+            'target_id':target,'joint_order':dataset['joint_order'],
+            'target_region':{'center_board_xy_mm':[10.0,20.0]},
+            'robot_placement_matrix_row_major':[1.0]*16,
+            'execution_contract':{'maximum_joint_tracking_error_rad':0.05},
+            'source_bindings':bindings,**zero,
+        },'plan_sha256')
+        receipt=signed({
+            'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA,
+            'status':'PASS','target_id':target,
+            'source_plan_sha256':plan['plan_sha256'],**zero,
+        },'receipt_sha256')
+        plans.append(plan)
+        receipts[target]=receipt
+        results.append({
+            'target_id':target,'plan_sha256':plan['plan_sha256'],
+            'receipt_sha256':receipt['receipt_sha256'],'action_count':2,
+            'root_pose_invariant_passed':True,
+        })
+    source_campaign=signed({
+        'schema':mechanics.REPRESENTATIVE_KEY_CONTACT_REFINED_MECHANICS_CAMPAIGN_SCHEMA,
+        'status':'READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_MECHANICS_REPLAY',
+        'plans':plans,**zero,
+    },'campaign_sha256')
+    source_result=signed({
+        'schema':mechanics.REPRESENTATIVE_KEY_NATIVE_MECHANICS_RESULT_CAMPAIGN_SCHEMA,
+        'status':'PASS_REPRESENTATIVE_ZERO_AUTHORITY_NATIVE_MECHANICS_CAMPAIGN',
+        'source_replay_campaign_sha256':source_campaign['campaign_sha256'],
+        'accepted_action_count':8,'results':results,**zero,
+    },'campaign_sha256')
+    return mechanics,(
+        review,dataset,proposal,{episode_id:payload},request_campaign,
+        {episode_id:request},native,source_campaign,source_result,receipts,
+    )
+
+
+def test_arm222_mechanics_plan_compilation_is_deterministic_and_nonexecuting():
+    mechanics,sources=_arm222_compilation_sources()
+    first,first_plans=mechanics.compile_state_policy_mechanics_replay_campaign(
+        *sources
+    )
+    second,second_plans=mechanics.compile_state_policy_mechanics_replay_campaign(
+        *sources
+    )
+    assert first==second and first_plans==second_plans
+    assert first['schema']==mechanics.STATE_POLICY_MECHANICS_REPLAY_CAMPAIGN_SCHEMA
+    assert first['episode_count']==1
+    assert first['total_joint_target_count']==2
+    assert first['total_collision_screened_bounded_sample_count']==2
+    plan=next(iter(first_plans.values()))
+    assert plan['contact_endpoint_sequences']==[0,1]
+    assert [row['phase_endpoint'] for row in plan['joint_targets']]==[True,True]
+    assert plan['proposal_semantics'][
+        'proposal_targets_preserved_without_interpolation'
+    ] is True
+    assert plan['native_mechanics_replay_executed'] is False
+    assert plan['hardware_access'] is plan['physical_authority'] is False
+    assert first['isaac_started'] is first['gpu_started'] is False
+
+
+def test_arm222_mechanics_plan_compilation_rejects_tampering_and_denominator_drift():
+    mechanics,sources=_arm222_compilation_sources()
+    tampered=list(sources)
+    payloads=dict(tampered[3])
+    episode_id=next(iter(payloads))
+    payloads[episode_id]+=b'{}\n'
+    tampered[3]=payloads
+    with pytest.raises(mechanics.MechanicsContractError,match='proposal digest'):
+        mechanics.compile_state_policy_mechanics_replay_campaign(*tampered)
+    tampered=list(sources)
+    proposal=json.loads(json.dumps(tampered[2]))
+    proposal['proposal_sample_count']=3
+    proposal['campaign_sha256']=mechanics._canonical_sha256({
+        key:value for key,value in proposal.items() if key!='campaign_sha256'
+    })
+    tampered[2]=proposal
+    with pytest.raises(mechanics.MechanicsContractError,match='boundary|lineage|denominator'):
+        mechanics.compile_state_policy_mechanics_replay_campaign(*tampered)
