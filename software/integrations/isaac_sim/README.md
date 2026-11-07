@@ -2083,6 +2083,33 @@ hardware access, and physical authority remain false. The next bounded stage
 is fresh LM4 mechanics-input materialization; mechanics outcomes remain
 unevaluated.
 
+ARM-224 materializes those admitted trajectories into fresh native mechanics
+replay plans without starting Isaac or a GPU. The retained manifest is
+`C:\IsaacSim\artifacts\issue190\arm224-state-policy-native-mechanics-inputs-001\manifest.json`
+with SHA-256
+`5f895d7dd14776ac6e44886367db0b13439a3d98a353d63a67cc72da5d85af3a`.
+It contains nine signed plans covering all `12,744` joint targets and the
+complete `523`-sample collision lineage. Each plan preserves its randomized
+reset, placement, mechanics parameters, two contact endpoints, and exact five
+runtime-file hashes while binding back to its ARM-222 plan and ARM-223
+admission receipt. No prior mechanics result is reused. Isaac/GPU start,
+mechanics execution, hardware access, and physical authority remain false.
+
+Reproduce the non-starting input materialization with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001/manifest.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001/status.json `
+  --materialize-state-policy-native-mechanics-inputs `
+  --state-policy-mechanics-runtime-admission-campaign C:/IsaacSim/artifacts/issue190/arm223-state-policy-mechanics-runtime-admission-001/campaign.json `
+  --state-policy-mechanics-runtime-output-dir C:/IsaacSim/artifacts/issue190/arm223-state-policy-mechanics-runtime-admission-001 `
+  --state-policy-mechanics-campaign C:/IsaacSim/artifacts/issue190/arm222-state-policy-mechanics-plans-001/campaign.json `
+  --state-policy-mechanics-output-dir C:/IsaacSim/artifacts/issue190/arm222-state-policy-mechanics-plans-001 `
+  --state-policy-native-mechanics-output-dir C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001
+```
+
 Reproduce the non-starting runtime admission with:
 
 ```powershell

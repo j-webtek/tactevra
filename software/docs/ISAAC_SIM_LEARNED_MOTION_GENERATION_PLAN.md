@@ -657,6 +657,17 @@ identity and lineage gate only: it starts neither Isaac nor a GPU, executes no
 mechanics replay, and grants no hardware or physical authority. The next stage
 is materialization of fresh LM4 mechanics replay inputs.
 
+ARM-224 completes that materialization. Its signed manifest at
+`C:\IsaacSim\artifacts\issue190\arm224-state-policy-native-mechanics-inputs-001`
+has SHA-256
+`5f895d7dd14776ac6e44886367db0b13439a3d98a353d63a67cc72da5d85af3a`
+and binds nine fresh replay plans to the admitted runtime hashes. The plans
+preserve all `12,744` targets, `523` collision-screen samples, randomized
+resets, mechanics parameters, placements, and contact endpoints. This stage
+does not start Isaac/GPU, reuse a mechanics result, or grant physical
+authority. Fresh zero-authority mechanics execution and outcome measurement
+are next.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -851,7 +862,12 @@ ScheduleGen. Neither is a physical success rate.
     all `12,744` targets and `523` collision-screen samples while recording
     zero Isaac/GPU starts, zero mechanics replays, and zero physical authority.
     Fresh mechanics-input materialization is next.
-13. Expand only after each predecessor produces reviewable evidence.
+13. **LM4 mechanics input materialization:** ARM-224 emits nine signed native
+    replay plans bound to the exact ARM-222 plans, ARM-223 admissions, and five
+    runtime hashes. All `12,744` targets, `523` collision samples, randomized
+    resets, placements, mechanics values, and contact endpoints are retained.
+    Isaac/GPU and mechanics execution remain at zero; fresh replay is next.
+14. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
