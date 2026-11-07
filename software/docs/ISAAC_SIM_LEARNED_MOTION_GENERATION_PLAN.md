@@ -1074,7 +1074,15 @@ ScheduleGen. Neither is a physical success rate.
     identity, target-key, or configuration-sweep evidence. This converts a
     generic measurement block into a deterministic capture backlog without
     creating a profile, route, replay, hardware access, or physical authority.
-29. Expand only after each predecessor produces reviewable evidence.
+29. **LM4 robot-geometry review candidates:** ARM-240 binds ARM-239 to the
+    retained upstream-mesh reduction and packages all `14` conservative
+    link-local boxes for the seven robot bodies. The candidates retain exact
+    mesh, upstream-commit, partition, containment, and non-watertight lineage,
+    but remain `PENDING`: physical model identity, uncertainty, false-positive
+    quality, and link5 whole-envelope review are still open. No ICQ-1 row is
+    modified and no profile, collision screen, route, replay, hardware access,
+    or physical authority is created.
+30. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
