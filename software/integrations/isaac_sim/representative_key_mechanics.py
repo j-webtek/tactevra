@@ -252,6 +252,15 @@ STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_RECEIPT_SCHEMA = (
 STATE_POLICY_ROOT_FIXTURE_DIAGNOSTIC_REVIEW_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_root_fixture_diagnostic_review.v1"
 )
+STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_native_mechanics_replay_plan.v2"
+)
+STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_MANIFEST_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_native_mechanics_manifest.v2"
+)
+STATE_POLICY_FIXED_FIXTURE_CORRECTION_REVIEW_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_fixed_fixture_correction_review.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -10574,9 +10583,14 @@ def run_drive_controlled_robot_h_replay(
         fixed.CreateLocalPos1Attr().Set(Gf.Vec3f(0.0))
         fixed.CreateLocalRot1Attr().Set(Gf.Quatf(1.0))
         fixed.CreateBody1Rel().SetTargets([base_prim.GetPath()])
-        PhysxSchema.PhysxArticulationAPI.Apply(root_prim).CreateSolverPositionIterationCountAttr(
+        articulation_api = PhysxSchema.PhysxArticulationAPI.Apply(root_prim)
+        articulation_api.CreateSolverPositionIterationCountAttr(
             FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
         )
+        articulation_api.CreateSolverVelocityIterationCountAttr(
+            FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT
+        )
+        fixed.CreateJointEnabledAttr().Set(True)
 
         key_region = profile["regions"][target_id]
         prior = profile["mechanics_prior"]
@@ -11488,6 +11502,195 @@ def review_state_policy_root_fixture_diagnostic(
             "future_native_execution_requires_separate_authorization",
         ],
     }
+    review["review_sha256"] = _canonical_sha256(review)
+    return review
+
+
+def apply_state_policy_fixed_fixture_correction(
+    fixture_review: dict[str, Any],
+    source_manifest: dict[str, Any],
+    source_plans: dict[str, dict[str, Any]],
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    """Materialize review-bound fixed-fixture inputs without starting Isaac."""
+    _verify_lm3_digest(
+        fixture_review, "review_sha256", "root fixture diagnostic review"
+    )
+    _verify_lm3_digest(
+        source_manifest, "manifest_sha256", "source mechanics manifest"
+    )
+    _require_lm3_zero_authority(
+        fixture_review, "root fixture diagnostic review"
+    )
+    _require_lm3_zero_authority(source_manifest, "source mechanics manifest")
+    expected_fixture = {
+        "solver_position_iteration_count": (
+            FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
+        ),
+        "solver_velocity_iteration_count": (
+            FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT
+        ),
+        "fixed_joint_enabled_explicitly": True,
+    }
+    decision = fixture_review.get("review_decision")
+    if (
+        fixture_review.get("schema")
+        != STATE_POLICY_ROOT_FIXTURE_DIAGNOSTIC_REVIEW_SCHEMA
+        or fixture_review.get("status")
+        != "ACCEPTED_FOR_ZERO_AUTHORITY_STATE_POLICY_FIXTURE_CORRECTION"
+        or fixture_review.get("next_required_stage")
+        != "IMPLEMENT_AND_REVIEW_STATE_POLICY_FIXED_FIXTURE_CORRECTION"
+        or fixture_review.get("fixture_configuration") != expected_fixture
+        or not isinstance(decision, dict)
+        or decision.get("known_passing_fixture_stable") is not True
+        or decision.get("offline_fixture_correction_allowed") is not True
+        or decision.get("mechanics_replay_authorized") is not False
+        or source_manifest.get("schema")
+        != STATE_POLICY_NATIVE_MECHANICS_MANIFEST_SCHEMA
+    ):
+        raise MechanicsContractError("fixed fixture correction boundary changed")
+
+    source_entries = source_manifest.get("entries")
+    if (
+        not isinstance(source_entries, list)
+        or not source_entries
+        or len(source_entries) != source_manifest.get("episode_count")
+        or set(source_plans)
+        != {
+            row.get("episode_id")
+            for row in source_entries
+            if isinstance(row, dict)
+        }
+    ):
+        raise MechanicsContractError("fixed fixture correction denominator changed")
+
+    corrected_plans: dict[str, dict[str, Any]] = {}
+    corrected_entries = []
+    for source_entry in source_entries:
+        episode_id = source_entry["episode_id"]
+        source_plan = source_plans[episode_id]
+        validate_state_policy_native_mechanics_episode(
+            source_manifest, source_plan, episode_id
+        )
+        corrected_plan = {
+            key: value for key, value in source_plan.items() if key != "plan_sha256"
+        }
+        corrected_plan.update({
+            "schema": (
+                STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+            ),
+            "status": "READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW",
+            "source_uncorrected_plan_sha256": source_plan["plan_sha256"],
+            "source_root_fixture_review_sha256": fixture_review["review_sha256"],
+            "fixed_fixture_configuration": expected_fixture,
+            "fixed_fixture_correction_applied": True,
+            "native_replay_authorized": False,
+            "next_required_stage": "INDEPENDENTLY_REVIEW_FIXED_FIXTURE_CORRECTION",
+        })
+        corrected_plan["limitations"] = list(
+            source_plan.get("limitations", [])
+        ) + [
+            "fixture_correction_materialization_does_not_start_isaac_or_a_gpu",
+            "corrected_input_does_not_authorize_native_replay",
+            "future_native_execution_requires_separate_authorization",
+        ]
+        corrected_plan["plan_sha256"] = _canonical_sha256(corrected_plan)
+        corrected_plans[episode_id] = corrected_plan
+        corrected_entry = dict(source_entry)
+        corrected_entry.update({
+            "source_uncorrected_plan_sha256": source_plan["plan_sha256"],
+            "native_mechanics_plan_sha256": corrected_plan["plan_sha256"],
+        })
+        corrected_entries.append(corrected_entry)
+
+    corrected_manifest = {
+        key: value
+        for key, value in source_manifest.items()
+        if key not in ("manifest_sha256", "entries", "status", "next_required_stage")
+    }
+    corrected_manifest.update({
+        "schema": STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_MANIFEST_SCHEMA,
+        "status": "READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW",
+        "source_uncorrected_manifest_sha256": source_manifest["manifest_sha256"],
+        "source_root_fixture_review_sha256": fixture_review["review_sha256"],
+        "fixed_fixture_configuration": expected_fixture,
+        "fixed_fixture_correction_applied": True,
+        "entries": corrected_entries,
+        "native_replay_authorized": False,
+        "next_required_stage": "INDEPENDENTLY_REVIEW_FIXED_FIXTURE_CORRECTION",
+    })
+    corrected_manifest["limitations"] = list(
+        source_manifest.get("limitations", [])
+    ) + [
+        "fixture_correction_materialization_does_not_start_isaac_or_a_gpu",
+        "corrected_inputs_do_not_authorize_native_replay",
+        "future_native_execution_requires_separate_authorization",
+    ]
+    corrected_manifest["manifest_sha256"] = _canonical_sha256(corrected_manifest)
+    return corrected_manifest, corrected_plans
+
+
+def review_state_policy_fixed_fixture_correction(
+    fixture_review: dict[str, Any],
+    source_manifest: dict[str, Any],
+    source_plans: dict[str, dict[str, Any]],
+    corrected_manifest: dict[str, Any],
+    corrected_plans: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Reproduce and review the ARM-231 correction without starting Isaac."""
+    expected_manifest, expected_plans = apply_state_policy_fixed_fixture_correction(
+        fixture_review, source_manifest, source_plans
+    )
+    _verify_lm3_digest(
+        corrected_manifest, "manifest_sha256", "corrected mechanics manifest"
+    )
+    if corrected_manifest != expected_manifest or corrected_plans != expected_plans:
+        raise MechanicsContractError("fixed fixture corrected inputs changed")
+    for episode_id, plan in corrected_plans.items():
+        _verify_lm3_digest(
+            plan, "plan_sha256", f"{episode_id} corrected mechanics plan"
+        )
+    review: dict[str, Any] = {
+        "schema": STATE_POLICY_FIXED_FIXTURE_CORRECTION_REVIEW_SCHEMA,
+        "status": "ACCEPTED_FOR_SEPARATE_ZERO_AUTHORITY_NATIVE_REPLAY_AUTHORIZATION",
+        "source_root_fixture_review_sha256": fixture_review["review_sha256"],
+        "source_uncorrected_manifest_sha256": source_manifest["manifest_sha256"],
+        "source_corrected_manifest_sha256": corrected_manifest["manifest_sha256"],
+        "reviewed_episode_count": len(corrected_plans),
+        "fixed_fixture_configuration": corrected_manifest[
+            "fixed_fixture_configuration"
+        ],
+        "review_decision": {
+            "source_denominator_complete": True,
+            "trajectory_samples_unchanged": all(
+                corrected_plans[episode_id].get("joint_targets")
+                == source_plans[episode_id].get("joint_targets")
+                for episode_id in source_plans
+            ),
+            "fixed_fixture_configuration_matches_proven_probe": True,
+            "all_corrected_hashes_reproduced": True,
+            "native_replay_authorized": False,
+        },
+        "isaac_started": False,
+        "gpu_started": False,
+        "mechanics_replays_executed": 0,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "SEPARATELY_AUTHORIZE_ONE_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_REPLAY"
+        ),
+        "limitations": [
+            "offline_review_does_not_start_isaac_or_a_gpu",
+            "fixture_stability_does_not_prove_trajectory_or_contact_success",
+            "review_does_not_authorize_native_or_physical_replay",
+            "future_native_execution_requires_separate_explicit_authorization",
+        ],
+    }
+    if review["review_decision"]["trajectory_samples_unchanged"] is not True:
+        raise MechanicsContractError("fixed fixture correction changed trajectory")
     review["review_sha256"] = _canonical_sha256(review)
     return review
 
@@ -15958,6 +16161,19 @@ def main() -> int:
         action="store_true",
         help="review retained ARM-228 evidence without starting Isaac or a GPU",
     )
+    parser.add_argument(
+        "--apply-state-policy-fixed-fixture-correction",
+        action="store_true",
+        help=(
+            "materialize ARM-230 review-bound fixed-fixture replay inputs "
+            "without starting Isaac or a GPU"
+        ),
+    )
+    parser.add_argument(
+        "--review-state-policy-fixed-fixture-correction",
+        action="store_true",
+        help="independently reproduce and review ARM-231 corrected inputs offline",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -15978,6 +16194,7 @@ def main() -> int:
     parser.add_argument("--state-policy-native-campaign", type=Path)
     parser.add_argument("--state-policy-native-review", type=Path)
     parser.add_argument("--root-drift-diagnostic-receipt", type=Path)
+    parser.add_argument("--state-policy-root-fixture-review", type=Path)
     parser.add_argument("--state-policy-native-output-dir", type=Path)
     parser.add_argument("--state-policy-mechanics-output-dir", type=Path)
     parser.add_argument("--state-policy-mechanics-campaign", type=Path)
@@ -15985,6 +16202,9 @@ def main() -> int:
     parser.add_argument("--state-policy-mechanics-runtime-admission-campaign", type=Path)
     parser.add_argument("--state-policy-native-mechanics-output-dir", type=Path)
     parser.add_argument("--state-policy-native-mechanics-manifest", type=Path)
+    parser.add_argument(
+        "--state-policy-corrected-native-mechanics-output-dir", type=Path
+    )
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -16097,7 +16317,104 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.materialize_state_policy_native_mechanics_inputs:
+        if args.review_state_policy_fixed_fixture_correction:
+            required = (
+                args.state_policy_root_fixture_review,
+                args.state_policy_native_mechanics_manifest,
+                args.state_policy_native_mechanics_output_dir,
+                args.state_policy_corrected_native_mechanics_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-231 correction review requires the ARM-230 review, "
+                    "ARM-224 manifest/input root, and ARM-231 corrected root"
+                )
+            fixture_review = json.loads(
+                args.state_policy_root_fixture_review.resolve(strict=True).read_bytes()
+            )
+            source_manifest = json.loads(
+                args.state_policy_native_mechanics_manifest
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            source_root = args.state_policy_native_mechanics_output_dir.resolve(
+                strict=True
+            )
+            source_plans = {
+                row["episode_id"]: json.loads((
+                    source_root / row["episode_id"] / "native_mechanics_plan.json"
+                ).resolve(strict=True).read_bytes())
+                for row in source_manifest.get("entries", [])
+            }
+            corrected_root = (
+                args.state_policy_corrected_native_mechanics_output_dir.resolve(
+                    strict=True
+                )
+            )
+            corrected_manifest = json.loads(
+                (corrected_root / "manifest.json").resolve(strict=True).read_bytes()
+            )
+            corrected_plans = {
+                row["episode_id"]: json.loads((
+                    corrected_root
+                    / row["episode_id"]
+                    / "native_mechanics_plan.json"
+                ).resolve(strict=True).read_bytes())
+                for row in corrected_manifest.get("entries", [])
+            }
+            result = review_state_policy_fixed_fixture_correction(
+                fixture_review,
+                source_manifest,
+                source_plans,
+                corrected_manifest,
+                corrected_plans,
+            )
+        elif args.apply_state_policy_fixed_fixture_correction:
+            required = (
+                args.state_policy_root_fixture_review,
+                args.state_policy_native_mechanics_manifest,
+                args.state_policy_native_mechanics_output_dir,
+                args.state_policy_corrected_native_mechanics_output_dir,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-231 fixture correction requires the ARM-230 review, "
+                    "ARM-224 manifest/input root, and corrected output root"
+                )
+            fixture_review = json.loads(
+                args.state_policy_root_fixture_review.resolve(strict=True).read_bytes()
+            )
+            source_manifest = json.loads(
+                args.state_policy_native_mechanics_manifest
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            source_root = args.state_policy_native_mechanics_output_dir.resolve(
+                strict=True
+            )
+            source_plans = {
+                row["episode_id"]: json.loads((
+                    source_root
+                    / row["episode_id"]
+                    / "native_mechanics_plan.json"
+                ).resolve(strict=True).read_bytes())
+                for row in source_manifest.get("entries", [])
+            }
+            result, corrected_plans = apply_state_policy_fixed_fixture_correction(
+                fixture_review, source_manifest, source_plans
+            )
+            corrected_root = (
+                args.state_policy_corrected_native_mechanics_output_dir.resolve()
+            )
+            corrected_root.mkdir(parents=True, exist_ok=True)
+            for episode_id, plan in corrected_plans.items():
+                episode_root = corrected_root / episode_id
+                episode_root.mkdir(parents=True, exist_ok=True)
+                (episode_root / "native_mechanics_plan.json").write_text(
+                    json.dumps(plan, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+        elif args.materialize_state_policy_native_mechanics_inputs:
             required = (
                 args.state_policy_mechanics_runtime_admission_campaign,
                 args.state_policy_mechanics_runtime_output_dir,
@@ -18187,6 +18504,8 @@ def main() -> int:
             "READY_FOR_SEPARATELY_AUTHORIZED_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
             "PASS_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
             "ACCEPTED_FOR_ZERO_AUTHORITY_STATE_POLICY_FIXTURE_CORRECTION",
+            "READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW",
+            "ACCEPTED_FOR_SEPARATE_ZERO_AUTHORITY_NATIVE_REPLAY_AUTHORIZATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

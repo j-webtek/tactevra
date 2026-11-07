@@ -2207,6 +2207,48 @@ path the stable fixture's eight solver-velocity iterations and explicitly
 enabled fixed joint. It does not authorize mechanics replay or another Isaac
 launch.
 
+ARM-231 applies only that reviewed fixture delta to the state-policy mechanics
+path: solver position iterations remain `64`, solver velocity iterations are
+authored as `8`, and the fixed joint is explicitly enabled. The retained
+corrected manifest is
+`C:\IsaacSim\artifacts\issue190\arm231-state-policy-fixed-fixture-correction-001\manifest.json`
+with content digest
+`ff166283e37c35bc906668bacc8a37128bcdcd9c1a7b088675412dc5ae38bb28`.
+It contains nine newly hashed plans while preserving every source trajectory
+sample. The independent offline review is retained at
+`C:\IsaacSim\artifacts\issue190\arm231-state-policy-fixed-fixture-correction-review-001\review.json`
+with SHA-256
+`faf67c3e4163b2c8bd40f0a3303fdcda31222f3e9196050f2588538f332e5916`.
+Neither step started Isaac or a GPU, executed a replay, contacted hardware, or
+granted replay authority.
+
+Reproduce the correction and its independent review with:
+
+```powershell
+$source = 'C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001'
+$corrected = 'C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001'
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output "$corrected/manifest.json" `
+  --status-output "$corrected/status.json" `
+  --apply-state-policy-fixed-fixture-correction `
+  --state-policy-root-fixture-review C:/IsaacSim/artifacts/issue190/arm230-state-policy-root-fixture-diagnostic-review-001/review.json `
+  --state-policy-native-mechanics-manifest "$source/manifest.json" `
+  --state-policy-native-mechanics-output-dir $source `
+  --state-policy-corrected-native-mechanics-output-dir $corrected
+
+$review = 'C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-review-001'
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output "$review/review.json" `
+  --status-output "$review/status.json" `
+  --review-state-policy-fixed-fixture-correction `
+  --state-policy-root-fixture-review C:/IsaacSim/artifacts/issue190/arm230-state-policy-root-fixture-diagnostic-review-001/review.json `
+  --state-policy-native-mechanics-manifest "$source/manifest.json" `
+  --state-policy-native-mechanics-output-dir $source `
+  --state-policy-corrected-native-mechanics-output-dir $corrected
+```
+
 Reproduce the non-starting ARM-230 review with:
 
 ```powershell
