@@ -4466,12 +4466,38 @@ def _arm222_compilation_sources():
             'receipt_sha256':'n'*64,
         }],**zero,
     },'review_sha256')
+    mechanics_profile=signed({
+        'schema':mechanics.PROFILE_SCHEMA,
+        'regions':[],**zero,
+    },'profile_sha256')
+    virtual_profile_bytes=json.dumps({
+        'schema':'rocell.virtual_commissioning_profile.v1',
+        'status':'UNMEASURED_SENSITIVITY_OVERLAY',
+        'simulation_only':True,'physical_release_effect':'NONE',
+    },sort_keys=True).encode()
+    drive_profile_bytes=json.dumps({
+        'schema':mechanics.GEOMETRY_PRIOR_PROFILE_SCHEMA,
+        'status':'PROVISIONAL_SIMULATION_ONLY',
+        'simulation_only':True,'physical_authority':False,
+    },sort_keys=True).encode()
+    robot_usd_bytes=b'#usda 1.0\n'
+    import_receipt=signed({
+        'schema':'tactevra.isaac_sim_urdf_import.v1',
+        'external_files':[{
+            'sha256':hashlib.sha256(robot_usd_bytes).hexdigest(),
+            'size_bytes':len(robot_usd_bytes),
+        }],**zero,
+    },'receipt_sha256')
     bindings={
-        'key_mechanics_profile_sha256':'k'*64,
-        'virtual_profile_sha256':'v'*64,
-        'drive_profile_file_sha256':'f'*64,
-        'robot_import_receipt_sha256':'i'*64,
-        'robot_usd_sha256':'u'*64,
+        'key_mechanics_profile_sha256':mechanics_profile['profile_sha256'],
+        'virtual_profile_sha256':hashlib.sha256(
+            virtual_profile_bytes
+        ).hexdigest(),
+        'drive_profile_file_sha256':hashlib.sha256(
+            drive_profile_bytes
+        ).hexdigest(),
+        'robot_import_receipt_sha256':import_receipt['receipt_sha256'],
+        'robot_usd_sha256':hashlib.sha256(robot_usd_bytes).hexdigest(),
     }
     plans=[]
     receipts={}
@@ -4511,14 +4537,19 @@ def _arm222_compilation_sources():
         'source_replay_campaign_sha256':source_campaign['campaign_sha256'],
         'accepted_action_count':8,'results':results,**zero,
     },'campaign_sha256')
-    return mechanics,(
+    sources=(
         review,dataset,proposal,{episode_id:payload},request_campaign,
         {episode_id:request},native,source_campaign,source_result,receipts,
     )
+    runtime=(
+        mechanics_profile,virtual_profile_bytes,drive_profile_bytes,
+        import_receipt,robot_usd_bytes,
+    )
+    return mechanics,sources,runtime
 
 
 def test_arm222_mechanics_plan_compilation_is_deterministic_and_nonexecuting():
-    mechanics,sources=_arm222_compilation_sources()
+    mechanics,sources,_runtime=_arm222_compilation_sources()
     first,first_plans=mechanics.compile_state_policy_mechanics_replay_campaign(
         *sources
     )
@@ -4542,7 +4573,7 @@ def test_arm222_mechanics_plan_compilation_is_deterministic_and_nonexecuting():
 
 
 def test_arm222_mechanics_plan_compilation_rejects_tampering_and_denominator_drift():
-    mechanics,sources=_arm222_compilation_sources()
+    mechanics,sources,_runtime=_arm222_compilation_sources()
     tampered=list(sources)
     payloads=dict(tampered[3])
     episode_id=next(iter(payloads))
@@ -4559,3 +4590,50 @@ def test_arm222_mechanics_plan_compilation_rejects_tampering_and_denominator_dri
     tampered[2]=proposal
     with pytest.raises(mechanics.MechanicsContractError,match='boundary|lineage|denominator'):
         mechanics.compile_state_policy_mechanics_replay_campaign(*tampered)
+
+
+def test_arm223_runtime_admission_is_deterministic_and_nonexecuting():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    campaign,plans=mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    first,first_receipts=mechanics.admit_state_policy_mechanics_runtime_inputs(
+        campaign,plans,*runtime
+    )
+    second,second_receipts=mechanics.admit_state_policy_mechanics_runtime_inputs(
+        campaign,plans,*runtime
+    )
+    assert first==second and first_receipts==second_receipts
+    assert first['schema']==(
+        mechanics.STATE_POLICY_MECHANICS_RUNTIME_ADMISSION_CAMPAIGN_SCHEMA
+    )
+    assert first['admission_count']==1
+    assert first['total_joint_target_count']==2
+    assert first['total_collision_screened_bounded_sample_count']==2
+    assert first['revalidated_file_count']==5
+    assert first['runtime_files_revalidated'] is True
+    assert first['isaac_started'] is first['gpu_started'] is False
+    assert first['mechanics_replays_executed']==0
+    assert first['hardware_access'] is first['physical_authority'] is False
+    receipt=next(iter(first_receipts.values()))
+    assert receipt['joint_target_count']==2
+    assert receipt['contact_endpoint_sequences']==[0,1]
+    assert receipt['mechanics_replay_executed'] is False
+
+
+def test_arm223_runtime_admission_rejects_runtime_and_plan_tampering():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    campaign,plans=mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    changed_runtime=list(runtime)
+    changed_runtime[2]+=b'\n'
+    with pytest.raises(mechanics.MechanicsContractError,match='lineage changed'):
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            campaign,plans,*changed_runtime
+        )
+    changed_plans=json.loads(json.dumps(plans))
+    episode_id=next(iter(changed_plans))
+    changed_plans[episode_id]['joint_targets'][0][
+        'joint_position_target_rad'
+    ][0]+=0.1
+    with pytest.raises(mechanics.MechanicsContractError,match='sha256 mismatch'):
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            campaign,changed_plans,*runtime
+        )

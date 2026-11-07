@@ -226,6 +226,12 @@ STATE_POLICY_MECHANICS_REPLAY_PLAN_SCHEMA = (
 STATE_POLICY_MECHANICS_REPLAY_CAMPAIGN_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_mechanics_replay_campaign.v1"
 )
+STATE_POLICY_MECHANICS_RUNTIME_ADMISSION_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_mechanics_runtime_admission.v1"
+)
+STATE_POLICY_MECHANICS_RUNTIME_ADMISSION_CAMPAIGN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_mechanics_runtime_admission_campaign.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -14054,6 +14060,253 @@ def compile_state_policy_mechanics_replay_campaign(
     return campaign, plans
 
 
+def admit_state_policy_mechanics_runtime_inputs(
+    mechanics_campaign: dict[str, Any],
+    mechanics_plans: dict[str, dict[str, Any]],
+    mechanics_profile: dict[str, Any],
+    virtual_profile_bytes: bytes,
+    drive_profile_bytes: bytes,
+    robot_import_receipt: dict[str, Any],
+    robot_usd_bytes: bytes,
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    """Reload ARM-222 plans and runtime files without starting Isaac or a GPU."""
+    _verify_lm3_digest(
+        mechanics_campaign, "campaign_sha256", "mechanics replay campaign"
+    )
+    _require_lm3_zero_authority(mechanics_campaign, "mechanics replay campaign")
+    entries = mechanics_campaign.get("entries")
+    if (
+        mechanics_campaign.get("schema")
+        != STATE_POLICY_MECHANICS_REPLAY_CAMPAIGN_SCHEMA
+        or mechanics_campaign.get("status")
+        != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_RUNTIME_ADMISSION"
+        or mechanics_campaign.get("next_required_stage")
+        != "ADMIT_AND_REVALIDATE_LM4_MECHANICS_RUNTIME_INPUTS"
+        or mechanics_campaign.get("runtime_admissions_completed") != 0
+        or mechanics_campaign.get("runtime_files_revalidated") is not False
+        or mechanics_campaign.get("isaac_started") is not False
+        or mechanics_campaign.get("gpu_started") is not False
+        or mechanics_campaign.get("native_mechanics_replays_executed") != 0
+        or not isinstance(entries, list)
+        or not entries
+        or len(entries) != mechanics_campaign.get("episode_count")
+    ):
+        raise MechanicsContractError("LM4 mechanics runtime admission boundary changed")
+    entries_by_id = {
+        row.get("episode_id"): row for row in entries if isinstance(row, dict)
+    }
+    if (
+        None in entries_by_id
+        or len(entries_by_id) != len(entries)
+        or set(entries_by_id) != set(mechanics_plans)
+    ):
+        raise MechanicsContractError("LM4 mechanics runtime denominator changed")
+
+    _verify_lm3_digest(mechanics_profile, "profile_sha256", "mechanics profile")
+    _require_lm3_zero_authority(mechanics_profile, "mechanics profile")
+    virtual_profile = json.loads(virtual_profile_bytes)
+    drive_profile = json.loads(drive_profile_bytes)
+    _verify_lm3_digest(
+        robot_import_receipt, "receipt_sha256", "robot import receipt"
+    )
+    _require_lm3_zero_authority(robot_import_receipt, "robot import receipt")
+    _require_lm3_zero_authority(drive_profile, "drive profile")
+    robot_usd_sha256 = hashlib.sha256(robot_usd_bytes).hexdigest()
+    external_files = robot_import_receipt.get("external_files")
+    if (
+        mechanics_profile.get("schema") != PROFILE_SCHEMA
+        or virtual_profile.get("schema")
+        != "rocell.virtual_commissioning_profile.v1"
+        or virtual_profile.get("status") != "UNMEASURED_SENSITIVITY_OVERLAY"
+        or virtual_profile.get("simulation_only") is not True
+        or virtual_profile.get("physical_release_effect") != "NONE"
+        or drive_profile.get("schema") != GEOMETRY_PRIOR_PROFILE_SCHEMA
+        or drive_profile.get("status") != "PROVISIONAL_SIMULATION_ONLY"
+        or drive_profile.get("simulation_only") is not True
+        or drive_profile.get("physical_authority") is not False
+        or robot_import_receipt.get("schema")
+        != "tactevra.isaac_sim_urdf_import.v1"
+        or not isinstance(external_files, list)
+        or len(external_files) != 1
+        or external_files[0].get("sha256") != robot_usd_sha256
+        or external_files[0].get("size_bytes") != len(robot_usd_bytes)
+    ):
+        raise MechanicsContractError("LM4 mechanics runtime file boundary changed")
+    actual_hashes = {
+        "key_mechanics_profile_sha256": mechanics_profile["profile_sha256"],
+        "virtual_profile_sha256": hashlib.sha256(virtual_profile_bytes).hexdigest(),
+        "drive_profile_file_sha256": hashlib.sha256(drive_profile_bytes).hexdigest(),
+        "robot_import_receipt_sha256": robot_import_receipt["receipt_sha256"],
+        "robot_usd_sha256": robot_usd_sha256,
+    }
+    file_evidence = {
+        "key_mechanics_profile": {
+            "sha256": actual_hashes["key_mechanics_profile_sha256"],
+            "hash_mode": "CANONICAL_DOCUMENT_EXCLUDING_PROFILE_SHA256",
+        },
+        "virtual_profile": {
+            "sha256": actual_hashes["virtual_profile_sha256"],
+            "hash_mode": "RAW_FILE_BYTES",
+        },
+        "drive_profile": {
+            "sha256": actual_hashes["drive_profile_file_sha256"],
+            "hash_mode": "RAW_FILE_BYTES",
+        },
+        "robot_import_receipt": {
+            "sha256": actual_hashes["robot_import_receipt_sha256"],
+            "hash_mode": "CANONICAL_DOCUMENT_EXCLUDING_RECEIPT_SHA256",
+        },
+        "robot_usd": {
+            "sha256": actual_hashes["robot_usd_sha256"],
+            "hash_mode": "RAW_FILE_BYTES",
+            "size_bytes": len(robot_usd_bytes),
+        },
+    }
+
+    receipts: dict[str, dict[str, Any]] = {}
+    receipt_rows = []
+    total_targets = 0
+    total_collision_samples = 0
+    for episode_id, entry in entries_by_id.items():
+        plan = mechanics_plans[episode_id]
+        _verify_lm3_digest(plan, "plan_sha256", f"{episode_id} mechanics plan")
+        _require_lm3_zero_authority(plan, f"{episode_id} mechanics plan")
+        bindings = plan.get("source_bindings")
+        joint_targets = plan.get("joint_targets")
+        endpoints = plan.get("contact_endpoint_sequences")
+        changed_runtime_files = []
+        if isinstance(bindings, dict):
+            changed_runtime_files = sorted(
+                key for key, value in actual_hashes.items()
+                if bindings.get(key) != value
+            )
+        if (
+            plan.get("schema") != STATE_POLICY_MECHANICS_REPLAY_PLAN_SCHEMA
+            or plan.get("status")
+            != "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_RUNTIME_ADMISSION"
+            or plan.get("episode_id") != episode_id
+            or plan.get("target_id") != entry.get("target_id")
+            or plan.get("plan_sha256") != entry.get("mechanics_plan_sha256")
+            or plan.get("sample_count") != entry.get("sample_count")
+            or plan.get("collision_screened_bounded_sample_count")
+            != entry.get("collision_screened_bounded_sample_count")
+            or plan.get("runtime_admission_required") is not True
+            or plan.get("native_mechanics_replay_executed") is not False
+            or plan.get("native_replay_authorized") is not False
+            or not isinstance(joint_targets, list)
+            or len(joint_targets) != plan.get("sample_count")
+            or not isinstance(endpoints, list)
+            or len(endpoints) != 2
+            or any(
+                not isinstance(endpoint, int)
+                or endpoint < 0
+                or endpoint >= len(joint_targets)
+                or joint_targets[endpoint].get("phase") != "CONTACT"
+                or joint_targets[endpoint].get("phase_endpoint") is not True
+                for endpoint in endpoints
+            )
+            or not isinstance(bindings, dict)
+            or changed_runtime_files
+        ):
+            suffix = (
+                ": " + ", ".join(changed_runtime_files)
+                if changed_runtime_files else ""
+            )
+            raise MechanicsContractError(
+                f"{episode_id} LM4 mechanics runtime lineage changed{suffix}"
+            )
+        receipt: dict[str, Any] = {
+            "schema": STATE_POLICY_MECHANICS_RUNTIME_ADMISSION_SCHEMA,
+            "status": (
+                "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_INPUT_MATERIALIZATION"
+            ),
+            "episode_id": episode_id,
+            "target_id": plan["target_id"],
+            "source_mechanics_campaign_sha256": mechanics_campaign[
+                "campaign_sha256"
+            ],
+            "source_mechanics_plan_sha256": plan["plan_sha256"],
+            "joint_target_count": plan["sample_count"],
+            "collision_screened_bounded_sample_count": plan[
+                "collision_screened_bounded_sample_count"
+            ],
+            "contact_endpoint_sequences": list(endpoints),
+            "runtime_files": file_evidence,
+            "runtime_files_revalidated": True,
+            "revalidated_file_count": 5,
+            "isaac_started": False,
+            "gpu_started": False,
+            "mechanics_replay_executed": False,
+            "native_replay_authorized": False,
+            "hardware_access": False,
+            "hardware_writes": 0,
+            "physical_authority": False,
+            "physical_movements": 0,
+            "controller_commands": [],
+            "gate_promotions": [],
+            "limitations": [
+                "runtime_hash_match_does_not_measure_mechanics_outcomes",
+                "isaac_and_gpu_have_not_started",
+                "fresh_mechanics_replay_remains_pending",
+                "no_native_or_physical_replay_authority",
+            ],
+        }
+        receipt["receipt_sha256"] = _canonical_sha256(receipt)
+        receipts[episode_id] = receipt
+        receipt_rows.append({
+            "episode_id": episode_id,
+            "target_id": plan["target_id"],
+            "receipt_sha256": receipt["receipt_sha256"],
+            "source_mechanics_plan_sha256": plan["plan_sha256"],
+            "joint_target_count": plan["sample_count"],
+            "collision_screened_bounded_sample_count": plan[
+                "collision_screened_bounded_sample_count"
+            ],
+        })
+        total_targets += plan["sample_count"]
+        total_collision_samples += plan["collision_screened_bounded_sample_count"]
+    if (
+        total_targets != mechanics_campaign.get("total_joint_target_count")
+        or total_collision_samples
+        != mechanics_campaign.get("total_collision_screened_bounded_sample_count")
+    ):
+        raise MechanicsContractError("LM4 mechanics runtime aggregate changed")
+
+    campaign: dict[str, Any] = {
+        "schema": STATE_POLICY_MECHANICS_RUNTIME_ADMISSION_CAMPAIGN_SCHEMA,
+        "status": (
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_INPUT_MATERIALIZATION"
+        ),
+        "source_mechanics_campaign_sha256": mechanics_campaign["campaign_sha256"],
+        "admission_count": len(receipt_rows),
+        "total_joint_target_count": total_targets,
+        "total_collision_screened_bounded_sample_count": total_collision_samples,
+        "admissions": receipt_rows,
+        "runtime_files": file_evidence,
+        "runtime_files_revalidated": True,
+        "revalidated_file_count": 5,
+        "isaac_started": False,
+        "gpu_started": False,
+        "mechanics_replays_executed": 0,
+        "fresh_mechanics_replays_required": len(receipt_rows),
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": "MATERIALIZE_FRESH_LM4_MECHANICS_REPLAY_INPUTS",
+        "limitations": [
+            "admission_stops_before_mechanics_input_materialization",
+            "runtime_hash_match_does_not_measure_mechanics_outcomes",
+            "all_nine_fresh_mechanics_replays_remain_pending",
+            "no_native_or_physical_replay_authority",
+        ],
+    }
+    campaign["campaign_sha256"] = _canonical_sha256(campaign)
+    return campaign, receipts
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--layout", type=Path, required=True)
@@ -14389,6 +14642,14 @@ def main() -> int:
         action="store_true",
         help="compile reviewed LM4 proposals into non-executing mechanics plans",
     )
+    parser.add_argument(
+        "--admit-state-policy-mechanics-runtime-inputs",
+        action="store_true",
+        help=(
+            "revalidate ARM-222 mechanics plans and their five runtime inputs "
+            "without starting Isaac or a GPU"
+        ),
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -14410,6 +14671,8 @@ def main() -> int:
     parser.add_argument("--state-policy-native-review", type=Path)
     parser.add_argument("--state-policy-native-output-dir", type=Path)
     parser.add_argument("--state-policy-mechanics-output-dir", type=Path)
+    parser.add_argument("--state-policy-mechanics-campaign", type=Path)
+    parser.add_argument("--state-policy-mechanics-runtime-output-dir", type=Path)
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -14520,7 +14783,61 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.compile_state_policy_mechanics_replay_campaign:
+        if args.admit_state_policy_mechanics_runtime_inputs:
+            required = (
+                args.state_policy_mechanics_campaign,
+                args.state_policy_mechanics_output_dir,
+                args.state_policy_mechanics_runtime_output_dir,
+                args.virtual_profile,
+                args.drive_profile,
+                args.import_receipt,
+                args.robot_usd,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-223 mechanics runtime admission requires the ARM-222 "
+                    "campaign/plan root, five runtime inputs, and admission "
+                    "output root"
+                )
+            mechanics_campaign = json.loads(
+                args.state_policy_mechanics_campaign
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            mechanics_root = args.state_policy_mechanics_output_dir.resolve(
+                strict=True
+            )
+            mechanics_plans = {
+                row["episode_id"]: json.loads((
+                    mechanics_root
+                    / row["episode_id"]
+                    / "mechanics_plan.json"
+                ).resolve(strict=True).read_bytes())
+                for row in mechanics_campaign.get("entries", [])
+            }
+            result, runtime_admissions = (
+                admit_state_policy_mechanics_runtime_inputs(
+                    mechanics_campaign,
+                    mechanics_plans,
+                    build_profile(args.layout.resolve(strict=True)),
+                    args.virtual_profile.resolve(strict=True).read_bytes(),
+                    args.drive_profile.resolve(strict=True).read_bytes(),
+                    json.loads(
+                        args.import_receipt.resolve(strict=True).read_bytes()
+                    ),
+                    args.robot_usd.resolve(strict=True).read_bytes(),
+                )
+            )
+            output_root = args.state_policy_mechanics_runtime_output_dir.resolve()
+            output_root.mkdir(parents=True, exist_ok=True)
+            for episode_id, admission in runtime_admissions.items():
+                episode_root = output_root / episode_id
+                episode_root.mkdir(parents=True, exist_ok=True)
+                (episode_root / "runtime_admission.json").write_text(
+                    json.dumps(admission, indent=2, sort_keys=True) + "\n",
+                    encoding="utf-8",
+                )
+        elif args.compile_state_policy_mechanics_replay_campaign:
             required = (
                 args.state_policy_native_review,
                 args.state_policy_dataset_manifest,
@@ -16383,6 +16700,7 @@ def main() -> int:
             "COMPLETE_ZERO_AUTHORITY_COLLISION_DIAGNOSTICS_NO_BLOCKERS_OBSERVED",
             "ACCEPTED_FOR_ZERO_AUTHORITY_MECHANICS_PLAN_COMPILATION",
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_RUNTIME_ADMISSION",
+            "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_INPUT_MATERIALIZATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

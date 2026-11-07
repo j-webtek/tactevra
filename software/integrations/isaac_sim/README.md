@@ -2069,6 +2069,37 @@ authority. Runtime admission and immediate runtime-file revalidation are the
 next boundary; native mechanics execution and contact, release, settling,
 tracking, and abstention results remain unevaluated.
 
+ARM-223 performs that runtime admission without materializing a replay or
+starting Isaac/GPU. The retained campaign is
+`C:\IsaacSim\artifacts\issue190\arm223-state-policy-mechanics-runtime-admission-001\campaign.json`
+with SHA-256
+`5f8e6d9120e6d6a4ec3f1e9389baad93f44d56b4208043ee6689a359572c07ca`.
+It reopens all nine ARM-222 plans, verifies their signed digests and complete
+`12,744`-target / `523`-collision-sample denominator, checks both contact
+endpoints per episode, and revalidates the exact key-mechanics, virtual, drive,
+robot-import, and robot-USD inputs. All nine admissions pass with five runtime
+files revalidated. Isaac/GPU start, input materialization, mechanics replay,
+hardware access, and physical authority remain false. The next bounded stage
+is fresh LM4 mechanics-input materialization; mechanics outcomes remain
+unevaluated.
+
+Reproduce the non-starting runtime admission with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output C:/IsaacSim/artifacts/issue190/arm223-state-policy-mechanics-runtime-admission-001/campaign.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm223-state-policy-mechanics-runtime-admission-001/status.json `
+  --admit-state-policy-mechanics-runtime-inputs `
+  --state-policy-mechanics-campaign C:/IsaacSim/artifacts/issue190/arm222-state-policy-mechanics-plans-001/campaign.json `
+  --state-policy-mechanics-output-dir C:/IsaacSim/artifacts/issue190/arm222-state-policy-mechanics-plans-001 `
+  --state-policy-mechanics-runtime-output-dir C:/IsaacSim/artifacts/issue190/arm223-state-policy-mechanics-runtime-admission-001 `
+  --virtual-profile software/config/virtual_commissioning_profile.json `
+  --drive-profile software/config/isaac_lm0b_geometry_prior_profile.json `
+  --import-receipt C:/IsaacSim/evidence/urdf_import_003.json `
+  --robot-usd C:/IsaacSim/artifacts/issue190/wp1-import-003/roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda
+```
+
 Reproduce the non-starting mechanics-plan compilation with:
 
 ```powershell

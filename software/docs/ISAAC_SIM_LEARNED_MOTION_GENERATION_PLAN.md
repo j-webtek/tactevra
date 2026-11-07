@@ -640,6 +640,23 @@ tolerances. Status
 of the next LM4 mechanics plans. It does not start Isaac, authorize mechanics
 execution, prove continuous or installed clearance, or grant physical motion.
 
+ARM-222 then compiles the exact learned-policy proposals into nine signed,
+non-executing mechanics plans. The retained campaign covers all `12,744`
+proposal targets and preserves the `523`-sample collision denominator as
+lineage. It binds each episode to its accepted ARM-217 target mechanics source
+and marks the two contact endpoints without inventing interpolation targets.
+
+ARM-223 reopens those nine plans and revalidates their five runtime inputs:
+the derived key-mechanics profile, virtual commissioning profile, drive
+profile, robot import receipt, and imported robot USD. The retained campaign at
+`C:\IsaacSim\artifacts\issue190\arm223-state-policy-mechanics-runtime-admission-001`
+has SHA-256
+`5f8e6d9120e6d6a4ec3f1e9389baad93f44d56b4208043ee6689a359572c07ca`.
+All nine admissions and the full `12,744` / `523` denominator pass. This is an
+identity and lineage gate only: it starts neither Isaac nor a GPU, executes no
+mechanics replay, and grants no hardware or physical authority. The next stage
+is materialization of fresh LM4 mechanics replay inputs.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -829,7 +846,12 @@ ScheduleGen. Neither is a physical success rate.
     denominator. Runtime admission and file revalidation are next; mechanics
     execution and its contact, release, settling, tracking, and abstention
     measurements have not occurred.
-12. Expand only after each predecessor produces reviewable evidence.
+12. **LM4 mechanics runtime admission:** ARM-223 reopens all nine plans and
+    revalidates the exact five runtime inputs. The signed campaign preserves
+    all `12,744` targets and `523` collision-screen samples while recording
+    zero Isaac/GPU starts, zero mechanics replays, and zero physical authority.
+    Fresh mechanics-input materialization is next.
+13. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
