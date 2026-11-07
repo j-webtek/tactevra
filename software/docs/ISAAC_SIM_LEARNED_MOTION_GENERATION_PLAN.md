@@ -929,7 +929,12 @@ ScheduleGen. Neither is a physical success rate.
     source and runtime hash, executes only the four-checkpoint static fixture
     probe, and signs either a pass or blocked receipt. It has no trajectory,
     joint-command, contact, retry, hardware, or physical-motion path.
-18. Expand only after each predecessor produces reviewable evidence.
+18. **LM4 diagnostic lifecycle correction:** the first separately authorized
+    ARM-228 launch started Isaac once but produced no receipt because fast app
+    shutdown occurred before the post-close writes. The attempt is unscored and
+    was not retried. ARM-229 persists both receipt and status before app close;
+    another diagnostic still requires separate authorization.
+19. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

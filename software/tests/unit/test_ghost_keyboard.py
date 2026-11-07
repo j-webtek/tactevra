@@ -1,6 +1,7 @@
 import json
 import hashlib
 import importlib.util
+import inspect
 import math
 from pathlib import Path
 import pytest
@@ -4949,6 +4950,16 @@ def test_arm228_root_drift_runtime_admission_rejects_plan_and_file_drift():
         mechanics.validate_state_policy_root_drift_diagnostic_inputs(
             diagnostic,manifest,native_plan,failure,runtime[2]+b'\n',runtime[4]
         )
+
+
+def test_arm229_root_drift_receipt_is_persisted_before_fast_app_close():
+    mechanics=_load_key_mechanics()
+    source=inspect.getsource(mechanics.run_state_policy_root_drift_diagnostic)
+    output_write=source.index('output_path.write_text(')
+    status_write=source.index('status_path.write_text(')
+    app_close=source.index('app.close()')
+    assert output_write < status_write < app_close
+    assert source.index('finally:', status_write) < app_close
 
 
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():

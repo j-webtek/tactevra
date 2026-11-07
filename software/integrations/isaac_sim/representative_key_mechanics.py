@@ -11293,21 +11293,24 @@ def run_state_policy_root_drift_diagnostic(
             "gate_promotions": [],
             "next_required_stage": "REVIEW_BLOCKED_ROOT_FIXTURE_DIAGNOSTIC",
         }
+    receipt["receipt_sha256"] = _canonical_sha256(receipt)
+    try:
+        # SimulationApp.close() can perform a fast process shutdown. Persist the
+        # governed result first so both PASS and BLOCKED attempts remain scored.
+        output_path.write_text(
+            json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        status_path.write_text(
+            json.dumps({
+                "status": receipt["status"],
+                "receipt_sha256": receipt["receipt_sha256"],
+            }, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
     finally:
         if app is not None:
             app.close()
-    receipt["receipt_sha256"] = _canonical_sha256(receipt)
-    output_path.write_text(
-        json.dumps(receipt, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
-    status_path.write_text(
-        json.dumps({
-            "status": receipt["status"],
-            "receipt_sha256": receipt["receipt_sha256"],
-        }, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
     return receipt
 
 
