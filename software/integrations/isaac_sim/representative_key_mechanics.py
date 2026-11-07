@@ -261,6 +261,9 @@ STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_MANIFEST_SCHEMA = (
 STATE_POLICY_FIXED_FIXTURE_CORRECTION_REVIEW_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_fixed_fixture_correction_review.v1"
 )
+STATE_POLICY_FIXED_FIXTURE_SINGLE_REPLAY_REQUEST_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_fixed_fixture_single_replay_request.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -11695,6 +11698,160 @@ def review_state_policy_fixed_fixture_correction(
     return review
 
 
+def build_state_policy_fixed_fixture_single_replay_request(
+    correction_review: dict[str, Any],
+    corrected_manifest: dict[str, Any],
+    corrected_plan: dict[str, Any],
+    episode_id: str,
+) -> dict[str, Any]:
+    """Bind one ARM-231 episode into a non-executing, one-attempt request."""
+    _verify_lm3_digest(
+        correction_review, "review_sha256", "fixed fixture correction review"
+    )
+    _verify_lm3_digest(
+        corrected_manifest, "manifest_sha256", "corrected mechanics manifest"
+    )
+    _verify_lm3_digest(
+        corrected_plan, "plan_sha256", "corrected mechanics plan"
+    )
+    _require_lm3_zero_authority(
+        correction_review, "fixed fixture correction review"
+    )
+    _require_lm3_zero_authority(
+        corrected_manifest, "corrected mechanics manifest"
+    )
+    _require_lm3_zero_authority(corrected_plan, "corrected mechanics plan")
+
+    decision = correction_review.get("review_decision")
+    fixture = correction_review.get("fixed_fixture_configuration")
+    entries = corrected_manifest.get("entries")
+    if (
+        correction_review.get("schema")
+        != STATE_POLICY_FIXED_FIXTURE_CORRECTION_REVIEW_SCHEMA
+        or correction_review.get("status")
+        != "ACCEPTED_FOR_SEPARATE_ZERO_AUTHORITY_NATIVE_REPLAY_AUTHORIZATION"
+        or correction_review.get("next_required_stage")
+        != "SEPARATELY_AUTHORIZE_ONE_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_REPLAY"
+        or correction_review.get("source_corrected_manifest_sha256")
+        != corrected_manifest.get("manifest_sha256")
+        or not isinstance(decision, dict)
+        or decision.get("source_denominator_complete") is not True
+        or decision.get("trajectory_samples_unchanged") is not True
+        or decision.get("fixed_fixture_configuration_matches_proven_probe")
+        is not True
+        or decision.get("all_corrected_hashes_reproduced") is not True
+        or decision.get("native_replay_authorized") is not False
+        or corrected_manifest.get("schema")
+        != STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_MANIFEST_SCHEMA
+        or corrected_manifest.get("status")
+        != "READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW"
+        or corrected_manifest.get("fixed_fixture_correction_applied") is not True
+        or corrected_manifest.get("fixed_fixture_configuration") != fixture
+        or corrected_manifest.get("runtime_files_revalidated") is not True
+        or corrected_manifest.get("native_replay_authorized") is not False
+        or corrected_manifest.get("isaac_started") is not False
+        or corrected_manifest.get("gpu_started") is not False
+        or corrected_manifest.get("mechanics_replays_executed") != 0
+        or not isinstance(entries, list)
+        or len(entries) != corrected_manifest.get("episode_count")
+        or len(entries) != correction_review.get("reviewed_episode_count")
+    ):
+        raise MechanicsContractError("single corrected replay review boundary changed")
+
+    matches = [
+        entry
+        for entry in entries
+        if isinstance(entry, dict) and entry.get("episode_id") == episode_id
+    ]
+    if len(matches) != 1:
+        raise MechanicsContractError(
+            "single corrected replay episode is absent or duplicated"
+        )
+    entry = matches[0]
+    targets = corrected_plan.get("joint_targets")
+    endpoints = corrected_plan.get("contact_endpoint_sequences")
+    if (
+        corrected_plan.get("schema")
+        != STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+        or corrected_plan.get("status")
+        != "READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW"
+        or corrected_plan.get("episode_id") != episode_id
+        or corrected_plan.get("target_id") != entry.get("target_id")
+        or corrected_plan.get("plan_sha256")
+        != entry.get("native_mechanics_plan_sha256")
+        or corrected_plan.get("source_uncorrected_plan_sha256")
+        != entry.get("source_uncorrected_plan_sha256")
+        or corrected_plan.get("source_root_fixture_review_sha256")
+        != corrected_manifest.get("source_root_fixture_review_sha256")
+        or corrected_plan.get("fixed_fixture_configuration") != fixture
+        or corrected_plan.get("fixed_fixture_correction_applied") is not True
+        or corrected_plan.get("runtime_files")
+        != corrected_manifest.get("runtime_files")
+        or corrected_plan.get("runtime_files_revalidated") is not True
+        or corrected_plan.get("native_replay_authorized") is not False
+        or corrected_plan.get("native_mechanics_replay_executed") is not False
+        or corrected_plan.get("sample_count") != entry.get("joint_target_count")
+        or not isinstance(targets, list)
+        or len(targets) != corrected_plan.get("sample_count")
+        or not isinstance(endpoints, list)
+        or endpoints != entry.get("contact_endpoint_sequences")
+        or len(endpoints) != 2
+    ):
+        raise MechanicsContractError("single corrected replay lineage changed")
+
+    request: dict[str, Any] = {
+        "schema": STATE_POLICY_FIXED_FIXTURE_SINGLE_REPLAY_REQUEST_SCHEMA,
+        "status": "READY_FOR_EXPLICIT_ONE_ATTEMPT_ZERO_AUTHORITY_AUTHORIZATION",
+        "source_correction_review_sha256": correction_review["review_sha256"],
+        "source_corrected_manifest_sha256": corrected_manifest["manifest_sha256"],
+        "source_corrected_plan_sha256": corrected_plan["plan_sha256"],
+        "episode_id": episode_id,
+        "target_id": corrected_plan["target_id"],
+        "joint_target_count": corrected_plan["sample_count"],
+        "contact_endpoint_sequences": endpoints,
+        "runtime_files": corrected_plan["runtime_files"],
+        "fixed_fixture_configuration": fixture,
+        "attempt_contract": {
+            "maximum_attempt_count": 1,
+            "automatic_retry_allowed": False,
+            "trajectory_playback_allowed_only_after_explicit_authorization": True,
+            "stop_on_first_root_invariant_failure": True,
+            "stop_on_first_unexpected_runtime_error": True,
+            "stop_on_first_collision_or_contact_failure": True,
+            "fresh_runtime_file_revalidation_required": True,
+            "hardware_or_physical_authority_allowed": False,
+        },
+        "required_authorization_statement": (
+            f"I authorize exactly one ARM-232 zero-authority native mechanics "
+            f"replay for {episode_id} ({corrected_plan['target_id']}), with no "
+            "automatic retry and no hardware or physical authority."
+        ),
+        "isaac_started": False,
+        "gpu_started": False,
+        "mechanics_replays_executed": 0,
+        "native_replay_authorized": False,
+        "automatic_retry_performed": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "OBTAIN_EXPLICIT_ONE_ATTEMPT_ZERO_AUTHORITY_NATIVE_REPLAY_AUTHORIZATION"
+        ),
+        "limitations": [
+            "request_materialization_does_not_start_isaac_or_a_gpu",
+            "request_materialization_does_not_authorize_native_replay",
+            "runtime_files_must_be_revalidated_immediately_before_execution",
+            "one_attempt_contract_forbids_automatic_retry",
+            "no_hardware_or_physical_authority",
+        ],
+    }
+    request["request_sha256"] = _canonical_sha256(request)
+    return request
+
+
 def run_state_policy_native_mechanics_episode(
     *,
     manifest_path: Path,
@@ -16174,6 +16331,14 @@ def main() -> int:
         action="store_true",
         help="independently reproduce and review ARM-231 corrected inputs offline",
     )
+    parser.add_argument(
+        "--build-state-policy-fixed-fixture-single-replay-request",
+        action="store_true",
+        help=(
+            "bind one reviewed ARM-231 episode into a non-executing, "
+            "one-attempt ARM-232 authorization request"
+        ),
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -16202,6 +16367,8 @@ def main() -> int:
     parser.add_argument("--state-policy-mechanics-runtime-admission-campaign", type=Path)
     parser.add_argument("--state-policy-native-mechanics-output-dir", type=Path)
     parser.add_argument("--state-policy-native-mechanics-manifest", type=Path)
+    parser.add_argument("--state-policy-fixed-fixture-correction-review", type=Path)
+    parser.add_argument("--state-policy-corrected-native-mechanics-manifest", type=Path)
     parser.add_argument(
         "--state-policy-corrected-native-mechanics-output-dir", type=Path
     )
@@ -16317,7 +16484,45 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.review_state_policy_fixed_fixture_correction:
+        if args.build_state_policy_fixed_fixture_single_replay_request:
+            required = (
+                args.state_policy_fixed_fixture_correction_review,
+                args.state_policy_corrected_native_mechanics_manifest,
+                args.state_policy_corrected_native_mechanics_output_dir,
+                args.episode_id,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-232 request requires the ARM-231 correction review, "
+                    "corrected manifest/input root, and exactly one episode ID"
+                )
+            correction_review = json.loads(
+                args.state_policy_fixed_fixture_correction_review
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            corrected_manifest = json.loads(
+                args.state_policy_corrected_native_mechanics_manifest
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            corrected_root = (
+                args.state_policy_corrected_native_mechanics_output_dir.resolve(
+                    strict=True
+                )
+            )
+            corrected_plan = json.loads((
+                corrected_root
+                / args.episode_id
+                / "native_mechanics_plan.json"
+            ).resolve(strict=True).read_bytes())
+            result = build_state_policy_fixed_fixture_single_replay_request(
+                correction_review,
+                corrected_manifest,
+                corrected_plan,
+                args.episode_id,
+            )
+        elif args.review_state_policy_fixed_fixture_correction:
             required = (
                 args.state_policy_root_fixture_review,
                 args.state_policy_native_mechanics_manifest,
@@ -18460,6 +18665,8 @@ def main() -> int:
             status_record["campaign_sha256"] = result["campaign_sha256"]
         if "review_sha256" in result:
             status_record["review_sha256"] = result["review_sha256"]
+        if "request_sha256" in result:
+            status_record["request_sha256"] = result["request_sha256"]
         args.status_output.write_text(
             json.dumps(status_record, sort_keys=True) + "\n", encoding="utf-8"
         )
@@ -18506,6 +18713,7 @@ def main() -> int:
             "ACCEPTED_FOR_ZERO_AUTHORITY_STATE_POLICY_FIXTURE_CORRECTION",
             "READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW",
             "ACCEPTED_FOR_SEPARATE_ZERO_AUTHORITY_NATIVE_REPLAY_AUTHORIZATION",
+            "READY_FOR_EXPLICIT_ONE_ATTEMPT_ZERO_AUTHORITY_AUTHORIZATION",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

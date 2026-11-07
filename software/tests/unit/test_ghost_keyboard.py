@@ -5222,6 +5222,93 @@ def test_arm231_runtime_authors_the_proven_fixed_fixture_configuration():
     assert 'fixed.CreateJointEnabledAttr().Set(True)' in source
 
 
+def _arm232_single_replay_request_sources():
+    mechanics,fixture_review,manifest,native_plans=(
+        _arm231_fixture_review_sources()
+    )
+    corrected_manifest,corrected_plans=(
+        mechanics.apply_state_policy_fixed_fixture_correction(
+            fixture_review,manifest,native_plans
+        )
+    )
+    correction_review=mechanics.review_state_policy_fixed_fixture_correction(
+        fixture_review,
+        manifest,
+        native_plans,
+        corrected_manifest,
+        corrected_plans,
+    )
+    episode_id=next(iter(corrected_plans))
+    return (
+        mechanics,
+        correction_review,
+        corrected_manifest,
+        corrected_plans[episode_id],
+        episode_id,
+    )
+
+
+def test_arm232_builds_one_attempt_corrected_replay_request_offline():
+    mechanics,review,manifest,plan,episode_id=(
+        _arm232_single_replay_request_sources()
+    )
+    first=mechanics.build_state_policy_fixed_fixture_single_replay_request(
+        review,manifest,plan,episode_id
+    )
+    second=mechanics.build_state_policy_fixed_fixture_single_replay_request(
+        review,manifest,plan,episode_id
+    )
+    assert first==second
+    assert first['schema']==(
+        mechanics.STATE_POLICY_FIXED_FIXTURE_SINGLE_REPLAY_REQUEST_SCHEMA
+    )
+    assert first['status']==(
+        'READY_FOR_EXPLICIT_ONE_ATTEMPT_ZERO_AUTHORITY_AUTHORIZATION'
+    )
+    assert first['episode_id']==episode_id
+    assert first['target_id']==plan['target_id']
+    assert first['joint_target_count']==plan['sample_count']
+    assert first['source_corrected_plan_sha256']==plan['plan_sha256']
+    assert first['attempt_contract']['maximum_attempt_count']==1
+    assert first['attempt_contract']['automatic_retry_allowed'] is False
+    assert first['attempt_contract']['fresh_runtime_file_revalidation_required'] is True
+    assert first['native_replay_authorized'] is False
+    assert first['isaac_started'] is first['gpu_started'] is False
+    assert first['mechanics_replays_executed']==0
+    assert first['hardware_access'] is first['physical_authority'] is False
+    assert first['next_required_stage']==(
+        'OBTAIN_EXPLICIT_ONE_ATTEMPT_ZERO_AUTHORITY_NATIVE_REPLAY_AUTHORIZATION'
+    )
+
+
+def test_arm232_rejects_review_plan_or_episode_drift():
+    mechanics,review,manifest,plan,episode_id=(
+        _arm232_single_replay_request_sources()
+    )
+    changed_review=json.loads(json.dumps(review))
+    changed_review['review_decision']['native_replay_authorized']=True
+    changed_review.pop('review_sha256')
+    changed_review['review_sha256']=mechanics._canonical_sha256(changed_review)
+    with pytest.raises(mechanics.MechanicsContractError,match='review boundary'):
+        mechanics.build_state_policy_fixed_fixture_single_replay_request(
+            changed_review,manifest,plan,episode_id
+        )
+
+    changed_plan=json.loads(json.dumps(plan))
+    changed_plan['target_id']='ENTER'
+    changed_plan.pop('plan_sha256')
+    changed_plan['plan_sha256']=mechanics._canonical_sha256(changed_plan)
+    with pytest.raises(mechanics.MechanicsContractError,match='lineage changed'):
+        mechanics.build_state_policy_fixed_fixture_single_replay_request(
+            review,manifest,changed_plan,episode_id
+        )
+
+    with pytest.raises(mechanics.MechanicsContractError,match='absent or duplicated'):
+        mechanics.build_state_policy_fixed_fixture_single_replay_request(
+            review,manifest,plan,'episode-not-reviewed'
+        )
+
+
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
     mechanics,sources,runtime=_arm222_compilation_sources()
     mechanics_campaign,plans=(

@@ -2222,6 +2222,34 @@ with SHA-256
 Neither step started Isaac or a GPU, executed a replay, contacted hardware, or
 granted replay authority.
 
+ARM-232 narrows that reviewed nine-episode denominator to exactly one corrected
+`SPACE` episode (`episode-ef340d0ad2740c118d87`) and signs a single-attempt
+authorization request. The request fixes the maximum attempt count at one,
+forbids automatic retry, requires fresh runtime-file revalidation immediately
+before execution, and preserves zero hardware and physical authority. Building
+the request is offline: it does not start Isaac or a GPU and it does not grant
+replay authority. A later native replay still requires the exact explicit
+authorization statement recorded in the request. The retained request is
+`C:\IsaacSim\artifacts\issue190\arm232-state-policy-fixed-fixture-single-replay-request-001\request.json`
+with SHA-256
+`f2d1f9708dc361c3f592f07d78eccd029dab4ccf5333def5cddc8f145e7caa65`.
+
+Build the non-executing ARM-232 request with:
+
+```powershell
+$corrected = 'C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001'
+$request = 'C:/IsaacSim/artifacts/issue190/arm232-state-policy-fixed-fixture-single-replay-request-001'
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output "$request/request.json" `
+  --status-output "$request/status.json" `
+  --build-state-policy-fixed-fixture-single-replay-request `
+  --state-policy-fixed-fixture-correction-review C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-review-001/review.json `
+  --state-policy-corrected-native-mechanics-manifest "$corrected/manifest.json" `
+  --state-policy-corrected-native-mechanics-output-dir $corrected `
+  --episode-id episode-ef340d0ad2740c118d87
+```
+
 Reproduce the correction and its independent review with:
 
 ```powershell
