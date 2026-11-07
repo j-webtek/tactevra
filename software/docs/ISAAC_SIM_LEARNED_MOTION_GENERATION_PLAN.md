@@ -1064,7 +1064,17 @@ ScheduleGen. Neither is a physical success rate.
     distinct 18-body `no_attachment` contract in tests, and refuses to infer
     local-frame 3D envelopes or uncertainty from the images. No collision
     profile, route, replay, hardware access, or physical authority is created.
-28. Expand only after each predecessor produces reviewable evidence.
+28. **LM4 installed-measurement gap audit:** ARM-239 hash-verifies the retained
+    ARM-238 package and audits it against the frozen workcell layout, physical
+    measurement gates, frame contract, model geometry, and 12 reference
+    photos. It retains the configured board, keyboard, phone, station, robot,
+    camera, cable, and tool facts as capture priors but promotes none of them
+    into ICQ-1 measurements. All 19 bodies remain pending, with a reviewed
+    body-specific list of missing local-frame primitives, uncertainty, pose,
+    identity, target-key, or configuration-sweep evidence. This converts a
+    generic measurement block into a deterministic capture backlog without
+    creating a profile, route, replay, hardware access, or physical authority.
+29. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

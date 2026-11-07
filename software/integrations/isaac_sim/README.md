@@ -2390,6 +2390,47 @@ accepted measured primitives, source hashes, instrument resolution, and
 uncertainty. Missing rows remain blockers; the provisional SPACE footprint and
 photo readings are not enough by themselves.
 
+ARM-239 performs the intervening evidence audit before any such replacement.
+It hash-verifies the authoritative ARM-238 package and compares its 19 pending
+bodies with the frozen workcell layout, current physical measurement gates,
+frame contract, model geometry, and retained reference photos. Configured
+values—including the `610 x 457 x 18 mm` board and `315 x 147 x 21 mm`
+keyboard—are retained as useful capture priors, while the `NOT_TESTED`
+physical gates, missing uncertainty, and missing local-frame envelopes keep
+every manifest row pending. The resulting matrix distinguishes rigid robot and
+camera geometry, static workcell bodies, the assembled contact tool, SPACE-key
+undeformed/depressed volumes, and the configuration-sampled cable sweep. It
+does not modify the ICQ-1 manifest or start simulation or hardware.
+
+The retained report is:
+
+`C:\IsaacSim\artifacts\issue190\arm239-installed-measurement-gap-matrix-002\report.json`
+
+- report content SHA-256:
+  `37337456397a27367e401c661ac641f8d2894618e675cd654cee6ab9b7458351`
+- report file SHA-256:
+  `e514f0f5c1eb67330ca56095ec48f33e8b7abb332a4a4203b80a6f8c3a2e6692`
+- accepted bodies: `0 / 19`; reference photos promoted: `false`
+
+Reproduce the offline audit with:
+
+```powershell
+$arm238 = 'C:/IsaacSim/artifacts/issue190/arm238-installed-collision-measurement-intake-002'
+$out = 'C:/IsaacSim/artifacts/issue190/arm239-installed-measurement-gap-matrix-002/report.json'
+python software/integrations/isaac_sim/installed_measurement_gap_matrix.py `
+  --arm238-manifest "$arm238/measurement_manifest.json" `
+  --arm238-receipt "$arm238/receipt.json" `
+  --measurement-record active-project/RoCell_v0_3/config/measurement_record.json `
+  --workcell-layout active-project/RoCell_v0_3/config/workcell_layout.json `
+  --frame-contract software/config/arm_frame_contract.json `
+  --output $out
+```
+
+The next bounded dependency is reviewed capture or import of exact local-frame
+geometry and uncertainty. A body may move from `PENDING` only when its source,
+instrument resolution, primitive envelope, and uncertainty satisfy ICQ-1; the
+gap matrix itself is not measurement evidence.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
