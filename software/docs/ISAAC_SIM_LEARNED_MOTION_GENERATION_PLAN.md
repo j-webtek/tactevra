@@ -702,6 +702,14 @@ targets, key contact, retry, hardware access, or physical authority. Planning
 does not start Isaac or a GPU; executing the diagnostic remains a separate
 authorization boundary.
 
+ARM-228 implements the corresponding one-attempt worker. Runtime admission
+rebuilds the signed ARM-227 plan and revalidates the exact drive profile and
+robot USD before starting Isaac. The worker authors only the known-passing
+fixed fixture and observes root translation and rotation at the four planned
+checkpoints. It creates no key, sends zero joint targets, does not play the
+failed trajectory, performs no retry, and emits no physical authority. Both a
+pass and an early stop produce a signed receipt for review.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -917,7 +925,11 @@ ScheduleGen. Neither is a physical success rate.
     static-root probe using the known-passing fixture configuration. Plan
     generation starts no simulator/GPU, emits no trajectory or joint command,
     and does not authorize the probe or another mechanics replay.
-17. Expand only after each predecessor produces reviewable evidence.
+17. **LM4 root-fixture diagnostic worker:** ARM-228 revalidates every ARM-227
+    source and runtime hash, executes only the four-checkpoint static fixture
+    probe, and signs either a pass or blocked receipt. It has no trajectory,
+    joint-command, contact, retry, hardware, or physical-motion path.
+18. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
