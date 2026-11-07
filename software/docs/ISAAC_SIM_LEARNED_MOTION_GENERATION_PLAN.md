@@ -783,6 +783,16 @@ geometry remain required; no simulation is started and no replay is authorized.
 Review SHA-256 is
 `e7d6de796cff936be7200d4e159d4b4a9654bf9a01530ba90683ef1a77f2d539`.
 
+ARM-237 binds the usable geometry and route lineage without promoting nominal
+data to installed evidence. It records the SPACE center `(224, 112) mm`, XY
+half-extents `(48, 7) mm`, nominal `z=21 mm` plane, and source route anchors
+29/34/35. It then retains the missing 3D key/depression envelope, uncertainty,
+tool/attachment transform, clamp/camera/cable geometry, clearance policy, and
+exclusion review as explicit blockers for the existing ICQ-1 manifest. No
+Cartesian correction, IK, collision proof, replay, or physical action occurs.
+Plan SHA-256 is
+`2c7c099bdd285d922ad01dd56092c3c79bd42e53dfbc41caacdd9741c15b1f01`.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -1042,7 +1052,12 @@ ScheduleGen. Neither is a physical success rate.
     lifted board-frame route, canonical IK, exact installed collision geometry,
     and conservative evidence for every adjacent segment. It remains offline
     and grants no replay, hardware, or physical authority.
-26. Expand only after each predecessor produces reviewable evidence.
+26. **LM4 installed-geometry intake:** ARM-237 binds all existing SPACE surface,
+    route-anchor, and collision-candidate evidence, while refusing to infer an
+    installed 3D key body or missing workcell geometry from nominal dimensions.
+    It routes the exact remaining blockers into the hash-bound ICQ-1 installed
+    measurement-manifest boundary and keeps route materialization disabled.
+27. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

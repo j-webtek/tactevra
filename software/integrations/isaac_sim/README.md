@@ -2320,6 +2320,30 @@ python software/integrations/isaac_sim/representative_key_mechanics.py `
   --representative-native-mechanics-receipt C:/IsaacSim/artifacts/issue190/arm217-representative-native-mechanics-refined-002/space/native_mechanics_receipt.json
 ```
 
+ARM-237 binds everything already known before requesting any new geometry. The
+provisional SPACE footprint is centered at board `(224, 112) mm`, has nominal
+XY half-extents `(48, 7) mm`, and lies on the nominal `z=21 mm` target plane.
+The last clear transit sample (source 29), old hover (34), and preserved first
+contact (35) are hash-bound. The plan does not invent key thickness, depression
+volume, pose uncertainty, contact-tool geometry, clamp/camera/cable envelopes,
+or collision exclusions. Those remain 11 explicit blockers for the existing
+ICQ-1 installed-collision measurement-manifest boundary. Plan SHA-256 is
+`2c7c099bdd285d922ad01dd56092c3c79bd42e53dfbc41caacdd9741c15b1f01`.
+
+Reproduce the non-starting ARM-237 intake plan with:
+
+```powershell
+$plan = 'C:/IsaacSim/artifacts/issue190/arm237-state-policy-lifted-route-geometry-intake-001'
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output "$plan/plan.json" `
+  --status-output "$plan/status.json" `
+  --build-state-policy-lifted-route-geometry-intake-plan `
+  --state-policy-transit-clearance-readiness-review C:/IsaacSim/artifacts/issue190/arm236-state-policy-transit-clearance-readiness-001/review.json `
+  --collision-candidate C:/IsaacSim/artifacts/issue190/arm196-link5-components-obb-32/collision_candidate.json `
+  --representative-cartesian-request C:/IsaacSim/artifacts/issue190/arm216-representative-native-admission-001/space/cartesian_request.json
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

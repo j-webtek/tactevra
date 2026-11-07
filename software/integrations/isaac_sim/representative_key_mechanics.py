@@ -273,6 +273,9 @@ STATE_POLICY_TRANSIT_CLEARANCE_CORRECTION_PLAN_SCHEMA = (
 STATE_POLICY_TRANSIT_CLEARANCE_MATERIALIZATION_READINESS_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_transit_clearance_materialization_readiness.v1"
 )
+STATE_POLICY_LIFTED_ROUTE_GEOMETRY_INTAKE_PLAN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_lifted_route_geometry_intake_plan.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -12519,6 +12522,175 @@ def review_state_policy_transit_clearance_materialization_readiness(
     return review
 
 
+def build_state_policy_lifted_route_geometry_intake_plan(
+    readiness_review: dict[str, Any],
+    mechanics_profile: dict[str, Any],
+    collision_candidate: dict[str, Any],
+    cartesian_request: dict[str, Any],
+) -> dict[str, Any]:
+    """Bind known SPACE geometry and retain only unresolved installed evidence."""
+
+    readiness_hash = _require_canonical_hash(
+        readiness_review, "review_sha256", "ARM-236 readiness review"
+    )
+    profile_hash = _require_canonical_hash(
+        mechanics_profile, "profile_sha256", "provisional mechanics profile"
+    )
+    candidate_hash = _require_canonical_hash(
+        collision_candidate, "candidate_sha256", "collision candidate"
+    )
+    request_hash = _require_canonical_hash(
+        cartesian_request, "request_sha256", "representative Cartesian request"
+    )
+    regions = mechanics_profile.get("regions")
+    samples = cartesian_request.get("samples")
+    blockers = collision_candidate.get("blockers")
+    if (
+        readiness_review.get("schema")
+        != STATE_POLICY_TRANSIT_CLEARANCE_MATERIALIZATION_READINESS_SCHEMA
+        or readiness_review.get("status")
+        != "BLOCKED_SOURCE_ROUTE_VIOLATES_NONCONTACT_CONTRACT"
+        or readiness_review.get("source_route_reusable") is not False
+        or mechanics_profile.get("schema") != PROFILE_SCHEMA
+        or mechanics_profile.get("status") != PROVISIONAL_STATUS
+        or mechanics_profile.get("coordinate_frame") != "board"
+        or not isinstance(regions, dict)
+        or readiness_review.get("target_id") not in regions
+        or collision_candidate.get("installed") is not False
+        or collision_candidate.get("installed_profile_eligible") is not False
+        or not isinstance(blockers, list)
+        or not blockers
+        or cartesian_request.get("schema") != TCP_CARTESIAN_SCHEDULE_SCHEMA
+        or cartesian_request.get("key_id") != readiness_review.get("target_id")
+        or not isinstance(samples, list)
+        or not samples
+    ):
+        raise MechanicsContractError("ARM-237 geometry-intake lineage changed")
+
+    target_id = readiness_review["target_id"]
+    target_region = regions[target_id]
+    center = target_region.get("center_board_xy_mm")
+    half_extent = target_region.get("half_extent_mm")
+    target_plane_z = mechanics_profile.get("target_plane_z_board_mm")
+    if (
+        not isinstance(center, list)
+        or len(center) != 2
+        or not isinstance(half_extent, list)
+        or len(half_extent) != 2
+        or any(
+            not isinstance(value, (int, float)) or isinstance(value, bool)
+            for value in center + half_extent + [target_plane_z]
+        )
+        or min(half_extent) <= 0.0
+    ):
+        raise MechanicsContractError("ARM-237 target surface changed")
+
+    samples_by_source = {row.get("source_sequence"): row for row in samples}
+    required_sources = (29, 34, 35)
+    if any(sequence not in samples_by_source for sequence in required_sources):
+        raise MechanicsContractError("ARM-237 Cartesian anchors changed")
+    anchors = {
+        "last_known_clear_transit": samples_by_source[29],
+        "prior_noncontact_hover": samples_by_source[34],
+        "preserved_first_contact": samples_by_source[35],
+    }
+    if (
+        anchors["last_known_clear_transit"].get("phase") != "TRANSIT"
+        or anchors["prior_noncontact_hover"].get("phase") != "HOVER"
+        or anchors["preserved_first_contact"].get("phase") != "CONTACT"
+        or any(
+            row.get("target_id") != target_id
+            or not isinstance(row.get("expected_tool_tip_board_mm"), list)
+            or len(row["expected_tool_tip_board_mm"]) != 3
+            for row in anchors.values()
+        )
+    ):
+        raise MechanicsContractError("ARM-237 Cartesian anchor semantics changed")
+
+    unresolved = sorted(set(blockers) | {
+        "INSTALLED_COLLISION_PROFILE_ABSENT",
+        "PROVISIONAL_LAYOUT_NOT_ACCEPTED_MEASURED",
+        "TARGET_KEYCAP_UNDEFORMED_VOLUME_UNMEASURED",
+        "TARGET_KEYCAP_DEPRESSED_ENVELOPE_UNMEASURED",
+        "TARGET_KEY_POSE_UNCERTAINTY_UNBOUND",
+    })
+    plan: dict[str, Any] = {
+        "schema": STATE_POLICY_LIFTED_ROUTE_GEOMETRY_INTAKE_PLAN_SCHEMA,
+        "status": "BLOCKED_PENDING_HASH_BOUND_INSTALLED_GEOMETRY",
+        "source_readiness_review_sha256": readiness_hash,
+        "source_mechanics_profile_sha256": profile_hash,
+        "source_collision_candidate_sha256": candidate_hash,
+        "source_cartesian_request_sha256": request_hash,
+        "episode_id": readiness_review["episode_id"],
+        "target_id": target_id,
+        "known_provisional_target_surface": {
+            "coordinate_frame": "board",
+            "center_board_xy_mm": list(center),
+            "half_extent_xy_mm": list(half_extent),
+            "target_plane_z_board_mm": target_plane_z,
+            "volume_complete": False,
+            "accepted_measured": False,
+            "source_state": mechanics_profile["provenance"]["state"],
+        },
+        "bound_cartesian_anchors": anchors,
+        "lifted_route_shape_contract": {
+            "segments": [
+                "ASCEND_AT_LAST_CLEAR_TRANSIT_XY",
+                "TRAVERSE_ABOVE_TARGET_CENTER",
+                "DESCEND_ONLY_TO_PROVEN_NONCONTACT_HOVER",
+            ],
+            "minimum_noncontact_tool_key_clearance_mm": 0.5,
+            "maximum_noncontact_key_displacement_mm": 0.05,
+            "preserve_first_contact_anchor": True,
+            "generate_only_after_exact_volume_and_uncertainty_binding": True,
+        },
+        "installed_geometry_intake": {
+            "required_target_key_records": [
+                "undeformed_keycap_oriented_volume_in_board_frame",
+                "fully_depressed_keycap_envelope_in_board_frame",
+                "target_key_pose_and_geometry_uncertainty_mm",
+                "measurement_source_hashes_and_instrument_resolution",
+            ],
+            "required_profile_records": [
+                "all_collision_contract_body_measurements",
+                "contact_tool_and_attachment_transform",
+                "configuration_sampled_moving_cable_envelopes",
+                "accepted_clearance_policy_and_uncertainty",
+                "reviewed_collision_pair_exclusions",
+            ],
+            "unresolved_blockers": unresolved,
+            "nominal_candidate_may_seed_measurement_review": True,
+            "nominal_candidate_may_clear_installed_gate": False,
+        },
+        "corrected_cartesian_route_materialized": False,
+        "corrected_joint_targets_materialized": False,
+        "canonical_ik_executed": False,
+        "continuous_clearance_proven": False,
+        "installed_collision_qualified": False,
+        "trajectory_playback_authorized": False,
+        "native_replay_authorized": False,
+        "isaac_started": False,
+        "gpu_started": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "BUILD_HASH_BOUND_INSTALLED_COLLISION_MEASUREMENT_MANIFEST"
+        ),
+        "limitations": [
+            "known_space_footprint_is_a_synthetic_nominal_prior",
+            "two_dimensional_footprint_is_not_a_collision_volume",
+            "cartesian_anchors_do_not_prove_continuous_clearance",
+            "plan_does_not_authorize_simulation_replay_or_physical_motion",
+        ],
+    }
+    plan["plan_sha256"] = _canonical_sha256(plan)
+    return plan
+
+
 def _write_randomized_trajectory(
     trajectory_path: Path, rows: list[dict[str, Any]]
 ) -> str:
@@ -16986,10 +17158,19 @@ def main() -> int:
         help="audit ARM-236 source-route evidence without starting Isaac",
     )
     parser.add_argument(
+        "--build-state-policy-lifted-route-geometry-intake-plan",
+        action="store_true",
+        help="bind ARM-237 known geometry and retain unresolved installed evidence",
+    )
+    parser.add_argument(
         "--state-policy-transit-clearance-correction-plan", type=Path
+    )
+    parser.add_argument(
+        "--state-policy-transit-clearance-readiness-review", type=Path
     )
     parser.add_argument("--representative-native-mechanics-plan", type=Path)
     parser.add_argument("--representative-native-mechanics-receipt", type=Path)
+    parser.add_argument("--representative-cartesian-request", type=Path)
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -17114,6 +17295,7 @@ def main() -> int:
             and not args.build_contact_refined_robot_h_replay_plan
             and not args.build_representative_key_collision_replay_campaign
             and not args.materialize_representative_key_native_collision_inputs
+            and not args.build_state_policy_lifted_route_geometry_intake_plan
             and any(item is not None for item in request_collision_arguments)
             and not all(item is not None for item in request_collision_arguments)
         ):
@@ -17136,7 +17318,37 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.review_state_policy_transit_clearance_materialization_readiness:
+        if args.build_state_policy_lifted_route_geometry_intake_plan:
+            required = (
+                args.state_policy_transit_clearance_readiness_review,
+                args.collision_candidate,
+                args.representative_cartesian_request,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-237 intake requires the ARM-236 review, collision "
+                    "candidate, and representative Cartesian request"
+                )
+            readiness_review = json.loads(
+                args.state_policy_transit_clearance_readiness_review
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            collision_candidate = json.loads(
+                args.collision_candidate.resolve(strict=True).read_bytes()
+            )
+            cartesian_request = json.loads(
+                args.representative_cartesian_request
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            result = build_state_policy_lifted_route_geometry_intake_plan(
+                readiness_review,
+                build_profile(args.layout.resolve(strict=True)),
+                collision_candidate,
+                cartesian_request,
+            )
+        elif args.review_state_policy_transit_clearance_materialization_readiness:
             required = (
                 args.state_policy_transit_clearance_correction_plan,
                 args.replay_plan,
