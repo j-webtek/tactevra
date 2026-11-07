@@ -4637,3 +4637,70 @@ def test_arm223_runtime_admission_rejects_runtime_and_plan_tampering():
         mechanics.admit_state_policy_mechanics_runtime_inputs(
             campaign,changed_plans,*runtime
         )
+
+
+def test_arm224_native_mechanics_materialization_is_deterministic_and_nonexecuting():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    first,first_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    second,second_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    assert first==second and first_plans==second_plans
+    assert first['schema']==mechanics.STATE_POLICY_NATIVE_MECHANICS_MANIFEST_SCHEMA
+    assert first['episode_count']==1
+    assert first['total_joint_target_count']==2
+    assert first['total_collision_screened_bounded_sample_count']==2
+    assert first['runtime_files_revalidated'] is True
+    assert first['isaac_started'] is first['gpu_started'] is False
+    assert first['mechanics_replays_executed']==0
+    assert first['prior_mechanics_results_reused'] is False
+    assert first['hardware_access'] is first['physical_authority'] is False
+    native_plan=next(iter(first_plans.values()))
+    source_plan=next(iter(plans.values()))
+    admission=next(iter(admissions.values()))
+    assert native_plan['schema']==(
+        mechanics.STATE_POLICY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+    )
+    assert native_plan['joint_targets']==source_plan['joint_targets']
+    assert native_plan['randomized_parameters']==source_plan['randomized_parameters']
+    assert native_plan['contact_endpoint_sequences']==[0,1]
+    assert native_plan['source_mechanics_plan_sha256']==source_plan['plan_sha256']
+    assert native_plan['source_runtime_admission_receipt_sha256']==(
+        admission['receipt_sha256']
+    )
+    assert native_plan['runtime_admission_required'] is False
+    assert native_plan['prior_mechanics_result_reused'] is False
+    assert native_plan['native_mechanics_replay_executed'] is False
+
+
+def test_arm224_native_mechanics_materialization_rejects_lineage_and_denominator_drift():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    changed_admissions=json.loads(json.dumps(admissions))
+    episode_id=next(iter(changed_admissions))
+    changed_admissions[episode_id]['joint_target_count']=3
+    with pytest.raises(mechanics.MechanicsContractError,match='sha256 mismatch'):
+        mechanics.materialize_state_policy_native_mechanics_inputs(
+            admission_campaign,changed_admissions,mechanics_campaign,plans
+        )
+    with pytest.raises(mechanics.MechanicsContractError,match='denominator changed'):
+        mechanics.materialize_state_policy_native_mechanics_inputs(
+            admission_campaign,admissions,mechanics_campaign,{}
+        )
