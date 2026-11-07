@@ -238,6 +238,9 @@ STATE_POLICY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA = (
 STATE_POLICY_NATIVE_MECHANICS_MANIFEST_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_native_mechanics_manifest.v1"
 )
+STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_native_mechanics_receipt.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -9800,6 +9803,174 @@ def _state_policy_trajectory_row(
     }
 
 
+def validate_state_policy_native_mechanics_episode(
+    manifest: dict[str, Any],
+    plan: dict[str, Any],
+    episode_id: str,
+) -> dict[str, Any]:
+    """Admit one ARM-224 plan for one fresh, zero-authority Isaac attempt."""
+    _verify_lm3_digest(manifest, "manifest_sha256", "native mechanics manifest")
+    _verify_lm3_digest(plan, "plan_sha256", "native mechanics plan")
+    _require_lm3_zero_authority(manifest, "native mechanics manifest")
+    _require_lm3_zero_authority(plan, "native mechanics plan")
+    entries = manifest.get("entries")
+    if (
+        manifest.get("schema") != STATE_POLICY_NATIVE_MECHANICS_MANIFEST_SCHEMA
+        or manifest.get("status")
+        != "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_STATE_POLICY_MECHANICS_REPLAYS"
+        or manifest.get("runtime_files_revalidated") is not True
+        or manifest.get("isaac_started") is not False
+        or manifest.get("gpu_started") is not False
+        or manifest.get("mechanics_replays_executed") != 0
+        or manifest.get("prior_mechanics_results_reused") is not False
+        or not isinstance(entries, list)
+        or not entries
+        or len(entries) != manifest.get("episode_count")
+    ):
+        raise MechanicsContractError("state-policy mechanics manifest boundary changed")
+    matches = [
+        entry
+        for entry in entries
+        if isinstance(entry, dict) and entry.get("episode_id") == episode_id
+    ]
+    if len(matches) != 1:
+        raise MechanicsContractError(
+            "state-policy mechanics episode is absent or duplicated"
+        )
+    entry = matches[0]
+    targets = plan.get("joint_targets")
+    endpoints = plan.get("contact_endpoint_sequences")
+    if (
+        plan.get("schema") != STATE_POLICY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+        or plan.get("status")
+        != "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_STATE_POLICY_MECHANICS_REPLAY"
+        or plan.get("episode_id") != episode_id
+        or plan.get("target_id") != entry.get("target_id")
+        or plan.get("plan_sha256") != entry.get("native_mechanics_plan_sha256")
+        or plan.get("source_mechanics_plan_sha256")
+        != entry.get("source_mechanics_plan_sha256")
+        or plan.get("source_runtime_admission_receipt_sha256")
+        != entry.get("runtime_admission_receipt_sha256")
+        or plan.get("source_runtime_admission_campaign_sha256")
+        != manifest.get("source_runtime_admission_campaign_sha256")
+        or plan.get("sample_count") != entry.get("joint_target_count")
+        or plan.get("collision_screened_bounded_sample_count")
+        != entry.get("collision_screened_bounded_sample_count")
+        or plan.get("runtime_files") != manifest.get("runtime_files")
+        or plan.get("runtime_files_revalidated") is not True
+        or plan.get("runtime_admission_required") is not False
+        or plan.get("prior_mechanics_result_reused") is not False
+        or plan.get("native_mechanics_replay_executed") is not False
+        or plan.get("native_replay_authorized") is not False
+        or not isinstance(targets, list)
+        or len(targets) != plan.get("sample_count")
+        or not isinstance(endpoints, list)
+        or endpoints != entry.get("contact_endpoint_sequences")
+        or len(endpoints) != 2
+    ):
+        raise MechanicsContractError("state-policy native mechanics lineage changed")
+    return entry
+
+
+def build_state_policy_native_mechanics_failure_receipt(
+    *,
+    manifest_sha256: str,
+    plan: dict[str, Any],
+    error_type: str,
+    error_message: str,
+) -> dict[str, Any]:
+    """Retain a truthful signed receipt when one native episode stops early.
+
+    This receipt deliberately does not claim that an in-memory trace survived
+    the simulator exception.  It records only the governed input lineage and
+    the observed execution error, which is enough to preserve the one-attempt
+    result without fabricating mechanics evidence or authorizing a retry.
+    """
+    plan_hash = _require_canonical_hash(
+        plan, "plan_sha256", "state-policy native mechanics plan"
+    )
+    if not isinstance(manifest_sha256, str) or len(manifest_sha256) != 64:
+        raise MechanicsContractError("state-policy manifest hash is invalid")
+    stopped_at_sequence = None
+    prefix = "root invariant failed at sequence "
+    if error_message.lower().startswith(prefix):
+        candidate = error_message[len(prefix) :]
+        if candidate.isdigit():
+            stopped_at_sequence = int(candidate)
+    stopped_target = next(
+        (
+            target
+            for target in plan.get("joint_targets", [])
+            if target.get("sequence") == stopped_at_sequence
+        ),
+        None,
+    )
+    failure_reason = (
+        "ROOT_INVARIANT"
+        if stopped_at_sequence is not None
+        else "UNEXPECTED_RUNTIME_ERROR"
+    )
+    receipt: dict[str, Any] = {
+        "schema": STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA,
+        "status": "BLOCKED_STATE_POLICY_NATIVE_MECHANICS_REPLAY",
+        "evidence_class": "PROVISIONAL_NATIVE_EXECUTION_FAILURE_ONLY",
+        "complete": False,
+        "failure_reason": failure_reason,
+        "execution_error": {"type": error_type, "message": error_message},
+        "stopped_at_sequence": stopped_at_sequence,
+        "stopped_phase": (
+            stopped_target.get("phase") if isinstance(stopped_target, dict) else None
+        ),
+        "stopped_action_index": (
+            stopped_target.get("action_index")
+            if isinstance(stopped_target, dict)
+            else None
+        ),
+        "episode_id": plan.get("episode_id"),
+        "partition": plan.get("partition"),
+        "seed": plan.get("seed"),
+        "scene_id": plan.get("scene_id"),
+        "target_id": plan.get("target_id"),
+        "source_manifest_sha256": manifest_sha256,
+        "source_plan_sha256": plan_hash,
+        "source_mechanics_plan_sha256": plan.get(
+            "source_mechanics_plan_sha256"
+        ),
+        "source_runtime_admission_campaign_sha256": plan.get(
+            "source_runtime_admission_campaign_sha256"
+        ),
+        "source_runtime_admission_receipt_sha256": plan.get(
+            "source_runtime_admission_receipt_sha256"
+        ),
+        "planned_joint_target_count": plan.get("sample_count"),
+        "collision_screened_bounded_sample_count": plan.get(
+            "collision_screened_bounded_sample_count"
+        ),
+        "contact_endpoint_sequences": list(
+            plan.get("contact_endpoint_sequences", [])
+        ),
+        "native_trace_retained": False,
+        "action_assessments": [],
+        "fresh_mechanics_replay": True,
+        "prior_mechanics_result_reused": False,
+        "automatic_retry_performed": False,
+        "hardware_access": False,
+        "physical_authority": False,
+        "controller_commands": [],
+        "hardware_writes": 0,
+        "physical_movements": 0,
+        "gate_promotions": [],
+        "limitations": list(plan.get("limitations", []))
+        + [
+            "execution_stopped_before_complete_native_mechanics_assessment",
+            "in_memory_native_trace_not_retained_after_runtime_exception",
+            "failure_receipt_does_not_authorize_retry",
+        ],
+    }
+    receipt["receipt_sha256"] = _canonical_sha256(receipt)
+    return receipt
+
+
 def run_drive_controlled_robot_h_replay(
     *,
     replay_plan_path: Path,
@@ -9812,6 +9983,7 @@ def run_drive_controlled_robot_h_replay(
     randomized_campaign_sha256: str | None = None,
     randomized_source_receipt_sha256: str | None = None,
     randomized_trajectory_path: Path | None = None,
+    state_policy_manifest_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Replay selected joint targets against one native key in Isaac."""
 
@@ -9859,12 +10031,26 @@ def run_drive_controlled_robot_h_replay(
         and plan.get("status")
         == "READY_FOR_ZERO_AUTHORITY_CONTACT_REFINED_KEY_MECHANICS_REPLAY"
     )
+    state_policy_plan = (
+        plan.get("schema") == STATE_POLICY_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+        and plan.get("status")
+        == "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_STATE_POLICY_MECHANICS_REPLAY"
+    )
     target_id = (
         plan.get("target_id")
-        if representative_plan or representative_adapted_plan or representative_refined_plan
+        if (
+            representative_plan
+            or representative_adapted_plan
+            or representative_refined_plan
+            or state_policy_plan
+        )
         else "H"
     )
-    randomized_parameters = None
+    randomized_parameters = (
+        _validate_randomized_replay_parameters(plan.get("randomized_parameters"))
+        if state_policy_plan
+        else None
+    )
     if randomized_episode is not None:
         if randomized_episode.get("target_id") != target_id:
             raise MechanicsContractError(
@@ -9885,7 +10071,12 @@ def run_drive_controlled_robot_h_replay(
             )
     contact_endpoint_sequences = (
         plan.get("contact_endpoint_sequences")
-        if representative_plan or representative_adapted_plan or representative_refined_plan
+        if (
+            representative_plan
+            or representative_adapted_plan
+            or representative_refined_plan
+            or state_policy_plan
+        )
         else plan.get("h_contact_endpoint_sequences")
     )
     target_region = profile.get("regions", {}).get(target_id)
@@ -9898,6 +10089,7 @@ def run_drive_controlled_robot_h_replay(
             or representative_plan
             or representative_adapted_plan
             or representative_refined_plan
+            or state_policy_plan
         )
         or plan.get("sample_count") != len(plan.get("joint_targets", []))
         or not isinstance(contact_endpoint_sequences, list)
@@ -9939,6 +10131,43 @@ def run_drive_controlled_robot_h_replay(
         ):
             raise MechanicsContractError(
                 "representative native mechanics replay boundary changed"
+            )
+    if state_policy_plan:
+        derived_contact_endpoints = [
+            row.get("sequence")
+            for row in plan["joint_targets"]
+            if row.get("target_id") == target_id
+            and row.get("phase") == "CONTACT"
+            and row.get("phase_endpoint") is True
+        ]
+        expected_randomized_center = _randomized_keyboard_point_mm(
+            list(target_region["center_board_xy_mm"]),
+            offset_x_mm=randomized_parameters["keyboard_offset_x_mm"],
+            offset_y_mm=randomized_parameters["keyboard_offset_y_mm"],
+            yaw_deg=randomized_parameters["keyboard_yaw_deg"],
+        )
+        if (
+            target_id not in {"1", "SPACE", "ENTER", "PERIOD"}
+            or not isinstance(state_policy_manifest_sha256, str)
+            or len(state_policy_manifest_sha256) != 64
+            or contact_endpoint_sequences != derived_contact_endpoints
+            or plan.get("target_region") != {
+                "center_board_xy_mm": list(target_region["center_board_xy_mm"]),
+                "half_extent_mm": list(target_region["half_extent_mm"]),
+            }
+            or plan.get("randomized_key_center_board_xy_mm")
+            != expected_randomized_center
+            or plan.get("execution_contract", {}).get(
+                "maximum_joint_tracking_error_rad"
+            )
+            != 0.05
+            or plan.get("execution_contract", {}).get(
+                "randomized_key_mechanics_required"
+            )
+            is not True
+        ):
+            raise MechanicsContractError(
+                "state-policy native mechanics replay boundary changed"
             )
     if representative_adapted_plan:
         adaptation = plan.get("feedback_adaptation", {})
@@ -10296,6 +10525,7 @@ def run_drive_controlled_robot_h_replay(
                 or representative_plan
                 or representative_adapted_plan
                 or representative_refined_plan
+                or state_policy_plan
             )
             else None
         )
@@ -10314,22 +10544,26 @@ def run_drive_controlled_robot_h_replay(
         )
         receipt: dict[str, Any] = {
             "schema": (
-                REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA
-                if (
-                    representative_plan
-                    or representative_adapted_plan
-                    or representative_refined_plan
-                )
+                STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+                if state_policy_plan
                 else (
-                    CONTACT_REFINED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
-                    if contact_refined_plan
+                    REPRESENTATIVE_KEY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+                    if (
+                        representative_plan
+                        or representative_adapted_plan
+                        or representative_refined_plan
+                    )
                     else (
-                        TRACE_LIFTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
-                        if trace_lifted_plan
+                        CONTACT_REFINED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                        if contact_refined_plan
                         else (
-                            FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
-                            if adapted_plan
-                            else DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                            TRACE_LIFTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                            if trace_lifted_plan
+                            else (
+                                FEEDBACK_ADAPTED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                                if adapted_plan
+                                else DRIVE_CONTROLLED_ROBOT_H_REPLAY_RECEIPT_SCHEMA
+                            )
                         )
                     )
                 )
@@ -10338,13 +10572,17 @@ def run_drive_controlled_robot_h_replay(
                 "PASS"
                 if passed
                 else (
-                    "BLOCKED_REPRESENTATIVE_NATIVE_KEY_MECHANICS_REPLAY"
-                    if (
-                        representative_plan
-                        or representative_adapted_plan
-                        or representative_refined_plan
+                    "BLOCKED_STATE_POLICY_NATIVE_MECHANICS_REPLAY"
+                    if state_policy_plan
+                    else (
+                        "BLOCKED_REPRESENTATIVE_NATIVE_KEY_MECHANICS_REPLAY"
+                        if (
+                            representative_plan
+                            or representative_adapted_plan
+                            or representative_refined_plan
+                        )
+                        else "BLOCKED_NATIVE_ROBOT_H_REPLAY"
                     )
-                    else "BLOCKED_NATIVE_ROBOT_H_REPLAY"
                 )
             ),
             "evidence_class": "PROVISIONAL_NATIVE_DRIVE_CONTROLLED_ROBOT_KEY_CONTACT",
@@ -10377,19 +10615,52 @@ def run_drive_controlled_robot_h_replay(
                         representative_plan
                         or representative_adapted_plan
                         or representative_refined_plan
+                        or state_policy_plan
                     )
                     else "single_representative_H_key_only"
                 ),
                 "tool_tip_collision_surface_is_governed_hand_tcp_minus_120_mm_endpoint",
             ],
         }
-        if representative_plan or representative_adapted_plan or representative_refined_plan:
+        if (
+            representative_plan
+            or representative_adapted_plan
+            or representative_refined_plan
+        ):
             receipt["maximum_joint_tracking_error_allowed_rad"] = (
                 maximum_tracking_error_allowed
             )
             receipt["source_arm216_receipt_sha256"] = bindings[
                 "arm216_receipt_sha256"
             ]
+        if state_policy_plan:
+            receipt.update({
+                "episode_id": plan["episode_id"],
+                "partition": plan["partition"],
+                "seed": plan["seed"],
+                "scene_id": plan["scene_id"],
+                "source_manifest_sha256": state_policy_manifest_sha256,
+                "source_mechanics_plan_sha256": plan[
+                    "source_mechanics_plan_sha256"
+                ],
+                "source_runtime_admission_campaign_sha256": plan[
+                    "source_runtime_admission_campaign_sha256"
+                ],
+                "source_runtime_admission_receipt_sha256": plan[
+                    "source_runtime_admission_receipt_sha256"
+                ],
+                "collision_screened_bounded_sample_count": plan[
+                    "collision_screened_bounded_sample_count"
+                ],
+                "contact_endpoint_sequences": list(contact_endpoint_sequences),
+                "maximum_joint_tracking_error_allowed_rad": (
+                    maximum_tracking_error_allowed
+                ),
+                "randomized_parameters": dict(randomized_parameters),
+                "randomized_key_center_board_xy_mm": list(key_center_xy_mm),
+                "fresh_mechanics_replay": True,
+                "prior_mechanics_result_reused": False,
+            })
         if randomized_episode is not None:
             receipt["randomized_episode_id"] = randomized_episode["episode_id"]
             receipt["randomized_parameters"] = dict(randomized_parameters)
@@ -10437,6 +10708,34 @@ def run_drive_controlled_robot_h_replay(
         return receipt
     except BaseException as exc:
         if (
+            state_policy_plan
+            and not isinstance(
+                exc, (MechanicsContractError, KeyboardInterrupt, SystemExit)
+            )
+        ):
+            receipt = build_state_policy_native_mechanics_failure_receipt(
+                manifest_sha256=state_policy_manifest_sha256,
+                plan=plan,
+                error_type=type(exc).__name__,
+                error_message=str(exc),
+            )
+            output_path.write_text(
+                json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+            status_path.write_text(
+                json.dumps(
+                    {
+                        "status": receipt["status"],
+                        "receipt_sha256": receipt["receipt_sha256"],
+                    },
+                    sort_keys=True,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            return receipt
+        if (
             randomized_episode is not None
             and not isinstance(exc, (MechanicsContractError, KeyboardInterrupt, SystemExit))
         ):
@@ -10478,6 +10777,42 @@ def run_drive_controlled_robot_h_replay(
     finally:
         if app is not None:
             app.close()
+
+
+def run_state_policy_native_mechanics_episode(
+    *,
+    manifest_path: Path,
+    episode_id: str,
+    replay_plan_path: Path,
+    layout_path: Path,
+    drive_profile_path: Path,
+    robot_usd_path: Path,
+    output_path: Path,
+    status_path: Path,
+) -> dict[str, Any]:
+    """Execute one precommitted ARM-224 episode with no automatic retry."""
+    manifest = json.loads(manifest_path.resolve(strict=True).read_bytes())
+    plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
+    validate_state_policy_native_mechanics_episode(manifest, plan, episode_id)
+    receipt = run_drive_controlled_robot_h_replay(
+        replay_plan_path=replay_plan_path,
+        layout_path=layout_path,
+        drive_profile_path=drive_profile_path,
+        robot_usd_path=robot_usd_path,
+        output_path=output_path,
+        status_path=status_path,
+        state_policy_manifest_sha256=manifest["manifest_sha256"],
+    )
+    if (
+        receipt.get("schema") != STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+        or receipt.get("episode_id") != episode_id
+        or receipt.get("source_manifest_sha256") != manifest["manifest_sha256"]
+        or receipt.get("source_plan_sha256") != plan["plan_sha256"]
+    ):
+        raise MechanicsContractError(
+            "state-policy native mechanics receipt boundary changed"
+        )
+    return receipt
 
 
 def _write_randomized_trajectory(
@@ -14884,6 +15219,14 @@ def main() -> int:
             "native mechanics replay inputs"
         ),
     )
+    parser.add_argument(
+        "--run-state-policy-native-mechanics-episode",
+        action="store_true",
+        help=(
+            "execute exactly one precommitted ARM-224 mechanics episode "
+            "without retry or physical authority"
+        ),
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -14909,6 +15252,7 @@ def main() -> int:
     parser.add_argument("--state-policy-mechanics-runtime-output-dir", type=Path)
     parser.add_argument("--state-policy-mechanics-runtime-admission-campaign", type=Path)
     parser.add_argument("--state-policy-native-mechanics-output-dir", type=Path)
+    parser.add_argument("--state-policy-native-mechanics-manifest", type=Path)
     parser.add_argument("--ridge-lambda", type=float, default=0.001)
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
@@ -15725,6 +16069,29 @@ def main() -> int:
             }
             result = aggregate_randomized_demonstration_campaign(
                 campaign, receipts
+            )
+        elif args.run_state_policy_native_mechanics_episode:
+            required = (
+                args.state_policy_native_mechanics_manifest,
+                args.episode_id,
+                args.replay_plan,
+                args.drive_profile,
+                args.robot_usd,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-225 episode execution requires its ARM-224 manifest, "
+                    "episode id, replay plan, drive profile, and robot USD"
+                )
+            result = run_state_policy_native_mechanics_episode(
+                manifest_path=args.state_policy_native_mechanics_manifest,
+                episode_id=args.episode_id,
+                replay_plan_path=args.replay_plan,
+                layout_path=args.layout,
+                drive_profile_path=args.drive_profile,
+                robot_usd_path=args.robot_usd,
+                output_path=args.output,
+                status_path=args.status_output,
             )
         elif args.run_randomized_demonstration_episode:
             required = (

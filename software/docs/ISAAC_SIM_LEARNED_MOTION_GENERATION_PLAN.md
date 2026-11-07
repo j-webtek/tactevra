@@ -668,6 +668,17 @@ does not start Isaac/GPU, reuse a mechanics result, or grant physical
 authority. Fresh zero-authority mechanics execution and outcome measurement
 are next.
 
+ARM-225 begins that fresh mechanics execution one precommitted episode at a
+time. The first `SPACE` episode started Isaac 6.1 and the GPU, then stopped on
+the unchanged fixed-base root invariant at sequence `723` in `TRANSIT`, before
+either contact endpoint (`1061`, `1299`). It was not retried. A signed
+error-only receipt retains the exact ARM-224 manifest/plan lineage and the
+observed `ROOT_INVARIANT` result while explicitly declining to claim a retained
+native trace, contact, release, settling, or action assessment. The execution
+wrapper now preserves the same fail-closed receipt shape for future runtime
+errors. The next bounded increment is root-drift diagnosis with retained step
+telemetry; it is not permission to replay this episode automatically.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -867,7 +878,13 @@ ScheduleGen. Neither is a physical success rate.
     runtime hashes. All `12,744` targets, `523` collision samples, randomized
     resets, placements, mechanics values, and contact endpoints are retained.
     Isaac/GPU and mechanics execution remain at zero; fresh replay is next.
-14. Expand only after each predecessor produces reviewable evidence.
+14. **LM4 first mechanics episode:** ARM-225 attempts one exact `SPACE` episode
+    without retry. Isaac/GPU start succeeds, but the replay stops at sequence
+    `723` during `TRANSIT` on the fixed-base root invariant, before its contact
+    endpoints. The signed blocked receipt retains input lineage and the error
+    but not the discarded in-memory trace. Root-drift telemetry and diagnosis
+    are required before another governed episode attempt.
+15. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
