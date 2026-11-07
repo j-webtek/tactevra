@@ -753,6 +753,16 @@ SHA-256
 This is evidence for offline diagnosis only. It grants neither retry authority
 nor hardware or physical authority.
 
+ARM-234 converts that partial trace into a deterministic offline review.
+Material key displacement begins during `TRANSIT` at sequence 654; the first
+root-orientation rise past `0.05 deg` follows at sequence 694, and the governed
+stop remains sequence 723. The 40-sample ordering narrows the next investigation
+to transit clearance and contact timing, but is not by itself proof of
+causality. Review SHA-256 is
+`ffab81579f296d6affc687fa774fd419f3db1e1e824520dfb5dd39666206227e`.
+No simulation, retry, hardware access, or physical authority occurs in this
+review.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -992,7 +1002,16 @@ ScheduleGen. Neither is a physical success rate.
     request. It starts no simulator or GPU, performs no replay, and grants no
     native, hardware, or physical authority. Fresh runtime-file revalidation
     and an exact explicit authorization remain prerequisites to execution.
-22. Expand only after each predecessor produces reviewable evidence.
+22. **LM4 single corrected replay execution:** ARM-233 consumes the exact
+    authorization once and stops fail-closed at sequence `723` after retaining
+    724 trace rows. The corrected fixture is active, no retry occurs, and the
+    result remains blocked with no hardware or physical authority.
+23. **LM4 premature transit-contact review:** ARM-234 confirms offline that
+    material key displacement begins at sequence `654` during `TRANSIT`, 40
+    samples before root orientation first exceeds `0.05 deg` and 69 samples
+    before the governed stop. It narrows correction planning without claiming
+    causality or authorizing another replay.
+24. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

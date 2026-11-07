@@ -2247,6 +2247,30 @@ No retry, hardware access, hardware write, physical authority, or physical
 movement occurred. The result remains blocked and does not authorize another
 attempt or any physical action.
 
+ARM-234 reviews the retained partial trace offline. Material key displacement
+first appears during `TRANSIT` at sequence 654 (`0.3699474037 mm`). Root
+orientation first exceeds the review's `0.05 deg` rise threshold at sequence
+694, 40 samples later, and reaches the governed failure at sequence 723. Key
+displacement at the stop is `3.6798967049 mm`. The review therefore confirms
+premature transit key displacement precedes the orientation breach, while
+explicitly declining to claim causality or exonerate the fixture from all
+dynamic loads. Its SHA-256 is
+`ffab81579f296d6affc687fa774fd419f3db1e1e824520dfb5dd39666206227e`.
+The next stage is offline transit-clearance and contact-timing correction
+planning; no replay or physical authority is granted.
+
+Reproduce the non-starting ARM-234 review with:
+
+```powershell
+$review = 'C:/IsaacSim/artifacts/issue190/arm234-state-policy-premature-transit-contact-review-001'
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output "$review/review.json" `
+  --status-output "$review/status.json" `
+  --review-state-policy-premature-transit-contact `
+  --source-native-receipt C:/IsaacSim/artifacts/issue190/arm233-state-policy-fixed-fixture-native-mechanics-001/episode-ef340d0ad2740c118d87/receipt.json
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
