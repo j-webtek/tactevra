@@ -732,6 +732,16 @@ independent review SHA-256 is
 Both operations were offline. The review permits only a later, separately
 authorized zero-authority native attempt; it does not itself authorize one.
 
+ARM-232 selects exactly one corrected `SPACE` episode from that reviewed
+denominator and binds its corrected plan, manifest, review, fixed-fixture
+configuration, runtime hashes, sample count, and contact endpoints into a
+single-attempt request. The request forbids automatic retry, requires fresh
+runtime-file revalidation immediately before a separately authorized launch,
+and carries no hardware or physical authority. Request construction is an
+offline planning action and starts neither Isaac nor a GPU. The retained
+request SHA-256 is
+`f2d1f9708dc361c3f592f07d78eccd029dab4ccf5333def5cddc8f145e7caa65`.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -966,7 +976,12 @@ ScheduleGen. Neither is a physical success rate.
     match the proven static fixture, materializes nine review-bound v2 inputs,
     and independently reproduces every corrected hash without starting Isaac.
     The trajectory denominator is unchanged and replay authority remains false.
-21. Expand only after each predecessor produces reviewable evidence.
+21. **LM4 single corrected replay request:** ARM-232 binds one reviewed
+    corrected `SPACE` episode into a one-attempt, no-retry authorization
+    request. It starts no simulator or GPU, performs no replay, and grants no
+    native, hardware, or physical authority. Fresh runtime-file revalidation
+    and an exact explicit authorization remain prerequisites to execution.
+22. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
