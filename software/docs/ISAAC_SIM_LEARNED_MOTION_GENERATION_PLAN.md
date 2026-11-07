@@ -1057,7 +1057,14 @@ ScheduleGen. Neither is a physical success rate.
     installed 3D key body or missing workcell geometry from nominal dimensions.
     It routes the exact remaining blockers into the hash-bound ICQ-1 installed
     measurement-manifest boundary and keeps route materialization disabled.
-27. Expand only after each predecessor produces reviewable evidence.
+27. **LM4 installed-measurement inventory:** ARM-238 emits and validates the
+    exact 19-body `stylus_attachment` ICQ-1 manifest while keeping all
+    unsupported geometry and clearance values `PENDING`. It hash-binds 12
+    supplied ruler/layout photos as reference-only evidence, preserves a
+    distinct 18-body `no_attachment` contract in tests, and refuses to infer
+    local-frame 3D envelopes or uncertainty from the images. No collision
+    profile, route, replay, hardware access, or physical authority is created.
+28. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
