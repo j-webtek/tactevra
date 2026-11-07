@@ -721,6 +721,17 @@ review SHA-256
 The review admits only an offline state-policy fixture correction. Mechanics
 replay, contact, hardware, and physical authority remain denied.
 
+ARM-231 applies and independently reproduces that exact correction across all
+nine state-policy episodes. The v2 manifest binds the ARM-230 review, retains
+the unchanged trajectory samples, authors `64` solver-position iterations, `8`
+solver-velocity iterations, and an explicitly enabled fixed joint, and replaces
+every prior replay-plan hash. Corrected manifest SHA-256 is
+`ff166283e37c35bc906668bacc8a37128bcdcd9c1a7b088675412dc5ae38bb28`;
+independent review SHA-256 is
+`faf67c3e4163b2c8bd40f0a3303fdcda31222f3e9196050f2588538f332e5916`.
+Both operations were offline. The review permits only a later, separately
+authorized zero-authority native attempt; it does not itself authorize one.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -951,7 +962,11 @@ ScheduleGen. Neither is a physical success rate.
     verifies the receipt and full source lineage, admitting only an offline
     correction to the state-policy fixed fixture. No mechanics replay or
     physical authority is granted.
-20. Expand only after each predecessor produces reviewable evidence.
+20. **LM4 fixed-fixture correction:** ARM-231 changes the state-policy runner to
+    match the proven static fixture, materializes nine review-bound v2 inputs,
+    and independently reproduces every corrected hash without starting Isaac.
+    The trajectory denominator is unchanged and replay authority remains false.
+21. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
