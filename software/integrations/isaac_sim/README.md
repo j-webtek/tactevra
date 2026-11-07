@@ -2271,6 +2271,30 @@ python software/integrations/isaac_sim/representative_key_mechanics.py `
   --source-native-receipt C:/IsaacSim/artifacts/issue190/arm233-state-policy-fixed-fixture-native-mechanics-001/episode-ef340d0ad2740c118d87/receipt.json
 ```
 
+ARM-235 turns that review into a non-executing correction plan. It preserves
+the last pre-displacement row at sequence 653, selects only sequences 654–940
+(`TRANSIT` and `HOVER`) for later deterministic IK regeneration, and preserves
+the first intended `CONTACT` row at 941 plus endpoints 1061 and 1299. Any later
+materializer must prove at least `0.5 mm` noncontact tool/key clearance, limit
+noncontact key displacement to `0.05 mm`, retain timing and phase labels, and
+reject the candidate unless clearance, IK, and joint continuity all pass. No
+corrected target is produced by ARM-235. Plan SHA-256 is
+`5dd11d86f30884e116ce8c0300af97100285cddaf4f90902b0e590e6ea59580d`.
+
+Reproduce the non-starting ARM-235 plan with:
+
+```powershell
+$plan = 'C:/IsaacSim/artifacts/issue190/arm235-state-policy-transit-clearance-correction-plan-001'
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output "$plan/plan.json" `
+  --status-output "$plan/status.json" `
+  --build-state-policy-transit-clearance-correction-plan `
+  --state-policy-premature-contact-review C:/IsaacSim/artifacts/issue190/arm234-state-policy-premature-transit-contact-review-001/review.json `
+  --source-native-receipt C:/IsaacSim/artifacts/issue190/arm233-state-policy-fixed-fixture-native-mechanics-001/episode-ef340d0ad2740c118d87/receipt.json `
+  --replay-plan C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

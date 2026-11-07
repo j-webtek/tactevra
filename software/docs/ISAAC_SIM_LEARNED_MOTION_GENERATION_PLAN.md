@@ -763,6 +763,15 @@ causality. Review SHA-256 is
 No simulation, retry, hardware access, or physical authority occurs in this
 review.
 
+ARM-235 binds ARM-234 and the unchanged corrected source plan into an offline
+correction contract. Only the noncontact window from sequence 654 through 940
+may later be regenerated; sequence 653, the first `CONTACT` row at 941, and
+contact endpoints 1061/1299 remain bound. Materialization must prove `0.5 mm`
+continuous noncontact clearance, at most `0.05 mm` noncontact key displacement,
+IK validity, and the existing `0.05 rad` adjacent-joint limit. The plan contains
+no replacement targets and grants no replay authority. SHA-256 is
+`5dd11d86f30884e116ce8c0300af97100285cddaf4f90902b0e590e6ea59580d`.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -1011,7 +1020,12 @@ ScheduleGen. Neither is a physical success rate.
     samples before root orientation first exceeds `0.05 deg` and 69 samples
     before the governed stop. It narrows correction planning without claiming
     causality or authorizing another replay.
-24. Expand only after each predecessor produces reviewable evidence.
+24. **LM4 transit-clearance correction planning:** ARM-235 binds the signed
+    premature-contact review to a 654–940 noncontact correction window. It
+    preserves source timing, phases, fixed fixture, first contact, and both
+    contact endpoints while requiring continuous clearance and zero-contact
+    evidence before a candidate may be retained. No targets are changed yet.
+25. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

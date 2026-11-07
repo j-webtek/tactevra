@@ -5416,13 +5416,38 @@ def test_arm233_admits_exact_authorization_once_after_fresh_hashes(
     assert len(calls)==1
 
 
-def test_arm234_reviews_premature_transit_displacement_offline():
+def _arm234_synthetic_review_sources():
     mechanics=_load_key_mechanics()
+    phases=(
+        'PARK','TRANSIT','TRANSIT','TRANSIT','TRANSIT','HOVER',
+        'CONTACT','RETRACT','HOVER','CONTACT','RETRACT',
+    )
+    source_plan={
+        'schema':mechanics.STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA,
+        'status':'READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW',
+        'fixed_fixture_correction_applied':True,
+        'fixed_fixture_configuration':{
+            'fixed_joint_enabled_explicitly':True,
+            'solver_position_iteration_count':64,
+            'solver_velocity_iteration_count':8,
+        },
+        'episode_id':'episode-test','target_id':'SPACE','sample_count':11,
+        'contact_endpoint_sequences':[6,9],
+        'joint_targets':[
+            {
+                'sequence':sequence,'phase':phase,
+                'joint_position_target_rad':[0.0]*6,
+            }
+            for sequence,phase in enumerate(phases)
+        ],
+    }
+    source_plan['plan_sha256']=mechanics._canonical_sha256(source_plan)
     trace=[
         {'target_sequence':0,'phase':'PARK','key_center_z_m':0.018},
-        {'target_sequence':1,'phase':'TRANSIT','key_center_z_m':0.0177},
-        {'target_sequence':2,'phase':'TRANSIT','key_center_z_m':0.016},
-        {'target_sequence':3,'phase':'TRANSIT','key_center_z_m':0.0143},
+        {'target_sequence':1,'phase':'TRANSIT','key_center_z_m':0.018},
+        {'target_sequence':2,'phase':'TRANSIT','key_center_z_m':0.0177},
+        {'target_sequence':3,'phase':'TRANSIT','key_center_z_m':0.016},
+        {'target_sequence':4,'phase':'TRANSIT','key_center_z_m':0.0143},
     ]
     roots=[
         {
@@ -5430,7 +5455,7 @@ def test_arm234_reviews_premature_transit_displacement_offline():
             'orientation_tolerance_deg':0.1,'translation_delta_mm':0.004,
             'translation_tolerance_mm':0.05,'passed':orientation<=0.1,
         }
-        for sequence,orientation in enumerate((0.01,0.04,0.06,0.11))
+        for sequence,orientation in enumerate((0.01,0.04,0.04,0.06,0.11))
     ]
     receipt={
         'schema':mechanics.STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA,
@@ -5438,23 +5463,29 @@ def test_arm234_reviews_premature_transit_displacement_offline():
         'failure_reason':'ROOT_INVARIANT','complete':False,
         'native_trace_retained':True,'automatic_retry_performed':False,
         'hardware_access':False,'physical_authority':False,
-        'native_trace':trace,'native_trace_row_count':4,
-        'attempted_joint_target_count':4,
+        'native_trace':trace,'native_trace_row_count':5,
+        'attempted_joint_target_count':5,
         'root_pose_invariant':{
-            'observations':roots,'observation_count':4,'all_passed':False,
+            'observations':roots,'observation_count':5,'all_passed':False,
         },
         'joint_tracking':[{} for _ in trace],
-        'stopped_at_sequence':3,'stopped_phase':'TRANSIT',
+        'stopped_at_sequence':4,'stopped_phase':'TRANSIT',
         'episode_id':'episode-test','target_id':'SPACE',
+        'source_plan_sha256':source_plan['plan_sha256'],
     }
     receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
-    first=mechanics.review_state_policy_premature_transit_contact(receipt)
+    review=mechanics.review_state_policy_premature_transit_contact(receipt)
+    return mechanics,source_plan,receipt,review
+
+
+def test_arm234_reviews_premature_transit_displacement_offline():
+    mechanics,_,receipt,first=_arm234_synthetic_review_sources()
     second=mechanics.review_state_policy_premature_transit_contact(receipt)
     assert first==second
     assert first['status']=='REVIEWED_PREMATURE_TRANSIT_KEY_DISPLACEMENT'
-    assert first['first_material_transit_key_displacement']['sequence']==1
-    assert first['first_root_orientation_rise']['sequence']==2
-    assert first['fail_closed_stop']['sequence']==3
+    assert first['first_material_transit_key_displacement']['sequence']==2
+    assert first['first_root_orientation_rise']['sequence']==3
+    assert first['fail_closed_stop']['sequence']==4
     assert first['temporal_separation']=={
         'displacement_to_orientation_rise_samples':1,
         'displacement_to_fail_closed_stop_samples':2,
@@ -5472,6 +5503,51 @@ def test_arm234_reviews_premature_transit_displacement_offline():
     changed['receipt_sha256']=mechanics._canonical_sha256(changed)
     with pytest.raises(mechanics.MechanicsContractError,match='boundary changed'):
         mechanics.review_state_policy_premature_transit_contact(changed)
+
+
+def test_arm235_plans_bounded_offline_transit_clearance_correction():
+    mechanics,source_plan,receipt,review=_arm234_synthetic_review_sources()
+    first=mechanics.build_state_policy_transit_clearance_correction_plan(
+        review,receipt,source_plan
+    )
+    second=mechanics.build_state_policy_transit_clearance_correction_plan(
+        review,receipt,source_plan
+    )
+    assert first==second
+    assert first['schema']==(
+        mechanics.STATE_POLICY_TRANSIT_CLEARANCE_CORRECTION_PLAN_SCHEMA
+    )
+    assert first['correction_window']=={
+        'last_preserved_pre_correction_sequence':1,
+        'first_sequence_to_regenerate':2,
+        'last_sequence_to_regenerate':5,
+        'first_preserved_contact_sequence':6,
+        'allowed_source_phases':['TRANSIT','HOVER'],
+    }
+    contract=first['materialization_contract']
+    assert contract['minimum_noncontact_tool_key_clearance_mm']==0.5
+    assert contract['maximum_noncontact_key_displacement_mm']==0.05
+    assert contract['preserve_contact_endpoint_sequences'] is True
+    assert contract['preserve_contact_endpoint_joint_targets'] is True
+    assert first['corrected_joint_targets_materialized'] is False
+    assert first['native_replay_authorized'] is False
+    assert first['isaac_started'] is first['physical_authority'] is False
+
+    changed=json.loads(json.dumps(source_plan))
+    changed['joint_targets'][6]['phase']='HOVER'
+    changed.pop('plan_sha256')
+    changed['plan_sha256']=mechanics._canonical_sha256(changed)
+    changed_receipt=json.loads(json.dumps(receipt))
+    changed_receipt['source_plan_sha256']=changed['plan_sha256']
+    changed_receipt.pop('receipt_sha256')
+    changed_receipt['receipt_sha256']=mechanics._canonical_sha256(changed_receipt)
+    changed_review=mechanics.review_state_policy_premature_transit_contact(
+        changed_receipt
+    )
+    with pytest.raises(mechanics.MechanicsContractError,match='window changed'):
+        mechanics.build_state_policy_transit_clearance_correction_plan(
+            changed_review,changed_receipt,changed
+        )
 
 
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():

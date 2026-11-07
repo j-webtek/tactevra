@@ -267,6 +267,9 @@ STATE_POLICY_FIXED_FIXTURE_SINGLE_REPLAY_REQUEST_SCHEMA = (
 STATE_POLICY_PREMATURE_TRANSIT_CONTACT_REVIEW_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_premature_transit_contact_review.v1"
 )
+STATE_POLICY_TRANSIT_CLEARANCE_CORRECTION_PLAN_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_transit_clearance_correction_plan.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -12176,6 +12179,144 @@ def review_state_policy_premature_transit_contact(
     return review
 
 
+def build_state_policy_transit_clearance_correction_plan(
+    review: dict[str, Any],
+    receipt: dict[str, Any],
+    source_plan: dict[str, Any],
+) -> dict[str, Any]:
+    """Plan an offline noncontact route correction without materializing it."""
+
+    review_hash = _require_canonical_hash(
+        review, "review_sha256", "ARM-234 premature-contact review"
+    )
+    reproduced_review = review_state_policy_premature_transit_contact(receipt)
+    source_plan_hash = _require_canonical_hash(
+        source_plan, "plan_sha256", "ARM-231 corrected mechanics plan"
+    )
+    targets = source_plan.get("joint_targets")
+    endpoints = source_plan.get("contact_endpoint_sequences")
+    if (
+        review != reproduced_review
+        or receipt.get("source_plan_sha256") != source_plan_hash
+        or review.get("episode_id") != source_plan.get("episode_id")
+        or review.get("target_id") != source_plan.get("target_id")
+        or source_plan.get("schema")
+        != STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+        or source_plan.get("status")
+        != "READY_FOR_INDEPENDENT_FIXED_FIXTURE_CORRECTION_REVIEW"
+        or source_plan.get("fixed_fixture_correction_applied") is not True
+        or not isinstance(targets, list)
+        or len(targets) != source_plan.get("sample_count")
+        or not isinstance(endpoints, list)
+        or len(endpoints) != 2
+    ):
+        raise MechanicsContractError("ARM-235 correction-plan lineage changed")
+
+    displacement_sequence = review[
+        "first_material_transit_key_displacement"
+    ]["sequence"]
+    anchor_sequence = displacement_sequence - 1
+    contact_rows = [row for row in targets if row.get("phase") == "CONTACT"]
+    if not contact_rows:
+        raise MechanicsContractError("ARM-235 source plan has no contact phase")
+    first_contact_sequence = contact_rows[0].get("sequence")
+    correction_end_sequence = first_contact_sequence - 1
+    by_sequence = {row.get("sequence"): row for row in targets}
+    correction_rows = [
+        by_sequence.get(sequence)
+        for sequence in range(displacement_sequence, first_contact_sequence)
+    ]
+    if (
+        anchor_sequence not in by_sequence
+        or any(row is None for row in correction_rows)
+        or by_sequence[anchor_sequence].get("phase") != "TRANSIT"
+        or by_sequence[displacement_sequence].get("phase") != "TRANSIT"
+        or any(row.get("phase") not in {"TRANSIT", "HOVER"}
+               for row in correction_rows)
+        or by_sequence[first_contact_sequence].get("phase") != "CONTACT"
+        or correction_end_sequence >= endpoints[0]
+    ):
+        raise MechanicsContractError("ARM-235 correction window changed")
+
+    required_clearance_mm = 0.5
+    maximum_noncontact_key_displacement_mm = 0.05
+    plan: dict[str, Any] = {
+        "schema": STATE_POLICY_TRANSIT_CLEARANCE_CORRECTION_PLAN_SCHEMA,
+        "status": "READY_FOR_OFFLINE_TRANSIT_CLEARANCE_CORRECTION_MATERIALIZATION",
+        "source_review_sha256": review_hash,
+        "source_receipt_sha256": review["source_receipt_sha256"],
+        "source_corrected_plan_sha256": source_plan_hash,
+        "episode_id": source_plan["episode_id"],
+        "target_id": source_plan["target_id"],
+        "source_sample_count": source_plan["sample_count"],
+        "source_contact_endpoint_sequences": list(endpoints),
+        "source_fixed_fixture_configuration": source_plan[
+            "fixed_fixture_configuration"
+        ],
+        "correction_window": {
+            "last_preserved_pre_correction_sequence": anchor_sequence,
+            "first_sequence_to_regenerate": displacement_sequence,
+            "last_sequence_to_regenerate": correction_end_sequence,
+            "first_preserved_contact_sequence": first_contact_sequence,
+            "allowed_source_phases": ["TRANSIT", "HOVER"],
+        },
+        "materialization_contract": {
+            "method": "DETERMINISTIC_IK_REGENERATION_WITH_CONTINUOUS_CLEARANCE_SCREEN",
+            "minimum_noncontact_tool_key_clearance_mm": required_clearance_mm,
+            "maximum_noncontact_key_displacement_mm": (
+                maximum_noncontact_key_displacement_mm
+            ),
+            "key_displacement_allowed_only_during_phase": "CONTACT",
+            "preserve_source_rows_before_sequence": displacement_sequence,
+            "preserve_source_rows_from_sequence": first_contact_sequence,
+            "preserve_sample_count": True,
+            "preserve_timestamps": True,
+            "preserve_phase_labels": True,
+            "preserve_contact_endpoint_sequences": True,
+            "preserve_contact_endpoint_joint_targets": True,
+            "preserve_fixed_fixture_configuration": True,
+            "maximum_adjacent_joint_step_rad": STATE_POLICY_MAX_ADJACENT_STEP_RAD,
+            "reject_if_clearance_or_ik_or_continuity_unproven": True,
+        },
+        "source_anchor_bindings": {
+            "pre_correction_row_sha256": _canonical_sha256(
+                by_sequence[anchor_sequence]
+            ),
+            "first_contact_row_sha256": _canonical_sha256(
+                by_sequence[first_contact_sequence]
+            ),
+            "contact_endpoint_row_sha256": [
+                _canonical_sha256(by_sequence[sequence]) for sequence in endpoints
+            ],
+        },
+        "corrected_joint_targets_materialized": False,
+        "trajectory_playback_authorized": False,
+        "native_replay_authorized": False,
+        "isaac_started": False,
+        "gpu_started": False,
+        "mechanics_replays_executed": 0,
+        "automatic_retry_performed": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "MATERIALIZE_AND_REVIEW_ONE_OFFLINE_TRANSIT_CLEARANCE_CORRECTION"
+        ),
+        "limitations": [
+            "planning_does_not_materialize_or_execute_joint_targets",
+            "clearance_threshold_is_a_simulation_contract_not_a_physical_allowance",
+            "preserved_contact_targets_remain_unqualified_until_offline_rescreening",
+            "continuous_clearance_must_be_proven_before_any_replay_request",
+            "plan_does_not_authorize_replay_hardware_or_physical_motion",
+        ],
+    }
+    plan["plan_sha256"] = _canonical_sha256(plan)
+    return plan
+
+
 def _write_randomized_trajectory(
     trajectory_path: Path, rows: list[dict[str, Any]]
 ) -> str:
@@ -16632,6 +16773,11 @@ def main() -> int:
         action="store_true",
         help="review retained ARM-233 partial trace without starting Isaac",
     )
+    parser.add_argument(
+        "--build-state-policy-transit-clearance-correction-plan",
+        action="store_true",
+        help="plan an offline ARM-235 transit-clearance correction",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -16661,6 +16807,7 @@ def main() -> int:
     parser.add_argument("--state-policy-native-mechanics-output-dir", type=Path)
     parser.add_argument("--state-policy-native-mechanics-manifest", type=Path)
     parser.add_argument("--state-policy-fixed-fixture-correction-review", type=Path)
+    parser.add_argument("--state-policy-premature-contact-review", type=Path)
     parser.add_argument("--state-policy-corrected-native-mechanics-manifest", type=Path)
     parser.add_argument(
         "--state-policy-corrected-native-mechanics-output-dir", type=Path
@@ -16777,7 +16924,32 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.review_state_policy_premature_transit_contact:
+        if args.build_state_policy_transit_clearance_correction_plan:
+            required = (
+                args.state_policy_premature_contact_review,
+                args.source_native_receipt,
+                args.replay_plan,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-235 planning requires the ARM-234 review, ARM-233 "
+                    "receipt, and ARM-231 corrected plan"
+                )
+            review = json.loads(
+                args.state_policy_premature_contact_review
+                .resolve(strict=True)
+                .read_bytes()
+            )
+            receipt = json.loads(
+                args.source_native_receipt.resolve(strict=True).read_bytes()
+            )
+            source_plan = json.loads(
+                args.replay_plan.resolve(strict=True).read_bytes()
+            )
+            result = build_state_policy_transit_clearance_correction_plan(
+                review, receipt, source_plan
+            )
+        elif args.review_state_policy_premature_transit_contact:
             if args.source_native_receipt is None:
                 raise MechanicsContractError(
                     "ARM-234 review requires the retained ARM-233 receipt"
