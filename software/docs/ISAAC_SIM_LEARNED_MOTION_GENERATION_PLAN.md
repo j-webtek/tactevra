@@ -1082,7 +1082,16 @@ ScheduleGen. Neither is a physical success rate.
     quality, and link5 whole-envelope review are still open. No ICQ-1 row is
     modified and no profile, collision screen, route, replay, hardware access,
     or physical authority is created.
-30. Expand only after each predecessor produces reviewable evidence.
+30. **LM4 robot-geometry review gate:** ARM-241 binds the seven candidate rows
+    to exact per-body hashes and a complete engineering-review contract. It
+    requires accepted installed identity, positive geometry uncertainty, and
+    conservative-candidate quality for every row, with extra findings for
+    non-watertight sources and the ARM-196/link-5 negative result. The current
+    request remains blocked because no engineering review is supplied. A future
+    passing assessment can establish eligibility only for a separate ICQ-1
+    robot-row build; it cannot modify the manifest, generate a collision
+    profile, screen a route, start Isaac, or grant physical authority.
+31. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

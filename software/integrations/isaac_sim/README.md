@@ -2467,6 +2467,40 @@ documented uncertainty policy. Candidate approval may then populate only the
 robot rows of a new ICQ-1 manifest; the remaining 12 non-robot bodies stay
 separate and pending.
 
+ARM-241 makes that review boundary executable and fail-closed. It binds every
+ARM-240 body to an exact candidate hash and requires complete accepted findings
+for installed-model identity, a positive geometry-uncertainty bound, and
+conservative-candidate quality. Non-watertight inputs require a separate risk
+finding. Link 5 additionally requires explicit acceptance of the whole-link
+fallback and disposition of ARM-196's retained negative route result. Missing
+bodies, changed candidate hashes, zero uncertainty, incomplete findings, or
+changed lineage are rejected.
+
+The current retained request is:
+
+`C:\IsaacSim\artifacts\issue190\arm241-robot-geometry-review-gate-001\request.json`
+
+- request content SHA-256:
+  `9284e8b4588e40fa1ad85b69dd0d2d5e00f788e500bd6e9b40085998aa58abdc`
+- request file SHA-256:
+  `e2914663b1a5c325a3242eb67154d072036c3f8e27b58fd93cf0705db6960266`
+
+It remains `BLOCKED_REVIEW_RECORD_REQUIRED`: no engineering review was
+invented from photographs, nominal dimensions, mesh containment, or past
+simulation. Even a future complete review produces only robot-row eligibility
+for a separate ICQ-1 build. It does not edit the measurement manifest, generate
+an installed profile, screen a route, start Isaac, or grant physical authority.
+
+Reproduce the request with:
+
+```powershell
+$arm240 = 'C:/IsaacSim/artifacts/issue190/arm240-robot-geometry-review-candidates-001/report.json'
+$out = 'C:/IsaacSim/artifacts/issue190/arm241-robot-geometry-review-gate-001/request.json'
+python software/integrations/isaac_sim/robot_geometry_review_gate.py `
+  --arm240-report $arm240 `
+  --output $out
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
