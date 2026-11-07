@@ -5054,6 +5054,174 @@ def test_arm230_reviews_exact_static_fixture_denominator_and_rejects_drift():
         )
 
 
+def _arm231_fixture_review_sources():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    native_plan=next(iter(native_plans.values()))
+    failure=mechanics.build_state_policy_native_mechanics_failure_receipt(
+        manifest_sha256=manifest['manifest_sha256'],
+        plan=native_plan,
+        error_type='RuntimeError',
+        error_message='root invariant failed at sequence 0',
+    )
+    diagnostic=mechanics.build_state_policy_root_drift_diagnostic_plan(
+        manifest,native_plan,failure
+    )
+    records=[{
+        'checkpoint':checkpoint,
+        'observed_position_m':[0.385,0.532,0.0701],
+        'observed_quaternion_wxyz':[1.0,0.0,0.0,0.0],
+        'translation_delta_mm':index*0.001,
+        'orientation_delta_deg':0.0,
+        'translation_tolerance_mm':0.05,
+        'orientation_tolerance_deg':0.1,
+        'passed':True,
+    } for index,checkpoint in enumerate(diagnostic['probe_contract']['checkpoints'])]
+    receipt={
+        'schema':mechanics.STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_RECEIPT_SCHEMA,
+        'status':'PASS_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC',
+        'complete':True,
+        'root_invariant_all_passed':True,
+        'checkpoint_records':records,
+        'checkpoint_count':4,
+        'source_diagnostic_plan_sha256':diagnostic['plan_sha256'],
+        'source_manifest_sha256':manifest['manifest_sha256'],
+        'source_plan_sha256':native_plan['plan_sha256'],
+        'source_failure_receipt_sha256':failure['receipt_sha256'],
+        'fixture_configuration':diagnostic['fixture_comparison'][
+            'known_passing_fixed_base_path'
+        ],
+        'translation_tolerance_mm':0.05,
+        'orientation_tolerance_deg':0.1,
+        'maximum_translation_delta_mm':0.003,
+        'maximum_orientation_delta_deg':0.0,
+        'trajectory_playback':False,
+        'joint_target_commands':0,
+        'key_contact':False,
+        'automatic_retry_performed':False,
+        'isaac_started':True,
+        'gpu_started':True,
+        'diagnostics_executed':1,
+        'hardware_access':False,
+        'hardware_writes':0,
+        'physical_authority':False,
+        'physical_movements':0,
+        'controller_commands':[],
+        'gate_promotions':[],
+        'next_required_stage':'REVIEW_ROOT_FIXTURE_DIAGNOSTIC',
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    review=mechanics.review_state_policy_root_fixture_diagnostic(
+        receipt,diagnostic,manifest,native_plan,failure
+    )
+    return mechanics,review,manifest,native_plans
+
+
+def test_arm231_applies_review_bound_fixture_correction_deterministically_offline():
+    mechanics,review,manifest,native_plans=_arm231_fixture_review_sources()
+    first,first_plans=mechanics.apply_state_policy_fixed_fixture_correction(
+        review,manifest,native_plans
+    )
+    second,second_plans=mechanics.apply_state_policy_fixed_fixture_correction(
+        review,manifest,native_plans
+    )
+    assert first==second and first_plans==second_plans
+    assert first['schema']==(
+        mechanics.STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_MANIFEST_SCHEMA
+    )
+    assert first['source_uncorrected_manifest_sha256']==manifest['manifest_sha256']
+    assert first['source_root_fixture_review_sha256']==review['review_sha256']
+    assert first['fixed_fixture_configuration']=={
+        'solver_position_iteration_count':64,
+        'solver_velocity_iteration_count':8,
+        'fixed_joint_enabled_explicitly':True,
+    }
+    assert first['isaac_started'] is first['gpu_started'] is False
+    assert first['mechanics_replays_executed']==0
+    assert first['native_replay_authorized'] is False
+    corrected=next(iter(first_plans.values()))
+    source=next(iter(native_plans.values()))
+    assert corrected['schema']==(
+        mechanics.STATE_POLICY_FIXED_FIXTURE_NATIVE_MECHANICS_REPLAY_PLAN_SCHEMA
+    )
+    assert corrected['source_uncorrected_plan_sha256']==source['plan_sha256']
+    assert corrected['fixed_fixture_correction_applied'] is True
+    assert corrected['native_replay_authorized'] is False
+    assert corrected['joint_targets']==source['joint_targets']
+    assert corrected['plan_sha256']!=source['plan_sha256']
+
+
+def test_arm231_rejects_review_or_source_denominator_drift():
+    mechanics,review,manifest,native_plans=_arm231_fixture_review_sources()
+    changed=json.loads(json.dumps(review))
+    changed['review_decision']['offline_fixture_correction_allowed']=False
+    changed.pop('review_sha256')
+    changed['review_sha256']=mechanics._canonical_sha256(changed)
+    with pytest.raises(mechanics.MechanicsContractError,match='boundary changed'):
+        mechanics.apply_state_policy_fixed_fixture_correction(
+            changed,manifest,native_plans
+        )
+    with pytest.raises(mechanics.MechanicsContractError,match='denominator changed'):
+        mechanics.apply_state_policy_fixed_fixture_correction(review,manifest,{})
+
+
+def test_arm231_independent_review_reproduces_every_corrected_hash():
+    mechanics,fixture_review,manifest,native_plans=(
+        _arm231_fixture_review_sources()
+    )
+    corrected_manifest,corrected_plans=(
+        mechanics.apply_state_policy_fixed_fixture_correction(
+            fixture_review,manifest,native_plans
+        )
+    )
+    first=mechanics.review_state_policy_fixed_fixture_correction(
+        fixture_review,manifest,native_plans,corrected_manifest,corrected_plans
+    )
+    second=mechanics.review_state_policy_fixed_fixture_correction(
+        fixture_review,manifest,native_plans,corrected_manifest,corrected_plans
+    )
+    assert first==second
+    assert first['schema']==(
+        mechanics.STATE_POLICY_FIXED_FIXTURE_CORRECTION_REVIEW_SCHEMA
+    )
+    assert first['reviewed_episode_count']==1
+    assert first['review_decision']['trajectory_samples_unchanged'] is True
+    assert first['review_decision']['all_corrected_hashes_reproduced'] is True
+    assert first['review_decision']['native_replay_authorized'] is False
+    assert first['isaac_started'] is first['gpu_started'] is False
+    changed=json.loads(json.dumps(corrected_plans))
+    episode_id=next(iter(changed))
+    changed[episode_id]['fixed_fixture_configuration'][
+        'solver_velocity_iteration_count'
+    ]=7
+    changed[episode_id].pop('plan_sha256')
+    changed[episode_id]['plan_sha256']=mechanics._canonical_sha256(
+        changed[episode_id]
+    )
+    with pytest.raises(mechanics.MechanicsContractError,match='inputs changed'):
+        mechanics.review_state_policy_fixed_fixture_correction(
+            fixture_review,manifest,native_plans,corrected_manifest,changed
+        )
+
+
+def test_arm231_runtime_authors_the_proven_fixed_fixture_configuration():
+    mechanics=_load_key_mechanics()
+    source=inspect.getsource(mechanics.run_drive_controlled_robot_h_replay)
+    assert 'CreateSolverPositionIterationCountAttr' in source
+    assert 'CreateSolverVelocityIterationCountAttr' in source
+    assert 'fixed.CreateJointEnabledAttr().Set(True)' in source
+
+
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
     mechanics,sources,runtime=_arm222_compilation_sources()
     mechanics_campaign,plans=(
