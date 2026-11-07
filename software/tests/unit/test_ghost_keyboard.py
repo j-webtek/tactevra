@@ -5619,6 +5619,91 @@ def test_arm236_blocks_reuse_of_noncontact_route_that_compresses_key():
         )
 
 
+def test_arm237_binds_known_space_geometry_without_inventing_volume():
+    mechanics=_load_key_mechanics()
+    readiness={
+        'schema':(
+            mechanics.STATE_POLICY_TRANSIT_CLEARANCE_MATERIALIZATION_READINESS_SCHEMA
+        ),
+        'status':'BLOCKED_SOURCE_ROUTE_VIOLATES_NONCONTACT_CONTRACT',
+        'source_route_reusable':False,
+        'episode_id':'episode-test','target_id':'SPACE',
+    }
+    readiness['review_sha256']=mechanics._canonical_sha256(readiness)
+    profile={
+        'schema':mechanics.PROFILE_SCHEMA,
+        'status':mechanics.PROVISIONAL_STATUS,
+        'coordinate_frame':'board','target_plane_z_board_mm':21.0,
+        'provenance':{
+            'state':'SYNTHETIC_BOUNDED_PRIOR_NOT_PRODUCT_SPECIFICATION'
+        },
+        'regions':{
+            'SPACE':{
+                'center_board_xy_mm':[224.0,112.0],
+                'half_extent_mm':[48.0,7.0],
+            }
+        },
+    }
+    profile['profile_sha256']=mechanics._canonical_sha256(profile)
+    candidate={
+        'installed':False,'installed_profile_eligible':False,
+        'blockers':['MOVING_CABLE_GEOMETRY_UNMEASURED'],
+    }
+    candidate['candidate_sha256']=mechanics._canonical_sha256(candidate)
+    request={
+        'schema':mechanics.TCP_CARTESIAN_SCHEDULE_SCHEMA,'key_id':'SPACE',
+        'samples':[
+            {
+                'source_sequence':29,'phase':'TRANSIT','target_id':'SPACE',
+                'expected_tool_tip_board_mm':[233.9,95.9,57.7],
+            },
+            {
+                'source_sequence':34,'phase':'HOVER','target_id':'SPACE',
+                'expected_tool_tip_board_mm':[226.2,107.8,27.3],
+            },
+            {
+                'source_sequence':35,'phase':'CONTACT','target_id':'SPACE',
+                'expected_tool_tip_board_mm':[224.0,112.0,18.3],
+            },
+        ],
+    }
+    request['request_sha256']=mechanics._canonical_sha256(request)
+
+    first=mechanics.build_state_policy_lifted_route_geometry_intake_plan(
+        readiness,profile,candidate,request
+    )
+    second=mechanics.build_state_policy_lifted_route_geometry_intake_plan(
+        readiness,profile,candidate,request
+    )
+    assert first==second
+    assert first['status']=='BLOCKED_PENDING_HASH_BOUND_INSTALLED_GEOMETRY'
+    assert first['known_provisional_target_surface']=={
+        'coordinate_frame':'board','center_board_xy_mm':[224.0,112.0],
+        'half_extent_xy_mm':[48.0,7.0],
+        'target_plane_z_board_mm':21.0,'volume_complete':False,
+        'accepted_measured':False,
+        'source_state':'SYNTHETIC_BOUNDED_PRIOR_NOT_PRODUCT_SPECIFICATION',
+    }
+    assert first['bound_cartesian_anchors'][
+        'last_known_clear_transit'
+    ]['source_sequence']==29
+    intake=first['installed_geometry_intake']
+    assert intake['nominal_candidate_may_clear_installed_gate'] is False
+    assert 'MOVING_CABLE_GEOMETRY_UNMEASURED' in intake['unresolved_blockers']
+    assert first['corrected_cartesian_route_materialized'] is False
+    assert first['installed_collision_qualified'] is False
+    assert first['isaac_started'] is first['physical_authority'] is False
+
+    changed=json.loads(json.dumps(candidate))
+    changed['installed']=True
+    changed.pop('candidate_sha256')
+    changed['candidate_sha256']=mechanics._canonical_sha256(changed)
+    with pytest.raises(mechanics.MechanicsContractError,match='lineage changed'):
+        mechanics.build_state_policy_lifted_route_geometry_intake_plan(
+            readiness,profile,changed,request
+        )
+
+
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
     mechanics,sources,runtime=_arm222_compilation_sources()
     mechanics_campaign,plans=(
