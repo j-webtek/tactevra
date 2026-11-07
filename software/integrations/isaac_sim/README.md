@@ -2164,6 +2164,13 @@ updates, then stops. It never instantiates a key, commands a joint target,
 plays the failed trajectory, retries, or accesses hardware. Both pass and
 blocked outcomes retain a signed receipt.
 
+The first authorized ARM-228 launch on 2026-11-07 started Isaac once and exited
+without a receipt because `SimulationApp.close()` used fast process shutdown
+before the post-close receipt writes could run. That launch is retained as an
+unscored attempt: it is neither a fixture pass nor a fixture failure, and it was
+not retried. ARM-229 moves both governed writes ahead of application close so a
+future separately authorized attempt can retain either outcome before shutdown.
+
 Run the separately authorized single probe with:
 
 ```powershell
