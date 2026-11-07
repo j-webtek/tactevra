@@ -5416,6 +5416,64 @@ def test_arm233_admits_exact_authorization_once_after_fresh_hashes(
     assert len(calls)==1
 
 
+def test_arm234_reviews_premature_transit_displacement_offline():
+    mechanics=_load_key_mechanics()
+    trace=[
+        {'target_sequence':0,'phase':'PARK','key_center_z_m':0.018},
+        {'target_sequence':1,'phase':'TRANSIT','key_center_z_m':0.0177},
+        {'target_sequence':2,'phase':'TRANSIT','key_center_z_m':0.016},
+        {'target_sequence':3,'phase':'TRANSIT','key_center_z_m':0.0143},
+    ]
+    roots=[
+        {
+            'sequence':sequence,'orientation_delta_deg':orientation,
+            'orientation_tolerance_deg':0.1,'translation_delta_mm':0.004,
+            'translation_tolerance_mm':0.05,'passed':orientation<=0.1,
+        }
+        for sequence,orientation in enumerate((0.01,0.04,0.06,0.11))
+    ]
+    receipt={
+        'schema':mechanics.STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA,
+        'status':'BLOCKED_STATE_POLICY_NATIVE_MECHANICS_REPLAY',
+        'failure_reason':'ROOT_INVARIANT','complete':False,
+        'native_trace_retained':True,'automatic_retry_performed':False,
+        'hardware_access':False,'physical_authority':False,
+        'native_trace':trace,'native_trace_row_count':4,
+        'attempted_joint_target_count':4,
+        'root_pose_invariant':{
+            'observations':roots,'observation_count':4,'all_passed':False,
+        },
+        'joint_tracking':[{} for _ in trace],
+        'stopped_at_sequence':3,'stopped_phase':'TRANSIT',
+        'episode_id':'episode-test','target_id':'SPACE',
+    }
+    receipt['receipt_sha256']=mechanics._canonical_sha256(receipt)
+    first=mechanics.review_state_policy_premature_transit_contact(receipt)
+    second=mechanics.review_state_policy_premature_transit_contact(receipt)
+    assert first==second
+    assert first['status']=='REVIEWED_PREMATURE_TRANSIT_KEY_DISPLACEMENT'
+    assert first['first_material_transit_key_displacement']['sequence']==1
+    assert first['first_root_orientation_rise']['sequence']==2
+    assert first['fail_closed_stop']['sequence']==3
+    assert first['temporal_separation']=={
+        'displacement_to_orientation_rise_samples':1,
+        'displacement_to_fail_closed_stop_samples':2,
+    }
+    assert first['review_decision'][
+        'material_key_displacement_during_transit_confirmed'
+    ] is True
+    assert first['review_decision']['causality_proven'] is False
+    assert first['review_decision']['another_replay_authorized'] is False
+    assert first['isaac_started'] is first['physical_authority'] is False
+
+    changed=json.loads(json.dumps(receipt))
+    changed['hardware_access']=True
+    changed.pop('receipt_sha256')
+    changed['receipt_sha256']=mechanics._canonical_sha256(changed)
+    with pytest.raises(mechanics.MechanicsContractError,match='boundary changed'):
+        mechanics.review_state_policy_premature_transit_contact(changed)
+
+
 def test_arm226_partial_failure_progress_retains_stop_metadata_and_counts():
     mechanics,sources,runtime=_arm222_compilation_sources()
     mechanics_campaign,plans=(

@@ -264,6 +264,9 @@ STATE_POLICY_FIXED_FIXTURE_CORRECTION_REVIEW_SCHEMA = (
 STATE_POLICY_FIXED_FIXTURE_SINGLE_REPLAY_REQUEST_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_fixed_fixture_single_replay_request.v1"
 )
+STATE_POLICY_PREMATURE_TRANSIT_CONTACT_REVIEW_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_premature_transit_contact_review.v1"
+)
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
 RANDOMIZED_DEMONSTRATION_SPLIT_REPETITIONS = {
@@ -12012,6 +12015,167 @@ def run_state_policy_fixed_fixture_single_replay(
     return receipt
 
 
+def review_state_policy_premature_transit_contact(
+    receipt: dict[str, Any],
+) -> dict[str, Any]:
+    """Review a retained ARM-233 partial trace without starting Isaac."""
+
+    receipt_hash = _require_canonical_hash(
+        receipt, "receipt_sha256", "ARM-233 native mechanics receipt"
+    )
+    trace = receipt.get("native_trace")
+    root = receipt.get("root_pose_invariant", {})
+    root_rows = root.get("observations")
+    tracking = receipt.get("joint_tracking")
+    if (
+        receipt.get("schema") != STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA
+        or receipt.get("status") != "BLOCKED_STATE_POLICY_NATIVE_MECHANICS_REPLAY"
+        or receipt.get("failure_reason") != "ROOT_INVARIANT"
+        or receipt.get("complete") is not False
+        or receipt.get("native_trace_retained") is not True
+        or receipt.get("automatic_retry_performed") is not False
+        or receipt.get("hardware_access") is not False
+        or receipt.get("physical_authority") is not False
+        or not isinstance(trace, list)
+        or not isinstance(root_rows, list)
+        or not isinstance(tracking, list)
+        or len(trace) != receipt.get("native_trace_row_count")
+        or len(trace) != receipt.get("attempted_joint_target_count")
+        or len(root_rows) != root.get("observation_count")
+        or len(root_rows) != len(trace)
+        or len(tracking) != len(trace)
+        or not trace
+        or root.get("all_passed") is not False
+    ):
+        raise MechanicsContractError("ARM-233 partial trace boundary changed")
+
+    park_rows = [row for row in trace if row.get("phase") == "PARK"]
+    transit_rows = [row for row in trace if row.get("phase") == "TRANSIT"]
+    if len(park_rows) != 1 or not transit_rows:
+        raise MechanicsContractError("ARM-233 phase evidence changed")
+    baseline_key_center_z_m = _finite_number(
+        park_rows[0].get("key_center_z_m"), "baseline key center z"
+    )
+    displacement_threshold_mm = 0.25
+
+    def displacement_mm(row: dict[str, Any]) -> float:
+        return (
+            baseline_key_center_z_m
+            - _finite_number(row.get("key_center_z_m"), "key center z")
+        ) * 1000.0
+
+    displaced = [
+        row for row in transit_rows
+        if displacement_mm(row) >= displacement_threshold_mm
+    ]
+    if not displaced:
+        raise MechanicsContractError(
+            "ARM-233 trace contains no material transit key displacement"
+        )
+    first_displaced = displaced[0]
+    stop_sequence = receipt.get("stopped_at_sequence")
+    stop_trace = next(
+        (row for row in trace if row.get("target_sequence") == stop_sequence),
+        None,
+    )
+    stop_root = next(
+        (row for row in root_rows if row.get("sequence") == stop_sequence),
+        None,
+    )
+    if stop_trace is None or stop_root is None:
+        raise MechanicsContractError("ARM-233 stopped-row evidence changed")
+    orientation_rise_threshold_deg = 0.05
+    rising = [
+        row for row in root_rows
+        if _finite_number(row.get("orientation_delta_deg"), "root orientation")
+        >= orientation_rise_threshold_deg
+    ]
+    if not rising:
+        raise MechanicsContractError("ARM-233 root-orientation evidence changed")
+    first_rising = rising[0]
+    first_displaced_sequence = first_displaced["target_sequence"]
+    first_rising_sequence = first_rising["sequence"]
+    if (
+        first_displaced.get("phase") != "TRANSIT"
+        or receipt.get("stopped_phase") != "TRANSIT"
+        or first_displaced_sequence >= first_rising_sequence
+        or first_rising_sequence >= stop_sequence
+        or stop_root.get("passed") is not False
+    ):
+        raise MechanicsContractError("ARM-233 temporal ordering changed")
+
+    review: dict[str, Any] = {
+        "schema": STATE_POLICY_PREMATURE_TRANSIT_CONTACT_REVIEW_SCHEMA,
+        "status": "REVIEWED_PREMATURE_TRANSIT_KEY_DISPLACEMENT",
+        "source_receipt_sha256": receipt_hash,
+        "episode_id": receipt["episode_id"],
+        "target_id": receipt["target_id"],
+        "reviewed_trace_row_count": len(trace),
+        "baseline_key_center_z_m": baseline_key_center_z_m,
+        "material_key_displacement_threshold_mm": displacement_threshold_mm,
+        "first_material_transit_key_displacement": {
+            "sequence": first_displaced_sequence,
+            "phase": first_displaced["phase"],
+            "displacement_mm": displacement_mm(first_displaced),
+        },
+        "first_root_orientation_rise": {
+            "sequence": first_rising_sequence,
+            "threshold_deg": orientation_rise_threshold_deg,
+            "orientation_delta_deg": first_rising["orientation_delta_deg"],
+        },
+        "fail_closed_stop": {
+            "sequence": stop_sequence,
+            "phase": receipt["stopped_phase"],
+            "key_displacement_mm": displacement_mm(stop_trace),
+            "root_translation_delta_mm": stop_root["translation_delta_mm"],
+            "root_translation_tolerance_mm": stop_root[
+                "translation_tolerance_mm"
+            ],
+            "root_orientation_delta_deg": stop_root["orientation_delta_deg"],
+            "root_orientation_tolerance_deg": stop_root[
+                "orientation_tolerance_deg"
+            ],
+        },
+        "temporal_separation": {
+            "displacement_to_orientation_rise_samples": (
+                first_rising_sequence - first_displaced_sequence
+            ),
+            "displacement_to_fail_closed_stop_samples": (
+                stop_sequence - first_displaced_sequence
+            ),
+        },
+        "review_decision": {
+            "static_fixture_configuration_exonerated": False,
+            "material_key_displacement_during_transit_confirmed": True,
+            "key_displacement_precedes_root_orientation_breach": True,
+            "causality_proven": False,
+            "route_or_contact_geometry_requires_offline_correction_review": True,
+            "another_replay_authorized": False,
+        },
+        "isaac_started": False,
+        "gpu_started": False,
+        "mechanics_replays_executed": 0,
+        "automatic_retry_performed": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "controller_commands": [],
+        "gate_promotions": [],
+        "next_required_stage": (
+            "PLAN_OFFLINE_TRANSIT_CLEARANCE_AND_CONTACT_TIMING_CORRECTION"
+        ),
+        "limitations": [
+            "temporal_precedence_does_not_by_itself_prove_causality",
+            "z_axis_key_displacement_does_not_localize_the_contact_pair",
+            "partial_trace_ends_at_the_first_governed_root_invariant_failure",
+            "review_does_not_authorize_replay_hardware_or_physical_motion",
+        ],
+    }
+    review["review_sha256"] = _canonical_sha256(review)
+    return review
+
+
 def _write_randomized_trajectory(
     trajectory_path: Path, rows: list[dict[str, Any]]
 ) -> str:
@@ -16463,6 +16627,11 @@ def main() -> int:
             "one-attempt ARM-232 authorization request"
         ),
     )
+    parser.add_argument(
+        "--review-state-policy-premature-transit-contact",
+        action="store_true",
+        help="review retained ARM-233 partial trace without starting Isaac",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -16608,7 +16777,16 @@ def main() -> int:
             raise MechanicsContractError(
                 "IK screening is mutually exclusive with native and binding modes"
             )
-        if args.build_state_policy_fixed_fixture_single_replay_request:
+        if args.review_state_policy_premature_transit_contact:
+            if args.source_native_receipt is None:
+                raise MechanicsContractError(
+                    "ARM-234 review requires the retained ARM-233 receipt"
+                )
+            receipt = json.loads(
+                args.source_native_receipt.resolve(strict=True).read_bytes()
+            )
+            result = review_state_policy_premature_transit_contact(receipt)
+        elif args.build_state_policy_fixed_fixture_single_replay_request:
             required = (
                 args.state_policy_fixed_fixture_correction_review,
                 args.state_policy_corrected_native_mechanics_manifest,
