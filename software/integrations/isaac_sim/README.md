@@ -2187,6 +2187,41 @@ python software/integrations/isaac_sim/representative_key_mechanics.py `
   --robot-usd C:/IsaacSim/artifacts/issue190/wp1-import-003/roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda
 ```
 
+The separately authorized `-002` probe completed on 2026-11-07 with status
+`PASS_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC`. Its receipt is retained at
+`C:\IsaacSim\artifacts\issue190\arm228-state-policy-root-drift-diagnostic-002\receipt.json`
+with SHA-256
+`d7e9e6a6a0815463c4d09ec6d829aeff75b2388359b6a221ebce82f00882be3e`.
+All four checkpoints passed. Maximum translation drift was
+`0.0012960249 mm` against the retained `0.05 mm` limit; maximum orientation
+drift was `0.0 deg` against `0.1 deg`. The probe executed no trajectory, joint
+target, key contact, retry, hardware access, or physical movement.
+
+ARM-230 independently reopens that receipt and its exact ARM-227, ARM-224, and
+ARM-225 lineage. The retained review at
+`C:\IsaacSim\artifacts\issue190\arm230-state-policy-root-fixture-diagnostic-review-001\review.json`
+has SHA-256
+`3875242ec7b6826320e10a9e86468466dbefbc9f7bc648087cb3da27b3ff5940`.
+It accepts only an offline correction that gives the state-policy mechanics
+path the stable fixture's eight solver-velocity iterations and explicitly
+enabled fixed joint. It does not authorize mechanics replay or another Isaac
+launch.
+
+Reproduce the non-starting ARM-230 review with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output C:/IsaacSim/artifacts/issue190/arm230-state-policy-root-fixture-diagnostic-review-001/review.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm230-state-policy-root-fixture-diagnostic-review-001/status.json `
+  --review-state-policy-root-fixture-diagnostic `
+  --root-drift-diagnostic-receipt C:/IsaacSim/artifacts/issue190/arm228-state-policy-root-drift-diagnostic-002/receipt.json `
+  --root-drift-diagnostic-plan C:/IsaacSim/artifacts/issue190/arm227-state-policy-root-drift-diagnostic-plan-001/plan.json `
+  --state-policy-native-mechanics-manifest C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001/manifest.json `
+  --replay-plan C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --source-failure-receipt C:/IsaacSim/artifacts/issue190/arm225-state-policy-native-mechanics-episode-001/episode-ef340d0ad2740c118d87/receipt.json
+```
+
 Reproduce the non-starting input materialization with:
 
 ```powershell

@@ -710,6 +710,17 @@ checkpoints. It creates no key, sends zero joint targets, does not play the
 failed trajectory, performs no retry, and emits no physical authority. Both a
 pass and an early stop produce a signed receipt for review.
 
+The separately authorized `-002` ARM-228 probe passed all four checkpoints.
+Maximum root translation drift was `0.0012960249 mm` against `0.05 mm`, and
+maximum orientation drift was `0.0 deg` against `0.1 deg`. Receipt SHA-256 is
+`d7e9e6a6a0815463c4d09ec6d829aeff75b2388359b6a221ebce82f00882be3e`.
+ARM-230 independently reopens the receipt and its ARM-227/224/225 lineage,
+verifies the full checkpoint denominator and zero-authority fields, and retains
+review SHA-256
+`3875242ec7b6826320e10a9e86468466dbefbc9f7bc648087cb3da27b3ff5940`.
+The review admits only an offline state-policy fixture correction. Mechanics
+replay, contact, hardware, and physical authority remain denied.
+
 **Exit gate**
 
 - the policy never emits wire commands or authority;
@@ -934,7 +945,13 @@ ScheduleGen. Neither is a physical success rate.
     shutdown occurred before the post-close writes. The attempt is unscored and
     was not retried. ARM-229 persists both receipt and status before app close;
     another diagnostic still requires separate authorization.
-19. Expand only after each predecessor produces reviewable evidence.
+19. **LM4 root-fixture diagnostic review:** the separately authorized `-002`
+    probe passes all four static checkpoints with `0.0012960249 mm` maximum
+    translation drift and `0.0 deg` rotation drift. ARM-230 independently
+    verifies the receipt and full source lineage, admitting only an offline
+    correction to the state-policy fixed fixture. No mechanics replay or
+    physical authority is granted.
+20. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
