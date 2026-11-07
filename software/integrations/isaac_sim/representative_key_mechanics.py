@@ -47,6 +47,8 @@ TCP_FIXED_BASE_COLLISION_DIAGNOSTIC_RECEIPT_SCHEMA = (
 FIXED_BASE_SETTLE_UPDATE_COUNT = 5
 FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT = 64
 FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT = 8
+FIXED_BASE_ROOT_TRANSLATION_TOLERANCE_MM = 0.05
+FIXED_BASE_ROOT_ORIENTATION_TOLERANCE_DEG = 0.1
 FIXED_BASE_COLLISION_REPLAY_PLAN_SCHEMA = (
     "tactevra.isaac_lm1_fixed_base_collision_replay_plan.v1"
 )
@@ -243,6 +245,9 @@ STATE_POLICY_NATIVE_MECHANICS_RECEIPT_SCHEMA = (
 )
 STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_PLAN_SCHEMA = (
     "tactevra.isaac_lm4_state_policy_root_drift_diagnostic_plan.v1"
+)
+STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_RECEIPT_SCHEMA = (
+    "tactevra.isaac_lm4_state_policy_root_drift_diagnostic_receipt.v1"
 )
 STATE_POLICY_PHASES = ("PARK", "TRANSIT", "HOVER", "CONTACT", "RETRACT")
 STATE_POLICY_MAX_ADJACENT_STEP_RAD = 0.05
@@ -9999,6 +10004,58 @@ def build_state_policy_root_drift_diagnostic_plan(
     return diagnostic
 
 
+def validate_state_policy_root_drift_diagnostic_inputs(
+    diagnostic_plan: dict[str, Any],
+    manifest: dict[str, Any],
+    source_plan: dict[str, Any],
+    failure_receipt: dict[str, Any],
+    drive_profile_bytes: bytes,
+    robot_usd_bytes: bytes,
+) -> dict[str, Any]:
+    """Reopen every ARM-227 input and reject any lineage or runtime drift."""
+    expected = build_state_policy_root_drift_diagnostic_plan(
+        manifest, source_plan, failure_receipt
+    )
+    _require_canonical_hash(
+        diagnostic_plan, "plan_sha256", "root-drift diagnostic plan"
+    )
+    if diagnostic_plan != expected:
+        raise MechanicsContractError("root-drift diagnostic plan changed")
+    runtime_files = manifest.get("runtime_files")
+    drive_binding = (
+        runtime_files.get("drive_profile")
+        if isinstance(runtime_files, dict)
+        else None
+    )
+    robot_binding = (
+        runtime_files.get("robot_usd")
+        if isinstance(runtime_files, dict)
+        else None
+    )
+    drive_sha256 = hashlib.sha256(drive_profile_bytes).hexdigest()
+    robot_sha256 = hashlib.sha256(robot_usd_bytes).hexdigest()
+    if (
+        not isinstance(drive_binding, dict)
+        or drive_binding.get("hash_mode") != "RAW_FILE_BYTES"
+        or drive_binding.get("sha256") != drive_sha256
+        or not isinstance(robot_binding, dict)
+        or robot_binding.get("hash_mode") != "RAW_FILE_BYTES"
+        or robot_binding.get("sha256") != robot_sha256
+        or robot_binding.get("size_bytes") != len(robot_usd_bytes)
+    ):
+        raise MechanicsContractError("root-drift runtime file lineage changed")
+    drive_profile = json.loads(drive_profile_bytes)
+    dt = _finite_number(drive_profile.get("physics_dt_s"), "physics dt")
+    if (
+        drive_profile.get("schema") != GEOMETRY_PRIOR_PROFILE_SCHEMA
+        or drive_profile.get("simulation_only") is not True
+        or drive_profile.get("physical_authority") is not False
+        or dt <= 0.0
+    ):
+        raise MechanicsContractError("root-drift drive profile boundary changed")
+    return drive_profile
+
+
 def build_state_policy_native_mechanics_failure_receipt(
     *,
     manifest_sha256: str,
@@ -10993,6 +11050,265 @@ def run_drive_controlled_robot_h_replay(
     finally:
         if app is not None:
             app.close()
+
+
+def run_state_policy_root_drift_diagnostic(
+    *,
+    diagnostic_plan_path: Path,
+    manifest_path: Path,
+    source_plan_path: Path,
+    failure_receipt_path: Path,
+    drive_profile_path: Path,
+    robot_usd_path: Path,
+    output_path: Path,
+    status_path: Path,
+) -> dict[str, Any]:
+    """Execute one static ARM-227 fixture probe without trajectory commands."""
+    diagnostic_plan = json.loads(
+        diagnostic_plan_path.resolve(strict=True).read_bytes()
+    )
+    manifest = json.loads(manifest_path.resolve(strict=True).read_bytes())
+    source_plan = json.loads(source_plan_path.resolve(strict=True).read_bytes())
+    failure_receipt = json.loads(
+        failure_receipt_path.resolve(strict=True).read_bytes()
+    )
+    drive_profile_bytes = drive_profile_path.resolve(strict=True).read_bytes()
+    robot_usd = robot_usd_path.resolve(strict=True)
+    robot_usd_bytes = robot_usd.read_bytes()
+    drive_profile = validate_state_policy_root_drift_diagnostic_inputs(
+        diagnostic_plan,
+        manifest,
+        source_plan,
+        failure_receipt,
+        drive_profile_bytes,
+        robot_usd_bytes,
+    )
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    status_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpoint_records: list[dict[str, Any]] = []
+    app = None
+    timeline = None
+    try:
+        from isaacsim import SimulationApp
+
+        app = SimulationApp({"headless": True, "multi_gpu": False})
+        import omni.timeline
+        import omni.usd
+        from isaacsim.core.simulation_manager import SimulationManager
+        from pxr import Gf, PhysxSchema, UsdGeom, UsdPhysics
+
+        if not omni.usd.get_context().open_stage(str(robot_usd)):
+            raise RuntimeError("Isaac could not open the governed robot USD")
+        for _ in range(5):
+            app.update()
+        stage = omni.usd.get_context().get_stage()
+        scene = UsdPhysics.Scene.Define(stage, "/World/physicsScene")
+        scene.CreateGravityDirectionAttr().Set(Gf.Vec3f(0.0, 0.0, -1.0))
+        scene.CreateGravityMagnitudeAttr().Set(drive_profile["gravity_m_s2"])
+
+        for prim_path, row in drive_profile["rigid_body_properties"].items():
+            prim = stage.GetPrimAtPath(prim_path)
+            if not prim.IsValid():
+                raise RuntimeError(f"missing governed rigid body {prim_path}")
+            mass = UsdPhysics.MassAPI.Apply(prim)
+            mass.CreateMassAttr().Set(row["mass_kg"])
+            mass.CreateCenterOfMassAttr().Set(
+                Gf.Vec3f(*row["center_of_mass_m"])
+            )
+            mass.CreateDiagonalInertiaAttr().Set(
+                Gf.Vec3f(*row["diagonal_inertia_kg_m2"])
+            )
+            axes = row["principal_axes_wxyz"]
+            mass.CreatePrincipalAxesAttr().Set(
+                Gf.Quatf(axes[0], Gf.Vec3f(*axes[1:]))
+            )
+
+        base_prim = stage.GetPrimAtPath("/roarm_m3/Geometry/world/base_link")
+        root_prim = stage.GetPrimAtPath("/roarm_m3")
+        if not base_prim.IsValid() or not root_prim.IsValid():
+            raise RuntimeError("governed articulation root is unavailable")
+        matrix = source_plan["robot_placement_matrix_row_major"]
+        yaw = math.atan2(matrix[4], matrix[0])
+        expected_position = [
+            matrix[3] / 1000.0,
+            matrix[7] / 1000.0,
+            matrix[11] / 1000.0,
+        ]
+        expected_quaternion = [
+            math.cos(yaw / 2.0),
+            0.0,
+            0.0,
+            math.sin(yaw / 2.0),
+        ]
+        before = UsdGeom.Xformable(base_prim).ComputeLocalToWorldTransform(0.0)
+        before_translation = before.ExtractTranslation()
+        root_matrix = Gf.Matrix4d(1.0)
+        root_matrix.SetRotate(
+            Gf.Rotation(Gf.Vec3d(0.0, 0.0, 1.0), math.degrees(yaw))
+        )
+        root_matrix.SetTranslateOnly(Gf.Vec3d(*[
+            expected_position[index] - float(before_translation[index])
+            for index in range(3)
+        ]))
+        UsdGeom.Xformable(root_prim).AddTransformOp().Set(root_matrix)
+        articulation_api = PhysxSchema.PhysxArticulationAPI.Apply(root_prim)
+        articulation_api.CreateSolverPositionIterationCountAttr(
+            FIXED_BASE_SOLVER_POSITION_ITERATION_COUNT
+        )
+        articulation_api.CreateSolverVelocityIterationCountAttr(
+            FIXED_BASE_SOLVER_VELOCITY_ITERATION_COUNT
+        )
+        fixed_joint = UsdPhysics.FixedJoint.Define(
+            stage, "/roarm_m3/TactevraFixedBaseJoint"
+        )
+        fixed_joint.CreateLocalPos0Attr().Set(Gf.Vec3f(*expected_position))
+        fixed_joint.CreateLocalRot0Attr().Set(Gf.Quatf(
+            expected_quaternion[0], Gf.Vec3f(*expected_quaternion[1:])
+        ))
+        fixed_joint.CreateLocalPos1Attr().Set(Gf.Vec3f(0.0, 0.0, 0.0))
+        fixed_joint.CreateLocalRot1Attr().Set(Gf.Quatf(1.0))
+        fixed_joint.CreateBody1Rel().SetTargets([base_prim.GetPath()])
+        fixed_joint.CreateJointEnabledAttr().Set(True)
+
+        def observe(checkpoint: str) -> None:
+            world = UsdGeom.Xformable(base_prim).ComputeLocalToWorldTransform(0.0)
+            translation = world.ExtractTranslation()
+            quaternion = world.RemoveScaleShear().ExtractRotationQuat()
+            imaginary = quaternion.GetImaginary()
+            observed_position = [
+                float(translation[index]) for index in range(3)
+            ]
+            observed_quaternion = [
+                float(quaternion.GetReal()),
+                float(imaginary[0]),
+                float(imaginary[1]),
+                float(imaginary[2]),
+            ]
+            result = evaluate_root_pose_invariant(
+                expected_position,
+                expected_quaternion,
+                observed_position,
+                observed_quaternion,
+                translation_tolerance_mm=(
+                    FIXED_BASE_ROOT_TRANSLATION_TOLERANCE_MM
+                ),
+                orientation_tolerance_deg=(
+                    FIXED_BASE_ROOT_ORIENTATION_TOLERANCE_DEG
+                ),
+            )
+            result.update({
+                "checkpoint": checkpoint,
+                "observed_position_m": observed_position,
+                "observed_quaternion_wxyz": observed_quaternion,
+            })
+            checkpoint_records.append(result)
+            if not result["passed"]:
+                raise RuntimeError(
+                    f"root fixture invariant failed at {checkpoint}"
+                )
+
+        observe("AFTER_FIXTURE_AUTHORING")
+        SimulationManager.set_physics_dt(drive_profile["physics_dt_s"])
+        SimulationManager.initialize_physics()
+        observe("AFTER_PHYSICS_INITIALIZATION")
+        timeline = omni.timeline.get_timeline_interface()
+        timeline.play()
+        app.update()
+        observe("AFTER_TIMELINE_START")
+        for _ in range(FIXED_BASE_SETTLE_UPDATE_COUNT):
+            app.update()
+        observe("AFTER_BOUNDED_SETTLE")
+        timeline.stop()
+        receipt: dict[str, Any] = {
+            "schema": STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_RECEIPT_SCHEMA,
+            "status": "PASS_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
+            "complete": True,
+            "root_invariant_all_passed": True,
+            "checkpoint_records": checkpoint_records,
+            "checkpoint_count": len(checkpoint_records),
+            "source_diagnostic_plan_sha256": diagnostic_plan["plan_sha256"],
+            "source_manifest_sha256": manifest["manifest_sha256"],
+            "source_plan_sha256": source_plan["plan_sha256"],
+            "source_failure_receipt_sha256": failure_receipt["receipt_sha256"],
+            "fixture_configuration": diagnostic_plan["fixture_comparison"][
+                "known_passing_fixed_base_path"
+            ],
+            "translation_tolerance_mm": (
+                FIXED_BASE_ROOT_TRANSLATION_TOLERANCE_MM
+            ),
+            "orientation_tolerance_deg": (
+                FIXED_BASE_ROOT_ORIENTATION_TOLERANCE_DEG
+            ),
+            "maximum_translation_delta_mm": max(
+                row["translation_delta_mm"] for row in checkpoint_records
+            ),
+            "maximum_orientation_delta_deg": max(
+                row["orientation_delta_deg"] for row in checkpoint_records
+            ),
+            "trajectory_playback": False,
+            "joint_target_commands": 0,
+            "key_contact": False,
+            "automatic_retry_performed": False,
+            "isaac_started": True,
+            "gpu_started": True,
+            "diagnostics_executed": 1,
+            "hardware_access": False,
+            "hardware_writes": 0,
+            "physical_authority": False,
+            "physical_movements": 0,
+            "controller_commands": [],
+            "gate_promotions": [],
+            "next_required_stage": "REVIEW_ROOT_FIXTURE_DIAGNOSTIC",
+        }
+    except BaseException as exc:
+        if timeline is not None:
+            timeline.stop()
+        receipt = {
+            "schema": STATE_POLICY_ROOT_DRIFT_DIAGNOSTIC_RECEIPT_SCHEMA,
+            "status": "BLOCKED_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
+            "complete": False,
+            "root_invariant_all_passed": False,
+            "checkpoint_records": checkpoint_records,
+            "checkpoint_count": len(checkpoint_records),
+            "execution_error": {
+                "type": type(exc).__name__,
+                "message": str(exc),
+            },
+            "source_diagnostic_plan_sha256": diagnostic_plan["plan_sha256"],
+            "source_manifest_sha256": manifest["manifest_sha256"],
+            "source_plan_sha256": source_plan["plan_sha256"],
+            "source_failure_receipt_sha256": failure_receipt["receipt_sha256"],
+            "trajectory_playback": False,
+            "joint_target_commands": 0,
+            "key_contact": False,
+            "automatic_retry_performed": False,
+            "isaac_started": app is not None,
+            "gpu_started": app is not None,
+            "diagnostics_executed": 1 if app is not None else 0,
+            "hardware_access": False,
+            "hardware_writes": 0,
+            "physical_authority": False,
+            "physical_movements": 0,
+            "controller_commands": [],
+            "gate_promotions": [],
+            "next_required_stage": "REVIEW_BLOCKED_ROOT_FIXTURE_DIAGNOSTIC",
+        }
+    finally:
+        if app is not None:
+            app.close()
+    receipt["receipt_sha256"] = _canonical_sha256(receipt)
+    output_path.write_text(
+        json.dumps(receipt, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    status_path.write_text(
+        json.dumps({
+            "status": receipt["status"],
+            "receipt_sha256": receipt["receipt_sha256"],
+        }, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return receipt
 
 
 def run_state_policy_native_mechanics_episode(
@@ -15451,6 +15767,11 @@ def main() -> int:
             "diagnostic plan"
         ),
     )
+    parser.add_argument(
+        "--run-state-policy-root-drift-diagnostic",
+        action="store_true",
+        help="execute one static zero-authority ARM-227 root-fixture probe",
+    )
     parser.add_argument("--randomized-campaign", type=Path)
     parser.add_argument("--randomized-result", type=Path)
     parser.add_argument("--randomized-receipt-root", type=Path)
@@ -15481,6 +15802,7 @@ def main() -> int:
     parser.add_argument("--episode-id")
     parser.add_argument("--source-native-receipt", type=Path)
     parser.add_argument("--source-failure-receipt", type=Path)
+    parser.add_argument("--root-drift-diagnostic-plan", type=Path)
     parser.add_argument("--trajectory-output", type=Path)
     parser.add_argument("--source-result-campaign", type=Path)
     parser.add_argument("--source-artifact-root", type=Path)
@@ -16294,6 +16616,31 @@ def main() -> int:
             }
             result = aggregate_randomized_demonstration_campaign(
                 campaign, receipts
+            )
+        elif args.run_state_policy_root_drift_diagnostic:
+            required = (
+                args.root_drift_diagnostic_plan,
+                args.state_policy_native_mechanics_manifest,
+                args.replay_plan,
+                args.source_failure_receipt,
+                args.drive_profile,
+                args.robot_usd,
+            )
+            if any(item is None for item in required):
+                raise MechanicsContractError(
+                    "ARM-228 execution requires the ARM-227 plan, ARM-224 "
+                    "manifest and episode plan, ARM-225 failure receipt, "
+                    "drive profile, and robot USD"
+                )
+            result = run_state_policy_root_drift_diagnostic(
+                diagnostic_plan_path=args.root_drift_diagnostic_plan,
+                manifest_path=args.state_policy_native_mechanics_manifest,
+                source_plan_path=args.replay_plan,
+                failure_receipt_path=args.source_failure_receipt,
+                drive_profile_path=args.drive_profile,
+                robot_usd_path=args.robot_usd,
+                output_path=args.output,
+                status_path=args.status_output,
             )
         elif args.build_state_policy_root_drift_diagnostic_plan:
             required = (
@@ -17614,6 +17961,7 @@ def main() -> int:
             "READY_FOR_ZERO_AUTHORITY_STATE_POLICY_MECHANICS_INPUT_MATERIALIZATION",
             "READY_FOR_FRESH_ZERO_AUTHORITY_ISAAC_STATE_POLICY_MECHANICS_REPLAYS",
             "READY_FOR_SEPARATELY_AUTHORIZED_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
+            "PASS_ZERO_AUTHORITY_ROOT_FIXTURE_DIAGNOSTIC",
             "NATIVE_DIAGNOSTIC_IMPROVEMENT_RETAINED",
             "NO_NATIVE_IMPROVEMENT_RETAINED",
         } else 2

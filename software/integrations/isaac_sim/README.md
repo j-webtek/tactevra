@@ -2154,6 +2154,32 @@ python software/integrations/isaac_sim/representative_key_mechanics.py `
   --source-failure-receipt C:/IsaacSim/artifacts/issue190/arm225-state-policy-native-mechanics-episode-001/episode-ef340d0ad2740c118d87/receipt.json
 ```
 
+ARM-228 implements the one-attempt worker for that signed plan. Before Isaac
+starts, it rebuilds ARM-227 from the exact manifest, episode plan, and failure
+receipt and revalidates the drive-profile and robot-USD byte hashes. The worker
+authors the known-passing fixed fixture (64 position iterations, eight velocity
+iterations, and an explicitly enabled fixed joint), records root pose after
+fixture authoring, physics initialization, timeline start, and five settle
+updates, then stops. It never instantiates a key, commands a joint target,
+plays the failed trajectory, retries, or accesses hardware. Both pass and
+blocked outcomes retain a signed receipt.
+
+Run the separately authorized single probe with:
+
+```powershell
+python software/integrations/isaac_sim/representative_key_mechanics.py `
+  --layout software/config/nominal_target_profiles.json `
+  --output C:/IsaacSim/artifacts/issue190/arm228-state-policy-root-drift-diagnostic-001/receipt.json `
+  --status-output C:/IsaacSim/artifacts/issue190/arm228-state-policy-root-drift-diagnostic-001/status.json `
+  --run-state-policy-root-drift-diagnostic `
+  --root-drift-diagnostic-plan C:/IsaacSim/artifacts/issue190/arm227-state-policy-root-drift-diagnostic-plan-001/plan.json `
+  --state-policy-native-mechanics-manifest C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001/manifest.json `
+  --replay-plan C:/IsaacSim/artifacts/issue190/arm224-state-policy-native-mechanics-inputs-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --source-failure-receipt C:/IsaacSim/artifacts/issue190/arm225-state-policy-native-mechanics-episode-001/episode-ef340d0ad2740c118d87/receipt.json `
+  --drive-profile software/config/isaac_lm0b_geometry_prior_profile.json `
+  --robot-usd C:/IsaacSim/artifacts/issue190/wp1-import-003/roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda
+```
+
 Reproduce the non-starting input materialization with:
 
 ```powershell

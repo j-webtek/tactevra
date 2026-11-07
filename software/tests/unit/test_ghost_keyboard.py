@@ -4479,6 +4479,7 @@ def _arm222_compilation_sources():
         'schema':mechanics.GEOMETRY_PRIOR_PROFILE_SCHEMA,
         'status':'PROVISIONAL_SIMULATION_ONLY',
         'simulation_only':True,'physical_authority':False,
+        'physics_dt_s':1.0/120.0,
     },sort_keys=True).encode()
     robot_usd_bytes=b'#usda 1.0\n'
     import_receipt=signed({
@@ -4879,6 +4880,74 @@ def test_arm227_root_drift_plan_rejects_failure_lineage_drift():
     with pytest.raises(mechanics.MechanicsContractError,match='lineage changed'):
         mechanics.build_state_policy_root_drift_diagnostic_plan(
             manifest,native_plan,changed
+        )
+
+
+def test_arm228_root_drift_runtime_admission_reopens_exact_inputs():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    native_plan=next(iter(native_plans.values()))
+    failure=mechanics.build_state_policy_native_mechanics_failure_receipt(
+        manifest_sha256=manifest['manifest_sha256'],
+        plan=native_plan,
+        error_type='RuntimeError',
+        error_message='root invariant failed at sequence 0',
+    )
+    diagnostic=mechanics.build_state_policy_root_drift_diagnostic_plan(
+        manifest,native_plan,failure
+    )
+    drive_profile=mechanics.validate_state_policy_root_drift_diagnostic_inputs(
+        diagnostic,manifest,native_plan,failure,runtime[2],runtime[4]
+    )
+    assert drive_profile['schema']==mechanics.GEOMETRY_PRIOR_PROFILE_SCHEMA
+    assert drive_profile['simulation_only'] is True
+    assert drive_profile['physical_authority'] is False
+
+
+def test_arm228_root_drift_runtime_admission_rejects_plan_and_file_drift():
+    mechanics,sources,runtime=_arm222_compilation_sources()
+    mechanics_campaign,plans=(
+        mechanics.compile_state_policy_mechanics_replay_campaign(*sources)
+    )
+    admission_campaign,admissions=(
+        mechanics.admit_state_policy_mechanics_runtime_inputs(
+            mechanics_campaign,plans,*runtime
+        )
+    )
+    manifest,native_plans=mechanics.materialize_state_policy_native_mechanics_inputs(
+        admission_campaign,admissions,mechanics_campaign,plans
+    )
+    native_plan=next(iter(native_plans.values()))
+    failure=mechanics.build_state_policy_native_mechanics_failure_receipt(
+        manifest_sha256=manifest['manifest_sha256'],
+        plan=native_plan,
+        error_type='RuntimeError',
+        error_message='root invariant failed at sequence 0',
+    )
+    diagnostic=mechanics.build_state_policy_root_drift_diagnostic_plan(
+        manifest,native_plan,failure
+    )
+    changed=json.loads(json.dumps(diagnostic))
+    changed['probe_contract']['joint_target_commands']=1
+    changed.pop('plan_sha256')
+    changed['plan_sha256']=mechanics._canonical_sha256(changed)
+    with pytest.raises(mechanics.MechanicsContractError,match='plan changed'):
+        mechanics.validate_state_policy_root_drift_diagnostic_inputs(
+            changed,manifest,native_plan,failure,runtime[2],runtime[4]
+        )
+    with pytest.raises(mechanics.MechanicsContractError,match='file lineage'):
+        mechanics.validate_state_policy_root_drift_diagnostic_inputs(
+            diagnostic,manifest,native_plan,failure,runtime[2]+b'\n',runtime[4]
         )
 
 
