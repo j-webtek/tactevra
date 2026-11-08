@@ -1387,3 +1387,9 @@ ceiling from 6,758 to 6,760. The import-safe core implements conservative
 bounding-sphere interval sweeps, reviewed self-collision exclusions, recursive
 refinement, and fail-closed budget handling. It loads no Isaac runtime, scene,
 or trajectory and introduces no physical authority.
+
+ARM-258 adds two tracked Python paths and advances the reviewed tracked-file
+ceiling from 6,760 to 6,762. Its non-starting preflight hash-binds the native
+Isaac sweep API, governed URDF, prior ARM-255 through ARM-257 evidence, geometry
+prior, and diagnostic pair policy. It identifies the exact proof-scoped inputs
+still required without starting Isaac or consuming the route attempt.

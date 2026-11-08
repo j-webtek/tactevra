@@ -3076,6 +3076,14 @@ center-path deviation plus 0.5 mm, recursively refines conservative hits,
 allows only reviewed pair exclusions, and fails closed on invalid bounds or
 budget exhaustion. Importing it cannot start Isaac or access hardware.
 
+ARM-258 adds `nominal_route_native_binding_preflight.py`, a non-starting,
+hash-bound readiness check for the native binding. It reuses the governed URDF,
+ARM-255 backend, ARM-256 runtime assessment, ARM-257 core, installed PhysX API
+stub, geometry prior, and diagnostic exclusion policy. The retained result is
+fail-closed on two explicit inputs: a certified seven-link sphere profile and a
+continuous-clearance-scoped pair policy. The existing diagnostic-only policy
+is deliberately not promoted.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

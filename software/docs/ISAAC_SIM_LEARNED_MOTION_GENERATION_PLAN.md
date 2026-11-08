@@ -1220,7 +1220,13 @@ ScheduleGen. Neither is a physical success rate.
     separately with reviewed exclusions only, and invalid bounds or exhausted
     depth fail closed. This step loads no scene or trajectory and consumes no
     governed route attempt.
-45. Expand only after each predecessor produces reviewable evidence.
+45. **LM4 native-binding proof-input preflight:** ARM-258 hash-binds the
+    available native sweep API, governed URDF, ARM-255 through ARM-257 lineage,
+    geometry prior, and current diagnostic pair policy. It fails closed because
+    the repository does not yet contain a certified seven-link sphere profile
+    or a continuous-clearance-scoped pair policy; the diagnostic policy is not
+    silently promoted. No Isaac runtime is started and no attempt is consumed.
+46. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
