@@ -1148,7 +1148,15 @@ ScheduleGen. Neither is a physical success rate.
     blocked on physical readings, frame-B registration, and independent review.
     No camera, instrument, simulator, GPU, controller, or robot is accessed,
     and no hardware or physical authority is created.
-37. Expand only after each predecessor produces reviewable evidence.
+37. **LM4 nominal base/board simulation profile:** ARM-250 hash-binds the
+    controlled RC03 workcell layout, BOM, simulation-hardware profile, and
+    nominal rigid scene into an explicit design-prior profile. It makes the
+    610 x 457 x 18 mm board, nominal base transform, and partial rear-clamp
+    span directly consumable by simulation-only route and physics experiments
+    without representing them as installed measurements. Unknown board bow
+    and full clamp bounds remain null; installed-profile compatibility,
+    controller commands, hardware access, and physical authority remain false.
+38. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

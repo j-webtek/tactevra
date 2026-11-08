@@ -2816,6 +2816,41 @@ registration, and two independent-review blockers. ARM-249 reads no camera,
 instrument, controller, or robot; starts no simulator or GPU; and grants no
 physical authority.
 
+ARM-250 removes installed metrology from the critical path for nominal
+simulation experiments without weakening that gate. The nominal-profile
+compiler hash-binds the controlled RC03 workcell layout, BOM, simulation
+hardware profile, and rigid-scene receipt. It emits the 610 x 457 x 18 mm
+board solid, the `(305, 457, 0) mm` reach-screening base seed, its nominal
+rotation, and the partial `X=225..385 mm` rear-clamp span as an explicit
+`NOMINAL_DESIGN_PRIOR`. Missing board bow and full clamp bounds remain null.
+The profile is incompatible with installed collision evidence and cannot
+promote a physical gate.
+
+Build the retained nominal profile:
+
+```powershell
+$out = 'C:/IsaacSim/artifacts/issue190/arm250-base-board-nominal-profile-001'
+python software/integrations/isaac_sim/base_board_nominal_profile.py `
+  --workcell-layout active-project/RoCell_v0_3/config/workcell_layout.json `
+  --bom active-project/RoCell_v0_3/BOM.csv `
+  --hardware-profile software/config/simulation_hardware_profile.json `
+  --nominal-scene software/integrations/isaac_sim/evidence/rc03_nominal_rigid_scene_20260929.json `
+  --output "$out/profile.json"
+```
+
+The retained profile is:
+
+`C:\IsaacSim\artifacts\issue190\arm250-base-board-nominal-profile-001\profile.json`
+
+- profile canonical SHA-256:
+  `fa740056b41e43b977cb26360eacdb73ead575a4e77171f4be2f4261500d8e69`
+- profile file SHA-256:
+  `ddc8ea3fbe3acdb216c44390ec690887d6a853bc2b10768a25d124c3e4441342`
+
+Its status is `READY_FOR_SIMULATION_ONLY_EXPERIMENTS`; installed metrology
+continues independently and remains pending. No simulator, GPU, camera,
+controller, or robot is accessed while producing the profile.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
