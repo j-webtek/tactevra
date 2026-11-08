@@ -2573,6 +2573,44 @@ To assess one separately completed template, add
 `--submission <completed-packet.json>` and select a separate assessment output
 path. Assessment never edits the source template or ARM-242 report.
 
+ARM-244 selects `base_board_installation` as the first operator-ready packet.
+It is foundational to every later board-frame pose, is shared by both
+attachment profiles, and can be measured without commanded arm motion. The
+work order binds the exact ARM-242 packet, blank ARM-243 template, and
+maintained frame `B` definition: front-left finished board top, +x right, +y
+rear, +z up, in millimetres.
+
+The retained work order is:
+
+`C:\IsaacSim\artifacts\issue190\arm244-base-board-capture-workorder-001\workorder.json`
+
+- work-order content SHA-256:
+  `d902bc104982eefc6745f3d1c757e89dda11a50fc2d0170de7d325271ab13c1b`
+- work-order file SHA-256:
+  `98f4d610118aa551612d468b9c92d833a84eacdb0928b1b0513f2a0f3720555c`
+
+It remains `BLOCKED_OPERATOR_MEASUREMENTS_AND_REVIEW_REQUIRED`. The work order
+enumerates all ten packet-specific acceptance values, provenance, instrument,
+frame, review, and stop requirements but leaves every measurement unfilled.
+Existing photographs are setup context unless retained with a reproducible
+hash and metric method; photographs alone do not establish board flatness,
+uncertainty, the board-to-base transform, clamp footprint, or conservative 3D
+envelopes. No submission, profile, collision result, simulator run, hardware
+access, controller command, or physical authority is created.
+
+Reproduce the work order with:
+
+```powershell
+$arm242 = 'C:/IsaacSim/artifacts/issue190/arm242-nonrobot-measurement-capture-packets-001/report.json'
+$arm243 = 'C:/IsaacSim/artifacts/issue190/arm243-capture-submission-gate-001/templates.json'
+$out = 'C:/IsaacSim/artifacts/issue190/arm244-base-board-capture-workorder-001/workorder.json'
+python software/integrations/isaac_sim/base_board_capture_workorder.py `
+  --arm242-report $arm242 `
+  --arm243-templates $arm243 `
+  --frame-contract software/config/arm_frame_contract.json `
+  --output $out
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

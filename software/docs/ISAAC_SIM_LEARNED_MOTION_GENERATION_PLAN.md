@@ -1109,7 +1109,17 @@ ScheduleGen. Neither is a physical success rate.
     manifest or profiles, run collision screening, start Isaac/GPU work,
     access hardware, or grant physical authority. The retained templates are
     intentionally uncompleted and remain blocked on real capture submissions.
-33. Expand only after each predecessor produces reviewable evidence.
+33. **LM4 foundational capture work order:** ARM-244 selects the shared
+    `base_board_installation` packet first because frame `B`, the installed
+    board solid, and the base/clamp installation underpin every later static
+    pose and require no commanded arm motion to measure. It binds exact
+    ARM-242/243/frame-contract hashes and enumerates all ten missing acceptance
+    values, provenance, instrument, review, and stop requirements without
+    prefilling any observation. Existing photographs remain context rather
+    than metric acceptance. The work order stays blocked on real metrology and
+    independent review and creates no profile, collision result, simulation,
+    hardware access, or physical authority.
+34. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
