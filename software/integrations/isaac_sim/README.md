@@ -2694,6 +2694,44 @@ python software/integrations/isaac_sim/base_board_raw_capture_compiler.py `
   --output C:/path/to/base-board-submission.json
 ```
 
+ARM-247 preserves the already supplied ruler, board, and calibration photos as
+hashed context evidence without treating perspective images as precision
+metrology. It produces a lineage-bound ARM-246 observation draft with the
+evidence list prefilled and an exact list of the fields that still need an
+instrumented observation and independent review. Context photos cannot become
+an accepted source merely by being included in the pack.
+
+Build a context pack without hardware access:
+
+```powershell
+python software/integrations/isaac_sim/base_board_context_evidence_pack.py `
+  --capture-kit "$root/arm246-base-board-raw-capture-compiler-001/capture-kit.json" `
+  --reference-root C:/path/to/attachment-root `
+  --evidence ruler_context=C:/path/to/ruler-photo.jpg `
+  --evidence calibration_context=C:/path/to/charuco-photo.jpg `
+  --output "$root/arm247-base-board-context-evidence-001/evidence-pack.json"
+```
+
+The output remains
+`BLOCKED_PRECISION_METROLOGY_AND_INDEPENDENT_REVIEW_REQUIRED`, grants no
+physical authority, and never starts Isaac, a GPU, or a controller.
+
+The retained ARM-247 pack contains 27 supplied images (12 ruler-context, two
+calibration-context, and 13 setup-context images):
+
+`C:\IsaacSim\artifacts\issue190\arm247-base-board-context-evidence-001\evidence-pack.json`
+
+- evidence-pack content SHA-256:
+  `944775a32a008c9039f024f71b1cb86b2d03c3c089af65640ce54abe081a05ac`
+- evidence-pack file SHA-256:
+  `a25829f62179dca7796269dc97a9127887f3684da000d41941f45690d07d1eb0`
+
+The pack records all 27 immutable image hashes and dimensions, pre-populates
+the evidence list in the ARM-246 draft, and reports 18 remaining observation
+requirements. It accepts zero measurement sources and completes zero measured
+fields; the supplied photos remain valuable context but are not silently
+upgraded into installed metrology.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
