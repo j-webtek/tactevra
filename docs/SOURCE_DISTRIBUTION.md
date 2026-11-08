@@ -1399,3 +1399,9 @@ ceiling from 6,762 to 6,764. Its import-safe proposal builder derives seven
 conservative link spheres from the retained upstream mesh bounds and six direct
 parent/child exclusions from the governed URDF. Both outputs remain pending
 independent review and grant no Isaac, attempt, hardware, or physical authority.
+
+ARM-260 adds two tracked Python paths and advances the reviewed tracked-file
+ceiling from 6,764 to 6,766. Its independent reviewer reopens the ARM-259
+proposal and both pinned sources, recomputes all seven spheres and 56 AABB
+corners, and rederives all six direct URDF adjacency pairs. Certification is
+limited to the pinned simulation model and grants no launch or physical access.
