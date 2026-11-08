@@ -1328,3 +1328,13 @@ The large route inputs and produced experiment remain external and hash-bound.
 Incomplete clamp geometry and installed uncertainty are deferred rather than
 embedded in the archive, and the binding starts no simulator, GPU, controller,
 or robot. All byte, duplicate-byte, and reduction limits remain unchanged.
+
+The ARM-252 nominal route-physics review adds two tracked Python paths,
+advancing the reviewed tracked-file ceiling from 6,748 to 6,750. It
+independently reopens the ARM-251 experiment and all four bound sources,
+recomputes file and canonical hashes, and admits at most one separately
+authorized nominal SPACE simulation attempt with no retry. The retained review
+remains external and hash-bound. It starts no simulator or GPU, generates no
+joint targets, sends no controller or wire command, and grants no hardware or
+physical authority. All byte, duplicate-byte, and reduction limits remain
+unchanged.
