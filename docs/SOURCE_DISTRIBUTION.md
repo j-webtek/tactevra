@@ -1275,3 +1275,11 @@ receipts remain external and hash-bound. The executor opens Isaac simulation
 only; it emits no hardware or controller commands and grants no physical,
 installed-collision, continuous-clearance, or dataset authority. All byte,
 duplicate, and reduction limits remain unchanged.
+
+The ARM-246 base/board raw-capture compiler adds two governed paths: one
+offline, zero-authority compiler and one focused unit-test module. The reviewed
+tracked-file ceiling advances from 6,738 to the exact observed 6,740 files.
+The blank capture kit and all future measurement evidence remain external and
+hash-bound; no image, measurement corpus, simulator asset, controller record,
+or authority-bearing output enters the source archive. Logical-byte,
+single-blob, duplicate-byte, and reduction limits remain unchanged.
