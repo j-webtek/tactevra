@@ -1338,3 +1338,13 @@ remains external and hash-bound. It starts no simulator or GPU, generates no
 joint targets, sends no controller or wire command, and grants no hardware or
 physical authority. All byte, duplicate-byte, and reduction limits remain
 unchanged.
+
+The ARM-253 nominal route-physics attempt request adds two tracked Python
+paths, advancing the reviewed tracked-file ceiling from 6,750 to 6,752. It
+freezes the accepted ARM-252 review into one explicit authorization statement,
+one attempt/no-retry contract, fixed output inventory, and automatic-typing
+handoff. The retained request remains external and hash-bound. Request
+generation starts no simulator or GPU, generates no joint targets, plays no
+trajectory, sends no controller or wire command, and grants no hardware or
+physical authority. All byte, duplicate-byte, and reduction limits remain
+unchanged.

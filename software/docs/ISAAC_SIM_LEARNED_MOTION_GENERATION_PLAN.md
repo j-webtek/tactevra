@@ -1175,7 +1175,15 @@ ScheduleGen. Neither is a physical success rate.
     representative multi-key set before vision-conditioned rolling-horizon
     typing. The review starts no simulator or GPU, generates no targets, and
     grants no hardware or physical authority.
-40. Expand only after each predecessor produces reviewable evidence.
+40. **LM4 nominal route-physics attempt request:** ARM-253 freezes the accepted
+    review, exact experiment and source-file identities, one-attempt/no-retry
+    boundary, required retained outputs, and the exact authorization statement
+    for a future fail-closed simulation worker. The request preserves the
+    `SPACE`-first automatic-typing rung and explicitly hands a passing result to
+    representative multi-key expansion. Building it starts no simulator or
+    GPU, generates no joint targets, plays no trajectory, and grants no
+    hardware or physical authority.
+41. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

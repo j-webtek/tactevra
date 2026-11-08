@@ -2923,6 +2923,41 @@ Physical typing still requires separate installed metrology, collision,
 camera, motion, and contact qualification. ARM-252 starts no simulator or GPU,
 generates no targets, and grants no hardware or physical authority.
 
+ARM-253 converts that accepted review into a non-executing, hash-bound launch
+request. It freezes exactly one nominal `SPACE` case, rows `654..940`, the
+`0.5 mm` clearance, `0.05 mm` displacement, and `0.05 rad` adjacent-step
+limits, a fixed retained-output inventory, no retry, no trajectory playback,
+and zero hardware/physical authority. The request is not the worker and does
+not itself authorize or start Isaac.
+
+Build the retained attempt request:
+
+```powershell
+$out = 'C:/IsaacSim/artifacts/issue190/arm253-nominal-route-physics-attempt-request-001'
+python software/integrations/isaac_sim/nominal_route_physics_attempt_request.py `
+  --review C:/IsaacSim/artifacts/issue190/arm252-nominal-route-physics-experiment-review-001/review.json `
+  --experiment C:/IsaacSim/artifacts/issue190/arm251-nominal-route-physics-experiment-001/experiment.json `
+  --nominal-profile C:/IsaacSim/artifacts/issue190/arm250-base-board-nominal-profile-001/profile.json `
+  --route-plan C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --correction-plan C:/IsaacSim/artifacts/issue190/arm235-state-policy-transit-clearance-correction-plan-001/plan.json `
+  --toolchain-lock software/config/isaac_sim_toolchain_lock.json `
+  --output "$out/request.json"
+```
+
+The retained request is:
+
+`C:\IsaacSim\artifacts\issue190\arm253-nominal-route-physics-attempt-request-001\request.json`
+
+- request canonical SHA-256:
+  `89eed1a3a4885e5b76c0c92c4915c7fbc80da39daa965ad1791df209d12b67e8`
+- request file SHA-256:
+  `4e1c75b33e3cf2dc76e0dbab0349ec0fe35f2401327b62f3359763d22a343c5c`
+
+Its status is `READY_FOR_EXPLICIT_ONE_ATTEMPT_SIMULATION_AUTHORIZATION`.
+The next increment must implement and independently test the fail-closed
+worker before any launch. A passing worker result advances only to a governed
+representative multi-key simulation set; it cannot authorize physical typing.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
