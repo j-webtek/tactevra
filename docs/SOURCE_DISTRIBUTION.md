@@ -1359,3 +1359,13 @@ does not implement or launch the pending Isaac physics backend, generate joint
 targets, play a trajectory, send controller or wire commands, or grant
 hardware or physical authority. All byte, duplicate-byte, and reduction limits
 remain unchanged.
+
+The ARM-255 nominal route-physics backend core adds two tracked Python paths,
+advancing the reviewed tracked-file ceiling from 6,754 to 6,756. It implements
+the deterministic one-attempt output contract behind a separately reviewed
+runtime protocol: 287 accepted canonical-IK rows, 288 boundary-inclusive
+continuous-clearance segments, 287 tool/key measurements, and determinate root
+drift. Discrete overlap sampling cannot satisfy the protocol. Definition
+generation imports no Isaac module, starts no simulator or GPU, consumes no
+attempt, plays no trajectory, and grants no hardware or physical authority.
+All byte, duplicate-byte, and reduction limits remain unchanged.

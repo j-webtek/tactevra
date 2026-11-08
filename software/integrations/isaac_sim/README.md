@@ -3000,6 +3000,42 @@ review may the envelope admit the already defined, separately authorized single
 attempt. A passing SPACE result remains only the first primitive toward the
 representative multi-key and vision-conditioned automatic-typing stages.
 
+ARM-255 implements the deterministic core of that backend without embedding an
+unreviewed Isaac adapter. It validates the retained worker, route, correction
+window, source/runtime hashes, and backend source identity. Its runtime protocol
+requires 287 accepted canonical-IK rows, 288 boundary-inclusive continuous
+clearance results, 287 determinate tool/key measurements, and determinate root
+drift. Discrete overlap samples are explicitly insufficient. The definition CLI
+does not import Isaac, start a GPU, claim the attempt directory, or consume the
+ARM-253 authorization.
+
+Build a reviewable backend definition with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$out = "$root/arm255-nominal-route-physics-backend-001"
+python software/integrations/isaac_sim/nominal_route_physics_backend.py `
+  --worker "$root/arm254-nominal-route-physics-worker-001/worker.json" `
+  --route-plan "$root/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json" `
+  --correction-plan "$root/arm235-state-policy-transit-clearance-correction-plan-001/plan.json" `
+  --backend-source software/integrations/isaac_sim/nominal_route_physics_backend.py `
+  --output "$out/backend.json"
+```
+
+The retained definition is:
+
+`C:\IsaacSim\artifacts\issue190\arm255-nominal-route-physics-backend-001\backend.json`
+
+- backend canonical SHA-256:
+  `132f1e028503a3a83af11f2a713f839e00e1fef49aa9cb3fbb0156f858245cde`
+- backend file SHA-256:
+  `968140c9b075cc4f6a8d5599edc765cd1b6cde734e32e6632513bd2c94fb6228`
+
+The next gate is an independent review that pins both this backend core and a
+concrete Isaac runtime adapter capable of true continuous clearance. Until that
+adapter exists and passes review, the reserved attempt remains unconsumed and
+no simulation result can be produced.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

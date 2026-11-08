@@ -174,6 +174,7 @@ TESTS = (
     "software/tests/unit/test_isaac_sim_collision_differential_evidence.py",
     "software/tests/unit/test_isaac_sim_collision_joint_space_evidence.py",
     "software/tests/unit/test_nominal_route_physics_worker.py",
+    "software/tests/unit/test_nominal_route_physics_backend.py",
 )
 
 
