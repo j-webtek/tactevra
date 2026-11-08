@@ -1239,7 +1239,14 @@ ScheduleGen. Neither is a physical success rate.
     and rederives exactly six direct parent/child exclusions. It certifies only
     pinned simulation-model vertex containment and direct adjacency. It admits
     no native binding, Isaac launch, route attempt, or physical operation.
-48. Expand only after each predecessor produces reviewable evidence.
+48. **LM4 certified-input native-binding readiness:** ARM-261 reruns the
+    hash-bound ARM-258 gate with the ARM-260 review. It verifies the outer
+    review identity, both nested certified-input identities, exact upstream
+    source files, and the governed URDF before clearing the two proof-input
+    blockers. The result authorizes only implementation and independent review
+    of a hash-pinned native binding; it does not admit that binding, start
+    Isaac, consume the reserved attempt, or grant physical authority.
+49. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

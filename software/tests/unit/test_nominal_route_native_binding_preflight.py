@@ -59,6 +59,50 @@ def _inputs(module):
     return backend, capability, diagnostic, kwargs
 
 
+def _proof_review(module):
+    profile_core = {
+        "schema": module.SPHERE_PROFILE_SCHEMA,
+        "status": "CERTIFIED_FOR_SIMULATION_CONTINUOUS_CLEARANCE",
+        "source_urdf_sha256": module.EXPECTED_URDF_SHA256,
+        "source_proposal_sha256": "7" * 64,
+        "link_spheres": [
+            {
+                "link_name": name,
+                "local_center_mm": [0.0, 0.0, 0.0],
+                "radius_mm": 1.0,
+            }
+            for name in module.REQUIRED_LINKS
+        ],
+    }
+    profile = {**profile_core, "profile_sha256": module._sha(profile_core)}
+    policy_core = {
+        "schema": module.PROOF_POLICY_SCHEMA,
+        "status": "ACCEPTED_FOR_SIMULATION_CONTINUOUS_CLEARANCE",
+        "source_urdf_sha256": module.EXPECTED_URDF_SHA256,
+        "source_proposal_sha256": "7" * 64,
+        "accepted_exclusion_pairs": [],
+        "hardware_access": False,
+        "physical_authority": False,
+    }
+    policy = {**policy_core, "policy_sha256": module._sha(policy_core)}
+    review_core = {
+        "schema": module.PROOF_REVIEW_SCHEMA,
+        "status": "ACCEPTED_FOR_NATIVE_BINDING_IMPLEMENTATION",
+        "certified_inputs_emitted": True,
+        "native_binding_admitted": False,
+        "launch_admitted": False,
+        "attempt_consumed": False,
+        "certified_sphere_profile": profile,
+        "accepted_pair_policy": policy,
+    }
+    review = {**review_core, "review_sha256": module._sha(review_core)}
+    module.EXPECTED_PROOF_REVIEW_SHA256 = review["review_sha256"]
+    module.EXPECTED_SPHERE_PROFILE_SHA256 = profile["profile_sha256"]
+    module.EXPECTED_PROOF_POLICY_SHA256 = policy["policy_sha256"]
+    module.EXPECTED_PROOF_REVIEW_FILE_SHA256 = "8" * 64
+    return review
+
+
 def test_arm258_current_inputs_fail_closed_on_exact_two_proof_gaps():
     module = _module()
     backend, capability, diagnostic, kwargs = _inputs(module)
@@ -79,36 +123,81 @@ def test_arm258_current_inputs_fail_closed_on_exact_two_proof_gaps():
 def test_arm258_becomes_implementation_ready_only_with_proof_scoped_inputs():
     module = _module()
     backend, capability, diagnostic, kwargs = _inputs(module)
-    sphere_profile = {
-        "schema": module.SPHERE_PROFILE_SCHEMA,
-        "status": "CERTIFIED_FOR_SIMULATION_CONTINUOUS_CLEARANCE",
-        "source_urdf_sha256": module.EXPECTED_URDF_SHA256,
-        "link_spheres": [
-            {"link_name": name, "local_center_mm": [0.0, 0.0, 0.0], "radius_mm": 1.0}
-            for name in module.REQUIRED_LINKS
-        ],
-    }
-    proof_policy = {
-        "schema": module.PROOF_POLICY_SCHEMA,
-        "status": "ACCEPTED_FOR_SIMULATION_CONTINUOUS_CLEARANCE",
-        "source_urdf_sha256": module.EXPECTED_URDF_SHA256,
-        "accepted_exclusion_pairs": [],
-        "hardware_access": False,
-        "physical_authority": False,
-    }
+    review = _proof_review(module)
 
     result = module.build_preflight(
         backend,
         capability,
         diagnostic,
-        sphere_profile=sphere_profile,
-        proof_pair_policy=proof_policy,
+        proof_input_review=review,
+        proof_input_review_file_sha256="8" * 64,
         **kwargs,
     )
 
     assert result["status"] == "READY_TO_IMPLEMENT_NATIVE_BINDING"
     assert result["blockers"] == []
     assert result["launch_admitted"] is False
+    assert result["certified_proof_inputs"] == {
+        "arm260_review_sha256": review["review_sha256"],
+        "certified_sphere_profile_sha256": review["certified_sphere_profile"][
+            "profile_sha256"
+        ],
+        "accepted_pair_policy_sha256": review["accepted_pair_policy"][
+            "policy_sha256"
+        ],
+    }
+    assert (
+        result["source_digests"]["arm260_proof_input_review_file_sha256"]
+        == "8" * 64
+    )
+
+
+@pytest.mark.parametrize(
+    ("section", "field"),
+    [
+        ("certified_sphere_profile", "radius_mm"),
+        ("accepted_pair_policy", "accepted_exclusion_pairs"),
+    ],
+)
+def test_arm261_rejects_self_consistent_review_with_tampered_nested_input(
+    section, field
+):
+    module = _module()
+    backend, capability, diagnostic, kwargs = _inputs(module)
+    review = _proof_review(module)
+    if section == "certified_sphere_profile":
+        review[section]["link_spheres"][0][field] = 0.5
+    else:
+        review[section][field] = [["robot:base_link", "robot:link2"]]
+    review_core = dict(review)
+    review_core.pop("review_sha256")
+    review["review_sha256"] = module._sha(review_core)
+
+    with pytest.raises(module.NativeBindingPreflightError, match="hash mismatch"):
+        module.build_preflight(
+            backend,
+            capability,
+            diagnostic,
+            proof_input_review=review,
+            proof_input_review_file_sha256="8" * 64,
+            **kwargs,
+        )
+
+
+def test_arm261_rejects_unpinned_review_file_identity():
+    module = _module()
+    backend, capability, diagnostic, kwargs = _inputs(module)
+    review = _proof_review(module)
+
+    with pytest.raises(module.NativeBindingPreflightError, match="file identity"):
+        module.build_preflight(
+            backend,
+            capability,
+            diagnostic,
+            proof_input_review=review,
+            proof_input_review_file_sha256="9" * 64,
+            **kwargs,
+        )
 
 
 @pytest.mark.parametrize("field", ["backend", "capability"])
