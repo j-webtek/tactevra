@@ -1193,7 +1193,17 @@ ScheduleGen. Neither is a physical success rate.
     Isaac physics backend remains the next implementation and review boundary.
     No simulator or GPU starts, no targets are generated, and no hardware or
     physical authority is created.
-42. Expand only after each predecessor produces reviewable evidence.
+42. **LM4 nominal route-physics backend core:** ARM-255 implements the exact
+    deterministic result contract behind a separately reviewable Isaac runtime
+    protocol. A passing result requires all 287 regenerated rows to carry
+    accepted determinate canonical IK, all 288 boundary-inclusive adjacent
+    segments to carry determinate continuous clearance (not sampled overlaps),
+    all 287 noncontact rows to satisfy tool/key clearance and displacement
+    limits, and one determinate root-drift observation. The definition CLI is
+    non-starting and consumes no attempt. Independent review must next pin an
+    actual Isaac adapter that satisfies this protocol before the ARM-253
+    authorization can be consumed.
+43. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
