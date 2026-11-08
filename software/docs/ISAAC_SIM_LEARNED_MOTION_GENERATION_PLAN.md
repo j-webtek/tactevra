@@ -1203,7 +1203,17 @@ ScheduleGen. Neither is a physical success rate.
     non-starting and consumes no attempt. Independent review must next pin an
     actual Isaac adapter that satisfies this protocol before the ARM-253
     authorization can be consumed.
-43. Expand only after each predecessor produces reviewable evidence.
+43. **LM4 Isaac runtime-capability gate:** ARM-256 launches only the selected
+    zero-authority Isaac Sim 6.1 runtime and retains its actual PhysX scene-query
+    surface. Shape, mesh, box, and sphere linear sweeps are available, but the
+    API has no direct articulated joint-interpolation or signed minimum-distance
+    query. Therefore native sweeps alone cannot satisfy ARM-255. The accepted
+    implementation direction is a hash-pinned conservative bounding-sphere
+    interval adapter that inflates the required clearance margin, bounds link
+    center-path deviation and rotation, recursively subdivides indeterminate
+    intervals, and separately checks moving self-collision pairs. This probe
+    loads no scene or trajectory and consumes no authorized route attempt.
+44. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

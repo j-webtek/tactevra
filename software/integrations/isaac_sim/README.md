@@ -3036,6 +3036,38 @@ concrete Isaac runtime adapter capable of true continuous clearance. Until that
 adapter exists and passes review, the reserved attempt remains unconsumed and
 no simulation result can be produced.
 
+ARM-256 binds that next gate to the installed Isaac runtime rather than an
+assumed API. Reproduce the zero-authority capability observation and its
+offline assessment with:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES'
+$stub = 'C:\IsaacSim\env_6_1_0\Lib\site-packages\isaacsim\extscache\omni.physics-110.3.2+110.3.0.wx64.r.cp312.u7f4\omni\physics\core\bindings\_physics.pyi'
+& 'C:\IsaacSim\env_6_1_0\Scripts\python.exe' `
+  software\integrations\isaac_sim\nominal_route_isaac_runtime_capability.py `
+  --probe-runtime --api-stub $stub `
+  --output C:\IsaacSim\artifacts\issue190\arm256-runtime-capability-observation-001\observation.json
+
+python software\integrations\isaac_sim\nominal_route_isaac_runtime_capability.py `
+  --assess `
+  --backend C:\IsaacSim\artifacts\issue190\arm255-nominal-route-physics-backend-001\backend.json `
+  --toolchain software\config\isaac_sim_toolchain_lock.json `
+  --observation C:\IsaacSim\artifacts\issue190\arm256-runtime-capability-observation-001\observation.json `
+  --output C:\IsaacSim\artifacts\issue190\arm256-runtime-capability-assessment-001\assessment.json
+```
+
+The live observation confirms all twelve required PhysX sweep methods for
+shape, mesh, box, and sphere queries. Their bound API semantics describe a
+linear sweep from the primitive's current pose with direction and distance;
+they do not accept an ending orientation, an articulated joint interpolation,
+or return signed minimum distance without a hit. ARM-256 therefore does not
+misrepresent those methods as an ARM-255 continuous-clearance result. It fixes
+the next implementation to conservative bounding-sphere interval sweeps with
+the 0.5 mm margin inflated into each query, recursively bounded center-path
+deviation, orientation-invariant link envelopes, and separate moving
+self-collision checks. No robot scene or trajectory was loaded and the
+one-attempt route budget remains unconsumed.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
