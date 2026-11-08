@@ -1283,3 +1283,13 @@ The blank capture kit and all future measurement evidence remain external and
 hash-bound; no image, measurement corpus, simulator asset, controller record,
 or authority-bearing output enters the source archive. Logical-byte,
 single-blob, duplicate-byte, and reduction limits remain unchanged.
+
+The ARM-247 base/board context-evidence packager adds two governed paths: one
+offline, zero-authority packager and one focused unit-test module. The reviewed
+tracked-file ceiling advances from 6,740 to the exact observed 6,742 files.
+All supplied photos and generated evidence packs remain external and
+hash-bound. The packager records image hashes and dimensions but explicitly
+forbids context photos from filling precision-metrology fields. No image,
+measurement corpus, simulator asset, controller record, or authority-bearing
+output enters the source archive. Logical-byte, single-blob, duplicate-byte,
+and reduction limits remain unchanged.
