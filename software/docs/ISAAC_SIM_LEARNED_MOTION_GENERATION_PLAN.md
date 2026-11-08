@@ -1156,7 +1156,16 @@ ScheduleGen. Neither is a physical success rate.
     without representing them as installed measurements. Unknown board bow
     and full clamp bounds remain null; installed-profile compatibility,
     controller commands, hardware access, and physical authority remain false.
-38. Expand only after each predecessor produces reviewable evidence.
+38. **LM4 nominal route-physics experiment binding:** ARM-251 binds the exact
+    ARM-250 fixture prior, ARM-231 corrected `SPACE` route, ARM-235 regeneration
+    window, and selected Isaac 6.1 toolchain into one reproducible baseline
+    experiment. The board participates as nominal collision geometry, while
+    the incomplete clamp volume, installed uncertainty sweeps, and physical
+    conclusions remain excluded. The contract requests one future simulator
+    case after independent review but starts no simulator or GPU, materializes
+    no targets, and grants no controller, hardware, replay, or physical
+    authority.
+39. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
