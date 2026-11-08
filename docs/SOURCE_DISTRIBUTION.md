@@ -1348,3 +1348,14 @@ generation starts no simulator or GPU, generates no joint targets, plays no
 trajectory, sends no controller or wire command, and grants no hardware or
 physical authority. All byte, duplicate-byte, and reduction limits remain
 unchanged.
+
+The ARM-254 nominal route-physics worker envelope adds two tracked Python
+paths, advancing the reviewed tracked-file ceiling from 6,752 to 6,754. It
+revalidates the ARM-253 request lineage, binds the robot USD, import receipt,
+virtual profile, and key-mechanics profile hashes already carried by the route,
+and implements atomic one-attempt/no-retry claiming and retained failure
+status. The retained preparation remains external and hash-bound. Its CLI
+does not implement or launch the pending Isaac physics backend, generate joint
+targets, play a trajectory, send controller or wire commands, or grant
+hardware or physical authority. All byte, duplicate-byte, and reduction limits
+remain unchanged.

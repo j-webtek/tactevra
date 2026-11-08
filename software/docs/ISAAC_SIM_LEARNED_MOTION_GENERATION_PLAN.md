@@ -1183,7 +1183,17 @@ ScheduleGen. Neither is a physical success rate.
     representative multi-key expansion. Building it starts no simulator or
     GPU, generates no joint targets, plays no trajectory, and grants no
     hardware or physical authority.
-41. Expand only after each predecessor produces reviewable evidence.
+41. **LM4 nominal route-physics worker envelope:** ARM-254 implements the
+    fail-closed orchestration boundary around that request. It freshly checks
+    every request/review/experiment/source hash, requires the route-bound robot
+    USD, import receipt, virtual profile, and key-mechanics profile identities,
+    atomically claims one absent output directory, records the claim before any
+    backend call, retains a terminal failure receipt, and permits no retry. The
+    CLI only emits a byte-stable preparation for independent review; the pinned
+    Isaac physics backend remains the next implementation and review boundary.
+    No simulator or GPU starts, no targets are generated, and no hardware or
+    physical authority is created.
+42. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
