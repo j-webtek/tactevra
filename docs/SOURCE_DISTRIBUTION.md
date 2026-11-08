@@ -1405,3 +1405,11 @@ ceiling from 6,764 to 6,766. Its independent reviewer reopens the ARM-259
 proposal and both pinned sources, recomputes all seven spheres and 56 AABB
 corners, and rederives all six direct URDF adjacency pairs. Certification is
 limited to the pinned simulation model and grants no launch or physical access.
+
+ARM-261 adds no tracked paths and leaves the reviewed tracked-file ceiling at
+6,766. It strengthens and reruns the non-starting native-binding preflight
+against the ARM-260 review wrapper, validating the review, sphere-profile, and
+pair-policy canonical hashes plus the review file digest. The resulting status
+permits native-binding implementation and independent review only; it starts no
+Isaac runtime, consumes no governed attempt, and grants no hardware or physical
+authority. All byte, duplicate-byte, and reduction limits remain unchanged.

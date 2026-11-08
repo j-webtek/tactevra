@@ -9,13 +9,26 @@ from pathlib import Path
 from typing import Any, Mapping
 
 
-PREFLIGHT_SCHEMA = "tactevra.isaac_lm4_native_sweep_binding_preflight.v1"
+PREFLIGHT_SCHEMA = "tactevra.isaac_lm4_native_sweep_binding_preflight.v2"
 BACKEND_SCHEMA = "tactevra.isaac_lm4_nominal_route_physics_backend.v1"
 ASSESSMENT_SCHEMA = "tactevra.isaac_lm4_runtime_capability_assessment.v1"
 SPHERE_PROFILE_SCHEMA = "tactevra.isaac_lm4_link_sphere_profile.v1"
 PROOF_POLICY_SCHEMA = "tactevra.isaac_lm4_continuous_clearance_pair_policy.v1"
+PROOF_REVIEW_SCHEMA = "tactevra.isaac_lm4_native_sweep_proof_input_review.v1"
 EXPECTED_URDF_SHA256 = (
     "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190"
+)
+EXPECTED_PROOF_REVIEW_FILE_SHA256 = (
+    "e395e84d4e0dc991025db73cf071ebaabc0e4bd73c461140bc7a1c12e0c5d97a"
+)
+EXPECTED_PROOF_REVIEW_SHA256 = (
+    "aff177aee0fa1bba98d607eddfb7aae90f9c65b515e91da6fec4714c9eddd4b5"
+)
+EXPECTED_SPHERE_PROFILE_SHA256 = (
+    "6150688561f6069efcf26ba0b843f8cf04542af7cfd357f02c35b799bc7aed3e"
+)
+EXPECTED_PROOF_POLICY_SHA256 = (
+    "8bce70dd4498ca3da3687a4d43cfddac82422ec80ff68aa330496590ac71efc4"
 )
 REQUIRED_LINKS = (
     "robot:base_link",
@@ -92,6 +105,42 @@ def _proof_policy_ready(policy: Mapping[str, Any] | None) -> bool:
     )
 
 
+def _reviewed_proof_inputs(
+    review: Mapping[str, Any] | None,
+) -> tuple[Mapping[str, Any] | None, Mapping[str, Any] | None, dict[str, str]]:
+    if review is None:
+        return None, None, {}
+    review_hash = _require_hash(review, "review_sha256", "ARM-260 proof-input review")
+    if (
+        review.get("schema") != PROOF_REVIEW_SCHEMA
+        or review.get("status") != "ACCEPTED_FOR_NATIVE_BINDING_IMPLEMENTATION"
+        or review.get("certified_inputs_emitted") is not True
+        or review.get("native_binding_admitted") is not False
+        or review.get("launch_admitted") is not False
+        or review.get("attempt_consumed") is not False
+    ):
+        raise NativeBindingPreflightError("ARM-260 proof-input review contract changed")
+    profile = review.get("certified_sphere_profile")
+    policy = review.get("accepted_pair_policy")
+    if not isinstance(profile, Mapping) or not isinstance(policy, Mapping):
+        raise NativeBindingPreflightError("ARM-260 certified proof inputs are missing")
+    profile_hash = _require_hash(profile, "profile_sha256", "certified sphere profile")
+    policy_hash = _require_hash(policy, "policy_sha256", "accepted pair policy")
+    if (
+        review_hash != EXPECTED_PROOF_REVIEW_SHA256
+        or profile_hash != EXPECTED_SPHERE_PROFILE_SHA256
+        or policy_hash != EXPECTED_PROOF_POLICY_SHA256
+    ):
+        raise NativeBindingPreflightError("certified proof-input identity changed")
+    if profile.get("source_proposal_sha256") != policy.get("source_proposal_sha256"):
+        raise NativeBindingPreflightError("certified proof-input proposal identities differ")
+    return profile, policy, {
+        "arm260_review_sha256": review_hash,
+        "certified_sphere_profile_sha256": profile_hash,
+        "accepted_pair_policy_sha256": policy_hash,
+    }
+
+
 def build_preflight(
     backend: Mapping[str, Any],
     capability: Mapping[str, Any],
@@ -104,8 +153,8 @@ def build_preflight(
     urdf_sha256: str,
     geometry_prior_sha256: str,
     diagnostic_pair_policy_file_sha256: str,
-    sphere_profile: Mapping[str, Any] | None = None,
-    proof_pair_policy: Mapping[str, Any] | None = None,
+    proof_input_review: Mapping[str, Any] | None = None,
+    proof_input_review_file_sha256: str | None = None,
 ) -> dict[str, Any]:
     """Assess native-binding readiness without importing or starting Isaac."""
 
@@ -144,6 +193,23 @@ def build_preflight(
     if digests["governed_urdf_sha256"] != EXPECTED_URDF_SHA256:
         raise NativeBindingPreflightError("governed URDF identity changed")
 
+    sphere_profile, proof_pair_policy, proof_hashes = _reviewed_proof_inputs(
+        proof_input_review
+    )
+    if proof_input_review is not None:
+        if proof_input_review_file_sha256 is None:
+            raise NativeBindingPreflightError(
+                "ARM-260 proof-input review file digest is missing"
+            )
+        review_file_hash = _digest(
+            proof_input_review_file_sha256, "ARM-260 proof-input review file"
+        )
+        if review_file_hash != EXPECTED_PROOF_REVIEW_FILE_SHA256:
+            raise NativeBindingPreflightError(
+                "ARM-260 proof-input review file identity changed"
+            )
+        digests["arm260_proof_input_review_file_sha256"] = review_file_hash
+
     blockers: list[str] = []
     if not _sphere_profile_ready(sphere_profile):
         blockers.append("CERTIFIED_LINK_SPHERE_PROFILE_MISSING")
@@ -151,7 +217,7 @@ def build_preflight(
         blockers.append("CONTINUOUS_CLEARANCE_PAIR_POLICY_MISSING")
     core: dict[str, Any] = {
         "schema": PREFLIGHT_SCHEMA,
-        "preflight_id": "arm258-native-sweep-binding-preflight-001",
+        "preflight_id": "arm261-native-sweep-binding-readiness-001",
         "status": (
             "READY_TO_IMPLEMENT_NATIVE_BINDING"
             if not blockers
@@ -160,6 +226,7 @@ def build_preflight(
         "source_backend_sha256": backend_hash,
         "source_capability_assessment_sha256": capability_hash,
         "source_digests": digests,
+        "certified_proof_inputs": proof_hashes,
         "required_native_calls": [
             "articulation_forward_kinematics",
             "scene_query.sweep_sphere_any",
@@ -183,11 +250,20 @@ def build_preflight(
             if blockers
             else "IMPLEMENT_HASH_PINNED_NATIVE_ISAAC_BINDING"
         ),
-        "limitations": [
-            "diagnostic_pair_policy_is_not_promoted_to_continuous_clearance_proof",
-            "mass_and_inertia_prior_is_not_a_certified_collision_sphere_profile",
-            "preflight_imports_no_isaac_module_and_consumes_no_route_attempt",
-        ],
+        "limitations": (
+            [
+                "diagnostic_pair_policy_is_not_promoted_to_continuous_clearance_proof",
+                "certified_proof_inputs_are_not_yet_available_to_the_native_binding",
+                "preflight_imports_no_isaac_module_and_consumes_no_route_attempt",
+            ]
+            if blockers
+            else [
+                "certification_is_limited_to_the_pinned_upstream_simulation_model",
+                "installed_tool_clamp_cable_and_optional_camera_geometry_are_excluded",
+                "native_binding_still_requires_implementation_and_independent_review",
+                "preflight_imports_no_isaac_module_and_consumes_no_route_attempt",
+            ]
+        ),
     }
     return {**core, "preflight_sha256": _sha(core)}
 
@@ -212,8 +288,12 @@ def main() -> int:
     parser.add_argument("--api-stub", type=Path, required=True)
     parser.add_argument("--urdf", type=Path, required=True)
     parser.add_argument("--geometry-prior", type=Path, required=True)
+    parser.add_argument("--proof-input-review", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    proof_input_review = (
+        _load(args.proof_input_review) if args.proof_input_review is not None else None
+    )
     result = build_preflight(
         _load(args.backend),
         _load(args.capability),
@@ -225,6 +305,12 @@ def main() -> int:
         urdf_sha256=_file_sha(args.urdf),
         geometry_prior_sha256=_file_sha(args.geometry_prior),
         diagnostic_pair_policy_file_sha256=_file_sha(args.diagnostic_pair_policy),
+        proof_input_review=proof_input_review,
+        proof_input_review_file_sha256=(
+            _file_sha(args.proof_input_review)
+            if args.proof_input_review is not None
+            else None
+        ),
     )
     args.output.parent.mkdir(parents=True, exist_ok=False)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n")

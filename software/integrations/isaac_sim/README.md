@@ -3121,6 +3121,37 @@ python software/integrations/isaac_sim/nominal_route_proof_input_review.py `
   --output C:\IsaacSim\artifacts\issue190\arm260-native-proof-input-review-002\review.json
 ```
 
+ARM-261 reruns the ARM-258 readiness gate against the independently certified
+ARM-260 wrapper. The v2 preflight verifies the outer review hash and both
+nested canonical hashes before accepting the seven-link sphere profile and
+direct-adjacency exclusion policy. It also records the review file digest so a
+certified-looking substitute cannot satisfy the gate. The retained readiness
+is `READY_TO_IMPLEMENT_NATIVE_BINDING`; that status permits implementation and
+independent review only. It does not admit a binding, start Isaac, create the
+governed attempt directory, play a trajectory, or grant physical authority.
+
+Reproduce the readiness receipt with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$stub = 'C:/IsaacSim/env_6_1_0/Lib/site-packages/isaacsim/extscache/omni.physics-110.3.2+110.3.0.wx64.r.cp312.u7f4/omni/physics/core/bindings/_physics.pyi'
+python software/integrations/isaac_sim/nominal_route_native_binding_preflight.py `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --capability "$root/arm256-runtime-capability-assessment-001/assessment.json" `
+  --diagnostic-pair-policy "$root/lm1-h-collision-pair-policy-001/policy.json" `
+  --arm257-source software/integrations/isaac_sim/nominal_route_conservative_sweep_adapter.py `
+  --api-stub $stub `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --geometry-prior software/config/isaac_lm0b_geometry_prior_profile.json `
+  --proof-input-review "$root/arm260-native-proof-input-review-002/review.json" `
+  --output "$root/arm261-native-binding-readiness-001/readiness.json"
+```
+
+The retained primary and reproduction files share file SHA-256
+`c60b211da9629e5975bb2e3922f85065e693d584a1fd87d050817e917dc40133`
+and canonical preflight SHA-256
+`5f3153301e64d526bd837c7084e01fbbcc644491f03cdffef0f5e2a252c119a8`.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
