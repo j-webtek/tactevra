@@ -1213,7 +1213,14 @@ ScheduleGen. Neither is a physical success rate.
     center-path deviation and rotation, recursively subdivides indeterminate
     intervals, and separately checks moving self-collision pairs. This probe
     loads no scene or trajectory and consumes no authorized route attempt.
-44. Expand only after each predecessor produces reviewable evidence.
+44. **LM4 conservative swept-envelope core:** ARM-257 implements the
+    Isaac-import-free proof kernel selected by ARM-256. Runtime-certified link
+    spheres are inflated by center-path deviation and the fixed 0.5 mm margin;
+    conservative hits recursively subdivide, moving self-collision is checked
+    separately with reviewed exclusions only, and invalid bounds or exhausted
+    depth fail closed. This step loads no scene or trajectory and consumes no
+    governed route attempt.
+45. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
