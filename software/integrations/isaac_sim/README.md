@@ -3084,6 +3084,24 @@ fail-closed on two explicit inputs: a certified seven-link sphere profile and a
 continuous-clearance-scoped pair policy. The existing diagnostic-only policy
 is deliberately not promoted.
 
+ARM-259 adds `nominal_route_proof_input_proposal.py`. It reads the retained
+upstream link-mesh binding and governed URDF without importing Isaac, encloses
+each retained link AABB in a radius-up-rounded local sphere, and derives only
+direct URDF parent/child exclusions. The seven spheres and six exclusions are
+review proposals, not certified proof inputs; they do not satisfy ARM-258 until
+a separate review reopens the source identities, containment arithmetic, and
+adjacency derivation. Installed tool, clamp, cable, and camera geometry remains
+outside this simulation-model-only proposal.
+
+Build the reproducible proposal with:
+
+```powershell
+python software/integrations/isaac_sim/nominal_route_proof_input_proposal.py `
+  --mesh-receipt software/integrations/isaac_sim/evidence/roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --output C:\IsaacSim\artifacts\issue190\arm259-native-proof-input-proposal-001\proposal.json
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

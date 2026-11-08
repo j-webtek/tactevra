@@ -178,6 +178,7 @@ TESTS = (
     "software/tests/unit/test_nominal_route_isaac_runtime_capability.py",
     "software/tests/unit/test_nominal_route_conservative_sweep_adapter.py",
     "software/tests/unit/test_nominal_route_native_binding_preflight.py",
+    "software/tests/unit/test_nominal_route_proof_input_proposal.py",
 )
 
 

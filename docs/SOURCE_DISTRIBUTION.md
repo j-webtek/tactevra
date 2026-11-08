@@ -1393,3 +1393,9 @@ ceiling from 6,760 to 6,762. Its non-starting preflight hash-binds the native
 Isaac sweep API, governed URDF, prior ARM-255 through ARM-257 evidence, geometry
 prior, and diagnostic pair policy. It identifies the exact proof-scoped inputs
 still required without starting Isaac or consuming the route attempt.
+
+ARM-259 adds two tracked Python paths and advances the reviewed tracked-file
+ceiling from 6,762 to 6,764. Its import-safe proposal builder derives seven
+conservative link spheres from the retained upstream mesh bounds and six direct
+parent/child exclusions from the governed URDF. Both outputs remain pending
+independent review and grant no Isaac, attempt, hardware, or physical authority.
