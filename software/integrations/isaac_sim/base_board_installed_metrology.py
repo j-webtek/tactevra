@@ -22,6 +22,7 @@ PACK_SCHEMA = "tactevra.isaac_lm4_base_board_context_evidence_pack.v1"
 PROTOCOL_SCHEMA = "tactevra.isaac_lm4_base_board_installed_metrology_protocol.v1"
 SESSION_SCHEMA = "tactevra.isaac_lm4_base_board_installed_metrology_session.v1"
 OBSERVATION_SCHEMA = "tactevra.isaac_lm4_base_board_raw_observation.v1"
+AUDIT_SCHEMA = "tactevra.isaac_lm4_base_board_metrology_session_audit.v1"
 _SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
@@ -141,6 +142,237 @@ def build_protocol(pack: Mapping[str, Any]) -> dict[str, Any]:
         "next_required_stage": "FILL_REPEATED_READINGS_AND_OBTAIN_INDEPENDENT_REVIEW",
     }
     return {**core, "protocol_sha256": _sha(core)}
+
+
+def _validate_protocol(protocol: Mapping[str, Any]) -> str:
+    unsigned = dict(protocol)
+    claimed = unsigned.pop("protocol_sha256", None)
+    template = protocol.get("session_template")
+    if (
+        protocol.get("schema") != PROTOCOL_SCHEMA
+        or protocol.get("status") != "BLOCKED_READINGS_AND_INDEPENDENT_REVIEW_REQUIRED"
+        or claimed != _sha(unsigned)
+        or protocol.get("context_evidence_may_fill_readings") is not False
+        or protocol.get("physical_authority") is not False
+        or not isinstance(template, Mapping)
+        or template.get("schema") != SESSION_SCHEMA
+        or template.get("source_evidence_pack_sha256")
+        != protocol.get("source_evidence_pack_sha256")
+    ):
+        raise BaseBoardInstalledMetrologyError("ARM-248 protocol changed")
+    return _digest(claimed, "protocol hash")
+
+
+def create_session(protocol: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the exact editable ARM-248 session without inventing values."""
+
+    _validate_protocol(protocol)
+    return copy.deepcopy(protocol["session_template"])
+
+
+def _audit_number(
+    value: object,
+    path: str,
+    missing: list[str],
+    invalid: list[str],
+    *,
+    positive: bool = False,
+) -> bool:
+    if value is None:
+        missing.append(path)
+        return False
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(float(value))
+        or (positive and float(value) <= 0.0)
+    ):
+        invalid.append(path)
+        return False
+    return True
+
+
+def audit_session(
+    protocol: Mapping[str, Any], session: Mapping[str, Any]
+) -> dict[str, Any]:
+    """Audit one editable session without compiling or accessing hardware."""
+
+    protocol_hash = _validate_protocol(protocol)
+    expected_top = {
+        "schema",
+        "source_evidence_pack_sha256",
+        "instrument_identity",
+        "instrument_resolution_mm",
+        "observer",
+        "reviewer",
+        "reviewer_decision",
+        "frame_B_registration_verified",
+        "readings_mm",
+    }
+    missing_capture: list[str] = []
+    invalid: list[str] = []
+    review_blockers: list[str] = []
+    completed_readings = 0
+    if set(session) != expected_top:
+        invalid.append("/")
+    if session.get("schema") != SESSION_SCHEMA:
+        invalid.append("/schema")
+    if (
+        session.get("source_evidence_pack_sha256")
+        != protocol.get("source_evidence_pack_sha256")
+    ):
+        invalid.append("/source_evidence_pack_sha256")
+
+    instrument = session.get("instrument_identity")
+    if instrument is None:
+        missing_capture.append("/instrument_identity")
+    elif not isinstance(instrument, str) or not instrument.strip():
+        invalid.append("/instrument_identity")
+    resolution_valid = _audit_number(
+        session.get("instrument_resolution_mm"),
+        "/instrument_resolution_mm",
+        missing_capture,
+        invalid,
+        positive=True,
+    )
+    observer = session.get("observer")
+    if observer is None:
+        missing_capture.append("/observer")
+    elif not isinstance(observer, str) or not observer.strip():
+        invalid.append("/observer")
+    frame_verified = session.get("frame_B_registration_verified")
+    if frame_verified is None:
+        missing_capture.append("/frame_B_registration_verified")
+    elif frame_verified is not True:
+        invalid.append("/frame_B_registration_verified")
+
+    reviewer = session.get("reviewer")
+    if reviewer is None:
+        review_blockers.append("/reviewer")
+    elif not isinstance(reviewer, str) or not reviewer.strip():
+        invalid.append("/reviewer")
+    elif (
+        isinstance(observer, str)
+        and observer.strip()
+        and reviewer.casefold() == observer.casefold()
+    ):
+        invalid.append("/reviewer")
+    decision = session.get("reviewer_decision")
+    if decision != "ACCEPTED_MEASURED":
+        if decision == "PENDING":
+            review_blockers.append("/reviewer_decision")
+        else:
+            invalid.append("/reviewer_decision")
+
+    readings = session.get("readings_mm")
+    scalar_shapes = {
+        "board_width": (3, True),
+        "board_depth": (3, True),
+        "board_thickness": (3, True),
+        "board_top_surface_deviation": (9, False),
+    }
+    vector_fields = (
+        "base_origin_B",
+        "base_x_datum_B",
+        "base_y_datum_B",
+        "clamp_min_B",
+        "clamp_max_B",
+    )
+    expected_readings = set(scalar_shapes) | set(vector_fields)
+    if not isinstance(readings, Mapping) or set(readings) != expected_readings:
+        invalid.append("/readings_mm")
+        readings = {}
+    for field, (count, positive) in scalar_shapes.items():
+        values = readings.get(field)
+        if not isinstance(values, list) or len(values) != count:
+            invalid.append(f"/readings_mm/{field}")
+            continue
+        for index, value in enumerate(values):
+            if _audit_number(
+                value,
+                f"/readings_mm/{field}/{index}",
+                missing_capture,
+                invalid,
+                positive=positive,
+            ):
+                completed_readings += 1
+    for field in vector_fields:
+        rows = readings.get(field)
+        if not isinstance(rows, list) or len(rows) != 3:
+            invalid.append(f"/readings_mm/{field}")
+            continue
+        for row_index, row in enumerate(rows):
+            if not isinstance(row, list) or len(row) != 3:
+                invalid.append(f"/readings_mm/{field}/{row_index}")
+                continue
+            for column_index, value in enumerate(row):
+                if _audit_number(
+                    value,
+                    f"/readings_mm/{field}/{row_index}/{column_index}",
+                    missing_capture,
+                    invalid,
+                ):
+                    completed_readings += 1
+
+    if not missing_capture and not invalid and resolution_valid:
+        resolution = float(session["instrument_resolution_mm"])
+        try:
+            origin, _ = _vector_repeats(
+                readings["base_origin_B"], "base origin", resolution
+            )
+            x_datum, _ = _vector_repeats(
+                readings["base_x_datum_B"], "base +x datum", resolution
+            )
+            y_datum, _ = _vector_repeats(
+                readings["base_y_datum_B"], "base +y datum", resolution
+            )
+            clamp_min, _ = _vector_repeats(
+                readings["clamp_min_B"], "clamp minimum", resolution
+            )
+            clamp_max, _ = _vector_repeats(
+                readings["clamp_max_B"], "clamp maximum", resolution
+            )
+            _rotation_from_datums(origin, x_datum, y_datum)
+            if any(high <= low for low, high in zip(clamp_min, clamp_max)):
+                invalid.extend(
+                    ["/readings_mm/clamp_min_B", "/readings_mm/clamp_max_B"]
+                )
+        except BaseBoardInstalledMetrologyError as exc:
+            invalid.append(f"/readings_mm: {exc}")
+
+    missing_capture = sorted(set(missing_capture))
+    invalid = sorted(set(invalid))
+    review_blockers = sorted(set(review_blockers))
+    if invalid:
+        status = "BLOCKED_INVALID_SESSION"
+    elif missing_capture:
+        status = "BLOCKED_CAPTURE_FIELDS_REQUIRED"
+    elif review_blockers:
+        status = "BLOCKED_INDEPENDENT_REVIEW_REQUIRED"
+    else:
+        status = "READY_FOR_ARM248_COMPILATION"
+    core: dict[str, Any] = {
+        "schema": AUDIT_SCHEMA,
+        "status": status,
+        "source_protocol_sha256": protocol_hash,
+        "completed_reading_count": completed_readings,
+        "required_reading_count": 63,
+        "missing_capture_fields": missing_capture,
+        "invalid_fields": invalid,
+        "independent_review_blockers": review_blockers,
+        "compiler_ready": status == "READY_FOR_ARM248_COMPILATION",
+        "values_inferred": False,
+        "hardware_access": False,
+        "hardware_writes": 0,
+        "physical_authority": False,
+        "physical_movements": 0,
+        "next_required_stage": (
+            "RUN_ARM248_COMPILER"
+            if status == "READY_FOR_ARM248_COMPILATION"
+            else "RESOLVE_REPORTED_FIELDS"
+        ),
+    }
+    return {**core, "audit_sha256": _sha(core)}
 
 
 def _scalar_repeats(
@@ -320,21 +552,30 @@ def _write_new(path: Path, value: Mapping[str, Any]) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--evidence-pack", type=Path, required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--evidence-pack", type=Path)
+    source.add_argument("--protocol", type=Path)
     parser.add_argument("--session", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    pack = _load(args.evidence_pack.resolve(strict=True))
-    if args.session is None:
-        result = build_protocol(pack)
+    if args.protocol is not None:
+        protocol = _load(args.protocol.resolve(strict=True))
+        if args.session is None:
+            result = create_session(protocol)
+        else:
+            result = audit_session(protocol, _load(args.session.resolve(strict=True)))
     else:
-        session_path = args.session.resolve(strict=True)
-        result = compile_session(
-            pack,
-            _load(session_path),
-            session_file_sha256=hashlib.sha256(session_path.read_bytes()).hexdigest(),
-            session_reference=session_path.name,
-        )
+        pack = _load(args.evidence_pack.resolve(strict=True))
+        if args.session is None:
+            result = build_protocol(pack)
+        else:
+            session_path = args.session.resolve(strict=True)
+            result = compile_session(
+                pack,
+                _load(session_path),
+                session_file_sha256=hashlib.sha256(session_path.read_bytes()).hexdigest(),
+                session_reference=session_path.name,
+            )
     _write_new(args.output.resolve(), result)
     print(json.dumps(result, indent=2))
     return 0

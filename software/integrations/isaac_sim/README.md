@@ -2773,6 +2773,49 @@ The retained blank protocol is:
 It remains `BLOCKED_READINGS_AND_INDEPENDENT_REVIEW_REQUIRED`; no measurement
 value or reviewer decision is inferred from the retained photographs.
 
+ARM-249 makes that physical handoff mechanically usable without weakening it.
+The same offline tool can now clone the hash-validated ARM-248 protocol into
+the exact editable session schema, then audit a partially or fully completed
+session. The audit reports each missing capture field, invalid field, and
+independent-review blocker separately; counts all 63 required scalar readings;
+checks positive dimensions, finite values, clamp ordering, and non-collinear
+base datums; and marks a session compiler-ready only when every capture and
+review gate passes. It never supplies a missing value.
+
+Create the retained editable session:
+
+```powershell
+python software/integrations/isaac_sim/base_board_installed_metrology.py `
+  --protocol C:/IsaacSim/artifacts/issue190/arm248-base-board-installed-metrology-001/protocol.json `
+  --output C:/IsaacSim/artifacts/issue190/arm249-base-board-metrology-session-001/session.json
+```
+
+Audit the session at any point without compiling it:
+
+```powershell
+python software/integrations/isaac_sim/base_board_installed_metrology.py `
+  --protocol C:/IsaacSim/artifacts/issue190/arm248-base-board-installed-metrology-001/protocol.json `
+  --session C:/IsaacSim/artifacts/issue190/arm249-base-board-metrology-session-001/session.json `
+  --output C:/IsaacSim/artifacts/issue190/arm249-base-board-metrology-session-001/audit.json
+```
+
+The retained blank handoff is:
+
+`C:\IsaacSim\artifacts\issue190\arm249-base-board-metrology-session-001`
+
+- session file SHA-256:
+  `4026bae3d37c81ff02a3d610b399dcba8bffde7579e3b086a7a7f42dd341da06`
+- audit canonical SHA-256:
+  `389bb79475db4529ed138293ddab4ec4ff27ef328cef261a50ef9e2e7e02ab14`
+- audit file SHA-256:
+  `ebe55a2304445d2dccfe9403f7ba33b67e44b6a3529ea56fb1d11b836d9c9ce0`
+
+The blank audit correctly remains `BLOCKED_CAPTURE_FIELDS_REQUIRED` with
+`0/63` readings, four missing capture-metadata values plus frame-B
+registration, and two independent-review blockers. ARM-249 reads no camera,
+instrument, controller, or robot; starts no simulator or GPU; and grants no
+physical authority.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

@@ -84,6 +84,65 @@ def test_arm248_builds_zero_authority_repeated_reading_protocol() -> None:
     assert protocol["physical_authority"] is False
 
 
+def test_arm249_creates_exact_editable_session_and_audits_blank_fields() -> None:
+    module = _module("arm249_blank", "base_board_installed_metrology.py")
+    protocol = module.build_protocol(_pack())
+    session = module.create_session(protocol)
+    assert session == protocol["session_template"]
+    assert session is not protocol["session_template"]
+
+    audit = module.audit_session(protocol, session)
+    assert audit["status"] == "BLOCKED_CAPTURE_FIELDS_REQUIRED"
+    assert audit["completed_reading_count"] == 0
+    assert audit["required_reading_count"] == 63
+    assert "/instrument_identity" in audit["missing_capture_fields"]
+    assert audit["independent_review_blockers"] == ["/reviewer", "/reviewer_decision"]
+    assert audit["values_inferred"] is False
+    assert audit["physical_authority"] is False
+
+
+def test_arm249_separates_review_only_blockers_from_capture() -> None:
+    module = _module("arm249_review", "base_board_installed_metrology.py")
+    pack = _pack()
+    protocol = module.build_protocol(pack)
+    session = _session(pack)
+    session["reviewer"] = None
+    session["reviewer_decision"] = "PENDING"
+
+    audit = module.audit_session(protocol, session)
+    assert audit["status"] == "BLOCKED_INDEPENDENT_REVIEW_REQUIRED"
+    assert audit["completed_reading_count"] == 63
+    assert audit["missing_capture_fields"] == []
+    assert audit["invalid_fields"] == []
+    assert audit["independent_review_blockers"] == ["/reviewer", "/reviewer_decision"]
+
+
+def test_arm249_marks_valid_accepted_session_compiler_ready() -> None:
+    module = _module("arm249_ready", "base_board_installed_metrology.py")
+    pack = _pack()
+    protocol = module.build_protocol(pack)
+    audit = module.audit_session(protocol, _session(pack))
+    assert audit["status"] == "READY_FOR_ARM248_COMPILATION"
+    assert audit["compiler_ready"] is True
+    assert audit["missing_capture_fields"] == []
+    assert audit["invalid_fields"] == []
+    assert audit["independent_review_blockers"] == []
+
+
+def test_arm249_reports_invalid_geometry_without_compiling() -> None:
+    module = _module("arm249_invalid", "base_board_installed_metrology.py")
+    pack = _pack()
+    protocol = module.build_protocol(pack)
+    session = _session(pack)
+    session["readings_mm"]["base_y_datum_B"] = copy.deepcopy(
+        session["readings_mm"]["base_x_datum_B"]
+    )
+    audit = module.audit_session(protocol, session)
+    assert audit["status"] == "BLOCKED_INVALID_SESSION"
+    assert audit["compiler_ready"] is False
+    assert any("base +y datum is coincident" in path for path in audit["invalid_fields"])
+
+
 def test_arm248_compiles_conservative_arm246_observation() -> None:
     module = _module("arm248", "base_board_installed_metrology.py")
     compiler = _module("arm246", "base_board_raw_capture_compiler.py")

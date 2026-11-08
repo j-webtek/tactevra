@@ -1138,7 +1138,17 @@ ScheduleGen. Neither is a physical success rate.
     retained form is deliberately blank and blocked; nominal comparison values
     cannot become measurements. It creates no manifest, profile, simulation,
     hardware access, command, or physical authority.
-36. Expand only after each predecessor produces reviewable evidence.
+36. **LM4 base/board metrology session workbench:** ARM-249 converts the
+    immutable ARM-248 protocol into its exact editable session schema and
+    audits progress without compiling or inventing observations. It reports
+    all missing capture fields, invalid fields, and independent-review blockers
+    separately; counts the 63 required scalar readings; and checks numeric,
+    clamp-order, and base-datum geometry before declaring the session ready for
+    ARM-248 compilation. The retained blank session remains at `0/63` and
+    blocked on physical readings, frame-B registration, and independent review.
+    No camera, instrument, simulator, GPU, controller, or robot is accessed,
+    and no hardware or physical authority is created.
+37. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
