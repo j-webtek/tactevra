@@ -2501,6 +2501,40 @@ python software/integrations/isaac_sim/robot_geometry_review_gate.py `
   --output $out
 ```
 
+ARM-242 advances the separate non-robot backlog. It hash-verifies ARM-239 and
+the ARM-241 split, then covers all `12` pending non-robot bodies exactly once
+in six setup-coherent capture packets: camera assembly, contact tool/TCP,
+moving cable sweep, base/board installation, keyboard/stations, and
+phone/station. Eleven bodies are shared by both attachment profiles. Only
+`attachment:contact_tool` is scoped exclusively to `stylus_attachment`, matching
+the existing 18-body `no_attachment` and 19-body `stylus_attachment` contracts.
+
+The retained report is:
+
+`C:\IsaacSim\artifacts\issue190\arm242-nonrobot-measurement-capture-packets-001\report.json`
+
+- report content SHA-256:
+  `0b76db7b7a458bb504c359f2d25e6e593a111fc0938c88342c1f923027755d7c`
+- report file SHA-256:
+  `b8844c7e3507c72442c75304b313961f7e62c44127f3bbda0478d3ed5a31a42b`
+
+All six packets remain pending. They preserve the exact missing acceptance
+fields and required measurement methods; no prior, photograph, or nominal
+dimension is promoted. The report does not alter the robot review, measurement
+manifest, installed profile, route, simulator, hardware, or physical authority.
+
+Reproduce it with:
+
+```powershell
+$arm239 = 'C:/IsaacSim/artifacts/issue190/arm239-installed-measurement-gap-matrix-002/report.json'
+$arm241 = 'C:/IsaacSim/artifacts/issue190/arm241-robot-geometry-review-gate-001/request.json'
+$out = 'C:/IsaacSim/artifacts/issue190/arm242-nonrobot-measurement-capture-packets-001/report.json'
+python software/integrations/isaac_sim/nonrobot_measurement_capture_packets.py `
+  --arm239-report $arm239 `
+  --arm241-request $arm241 `
+  --output $out
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

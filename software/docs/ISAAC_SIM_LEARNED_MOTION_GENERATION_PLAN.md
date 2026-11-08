@@ -1091,7 +1091,15 @@ ScheduleGen. Neither is a physical success rate.
     passing assessment can establish eligibility only for a separate ICQ-1
     robot-row build; it cannot modify the manifest, generate a collision
     profile, screen a route, start Isaac, or grant physical authority.
-31. Expand only after each predecessor produces reviewable evidence.
+31. **LM4 non-robot capture packets:** ARM-242 preserves the ARM-239/241 split
+    and converts all `12` remaining non-robot gaps into six hash-bound capture
+    packets. Eleven bodies are explicitly shared across `no_attachment` and
+    `stylus_attachment`; only the contact tool is stylus-only. Every exact
+    missing acceptance field, prior identifier, binding mode, method, and
+    common provenance requirement is retained. All packets remain pending and
+    no measurement, manifest row, profile, route, replay, hardware access, or
+    physical authority is created.
+32. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
