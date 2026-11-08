@@ -1369,3 +1369,15 @@ drift. Discrete overlap sampling cannot satisfy the protocol. Definition
 generation imports no Isaac module, starts no simulator or GPU, consumes no
 attempt, plays no trajectory, and grants no hardware or physical authority.
 All byte, duplicate-byte, and reduction limits remain unchanged.
+
+The ARM-256 Isaac runtime-capability gate adds two tracked Python paths,
+advancing the reviewed tracked-file ceiling from 6,756 to 6,758. It performs
+an explicit, zero-authority launch of the selected Isaac Sim 6.1 runtime and
+retains the available PhysX shape, mesh, box, and sphere sweep methods plus the
+bound API-stub identity. The assessment distinguishes continuous linear
+primitive sweeps from the still-missing articulated joint-path proof and
+requires a conservative bounding-sphere interval adapter rather than accepting
+discrete overlap sampling. No scene or trajectory is loaded, the reserved
+route attempt remains unconsumed, and no controller, hardware, wire, or
+physical authority is introduced. All byte, duplicate-byte, and reduction
+limits remain unchanged.
