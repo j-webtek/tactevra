@@ -2885,6 +2885,44 @@ compiler starts no simulator or GPU, materializes no corrected joint targets,
 allows no simulator truth into model inputs, and cannot promote an installed
 or physical gate.
 
+ARM-252 independently reopens that experiment and all four source files. It
+recomputes their file and canonical hashes, verifies the exact nominal fixture,
+SPACE route, sequence `654..940` regeneration window, acceptance limits,
+selected runner, truth isolation, and zero-authority fields. The accepted
+review admits no more than one later nominal simulation attempt, requires fresh
+source validation at launch, forbids automatic retry, and does not itself
+authorize launch.
+
+Build the retained independent review:
+
+```powershell
+$out = 'C:/IsaacSim/artifacts/issue190/arm252-nominal-route-physics-experiment-review-001'
+python software/integrations/isaac_sim/nominal_route_physics_experiment_review.py `
+  --experiment C:/IsaacSim/artifacts/issue190/arm251-nominal-route-physics-experiment-001/experiment.json `
+  --nominal-profile C:/IsaacSim/artifacts/issue190/arm250-base-board-nominal-profile-001/profile.json `
+  --route-plan C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --correction-plan C:/IsaacSim/artifacts/issue190/arm235-state-policy-transit-clearance-correction-plan-001/plan.json `
+  --toolchain-lock software/config/isaac_sim_toolchain_lock.json `
+  --output "$out/review.json"
+```
+
+The retained review is:
+
+`C:\IsaacSim\artifacts\issue190\arm252-nominal-route-physics-experiment-review-001\review.json`
+
+- review canonical SHA-256:
+  `b937781c72ed7ff3a274bea9e7349101ab48af00cfcec3b98720af073380826d`
+- review file SHA-256:
+  `67f0bd04fc4bafe64b89b6b90a452db86fd27b4f0dc520aed055ffa045185fcc`
+
+The review keeps the automatic-typing objective explicit. A passing single-key
+SPACE simulation qualifies only the reusable nominal route primitive. The next
+typing increment is representative multi-key expansion under the same gates,
+followed later by vision-conditioned localization and rolling-horizon typing.
+Physical typing still requires separate installed metrology, collision,
+camera, motion, and contact qualification. ARM-252 starts no simulator or GPU,
+generates no targets, and grants no hardware or physical authority.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

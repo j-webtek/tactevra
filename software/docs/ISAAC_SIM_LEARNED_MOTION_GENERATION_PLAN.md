@@ -1165,7 +1165,17 @@ ScheduleGen. Neither is a physical success rate.
     case after independent review but starts no simulator or GPU, materializes
     no targets, and grants no controller, hardware, replay, or physical
     authority.
-39. Expand only after each predecessor produces reviewable evidence.
+39. **LM4 nominal route-physics independent review:** ARM-252 independently
+    reopens the ARM-251 experiment and its four sources, verifies every file and
+    canonical binding, and preserves the exact one-case fixture, route, runner,
+    truth-isolation, and acceptance limits. It accepts at most one later,
+    separately authorized SPACE simulation attempt with no automatic retry.
+    This is the first rung of the automatic-typing ladder: qualify one reusable
+    approach/traverse/descent primitive, then expand the same contract to a
+    representative multi-key set before vision-conditioned rolling-horizon
+    typing. The review starts no simulator or GPU, generates no targets, and
+    grants no hardware or physical authority.
+40. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
