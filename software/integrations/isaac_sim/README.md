@@ -2611,6 +2611,43 @@ python software/integrations/isaac_sim/base_board_capture_workorder.py `
   --output $out
 ```
 
+ARM-245 reconciles every maintained board, base, clamp, frame, and fixed-plane
+source against those ten fields before requesting new measurements. It retains
+three useful comparison targets—the nominal `610 x 457 x 18 mm` board solid,
+the reach-screening base pose at `(305, 457, 0) mm`, and the nominal clamp
+rear-edge X span `225–385 mm`—but explicitly accepts none as installed
+metrology. The frame-B definition and `3.533 mm` image-plane RMS residual are
+context only; the residual is not board flatness or geometry uncertainty.
+
+The retained reconciliation is:
+
+`C:\IsaacSim\artifacts\issue190\arm245-base-board-prior-reconciliation-001\report.json`
+
+- reconciliation content SHA-256:
+  `25d16ce183c17875064bf70d23acae48e94ded49c656ecc2875632e6a2d91509`
+- reconciliation file SHA-256:
+  `9cbc6089447b1620a890e8575fbc8ae2e4c8317972a4b516be9c99812e308bcc`
+
+The result remains `BLOCKED_INSTALLED_METROLOGY_STILL_REQUIRED`: zero of ten
+acceptance fields are complete. It narrows the next capture to installed board
+solid/flatness, base transform, full clamp footprint, conservative envelopes,
+uncertainties, retained evidence hashes, and independent review. It does not
+complete a submission, edit a measurement manifest, start Isaac, access
+hardware, issue a controller command, or grant physical authority.
+
+Reproduce it with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/base_board_prior_reconciliation.py `
+  --workorder "$root/arm244-base-board-capture-workorder-001/workorder.json" `
+  --frame-contract software/config/arm_frame_contract.json `
+  --board-plane software/config/calibration_candidates/rc03_int_r1_fixed_board_plane_2026-10-17.json `
+  --hardware-profile software/config/simulation_hardware_profile.json `
+  --nominal-scene software/integrations/isaac_sim/evidence/rc03_nominal_rigid_scene_20260929.json `
+  --output "$root/arm245-base-board-prior-reconciliation-001/report.json"
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

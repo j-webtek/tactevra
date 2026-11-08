@@ -1119,7 +1119,16 @@ ScheduleGen. Neither is a physical success rate.
     than metric acceptance. The work order stays blocked on real metrology and
     independent review and creates no profile, collision result, simulation,
     hardware access, or physical authority.
-34. Expand only after each predecessor produces reviewable evidence.
+34. **LM4 base/board prior reconciliation:** ARM-245 hash-binds the ARM-244
+    work order to the maintained frame, fixed-plane, simulation-profile, and
+    nominal-scene sources. It preserves the nominal board solid, reach-screening
+    base pose, and partial clamp span as comparison targets but promotes none
+    into installed metrology. It also prevents the camera-plane fit residual
+    from being misused as board geometry uncertainty. Zero of ten acceptance
+    fields are complete; the exact installed capture and independent review
+    remain required. No manifest, profile, simulation, hardware access, or
+    physical authority is created.
+35. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
