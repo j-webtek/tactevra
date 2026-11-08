@@ -1233,7 +1233,13 @@ ScheduleGen. Neither is a physical success rate.
     separate source-and-arithmetic review; non-watertight meshes limit solid
     claims but not retained-vertex containment, and installed tool, clamp,
     cable, or camera geometry is not claimed.
-47. Expand only after each predecessor produces reviewable evidence.
+47. **LM4 native-binding proof-input independent review:** ARM-260 reopens the
+    ARM-259 artifact, retained mesh receipt, and governed URDF; independently
+    recomputes seven centers, upward-rounded radii, and all 56 AABB corners;
+    and rederives exactly six direct parent/child exclusions. It certifies only
+    pinned simulation-model vertex containment and direct adjacency. It admits
+    no native binding, Isaac launch, route attempt, or physical operation.
+48. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

@@ -3102,6 +3102,25 @@ python software/integrations/isaac_sim/nominal_route_proof_input_proposal.py `
   --output C:\IsaacSim\artifacts\issue190\arm259-native-proof-input-proposal-001\proposal.json
 ```
 
+ARM-260 adds `nominal_route_proof_input_review.py`, an independent fail-closed
+reviewer. It reopens the ARM-259 proposal and both pinned sources, recomputes
+all seven sphere centers and upward-rounded radii, verifies all 56 retained
+AABB corners, and rederives the six direct URDF adjacency pairs. Self-consistent
+changes to a sphere or pair list are rejected even when proposal hashes are
+recomputed. Accepted outputs carry the exact simulation-only statuses required
+by ARM-258, but do not admit the native binding, start Isaac, or consume the
+governed route attempt.
+
+Run the independent review with:
+
+```powershell
+python software/integrations/isaac_sim/nominal_route_proof_input_review.py `
+  --proposal C:\IsaacSim\artifacts\issue190\arm259-native-proof-input-proposal-001\proposal.json `
+  --mesh-receipt software/integrations/isaac_sim/evidence/roarm_m3_upstream_link_mesh_binding_20261004.json `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --output C:\IsaacSim\artifacts\issue190\arm260-native-proof-input-review-002\review.json
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
