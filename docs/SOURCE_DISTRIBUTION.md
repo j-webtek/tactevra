@@ -1413,3 +1413,12 @@ pair-policy canonical hashes plus the review file digest. The resulting status
 permits native-binding implementation and independent review only; it starts no
 Isaac runtime, consumes no governed attempt, and grants no hardware or physical
 authority. All byte, duplicate-byte, and reduction limits remain unchanged.
+
+ARM-262 adds two tracked Python paths and advances the reviewed tracked-file
+ceiling from 6,766 to 6,768. Its import-safe native binding maps certified
+spheres through supplied Isaac articulation transforms, applies conservative
+URDF-derived path-deviation bounds, calls environment-only PhysX overlap/sweep
+queries, and checks moving self-collision with exactly the reviewed exclusions.
+The definition remains pending independent review; it starts no runtime,
+consumes no governed attempt, and grants no hardware or physical authority.
+All byte, duplicate-byte, and reduction limits remain unchanged.

@@ -1246,7 +1246,14 @@ ScheduleGen. Neither is a physical success rate.
     blockers. The result authorizes only implementation and independent review
     of a hash-pinned native binding; it does not admit that binding, start
     Isaac, consume the reserved attempt, or grant physical authority.
-49. Expand only after each predecessor produces reviewable evidence.
+49. **LM4 hash-pinned native conservative-sweep binding:** ARM-262 implements
+    the ARM-257 runtime boundary over native articulation link transforms and
+    environment-only PhysX sphere overlap/sweep queries. It derives
+    conservative joint-path center bounds from the governed URDF and checks
+    moving self-collision analytically with exactly the six certified
+    exclusions. The import-safe definition is pending independent review and
+    cannot launch Isaac or consume the governed attempt.
+50. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
