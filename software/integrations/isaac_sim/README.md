@@ -2958,6 +2958,48 @@ The next increment must implement and independently test the fail-closed
 worker before any launch. A passing worker result advances only to a governed
 representative multi-key simulation set; it cannot authorize physical typing.
 
+ARM-254 implements the fail-closed worker envelope without supplying or
+launching the Isaac physics backend. It reopens the complete ARM-253 lineage,
+adds mandatory hashes for the robot USD, robot import receipt, virtual profile,
+and key-mechanics profile already carried by the corrected route, and fixes the
+one-attempt lifecycle: fresh revalidation, exact authorization, independent
+worker/backend review, atomic output-directory claim, status-before-import,
+all outputs before shutdown, and retained failure with no retry.
+
+Build the retained non-starting worker preparation:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$out = "$root/arm254-nominal-route-physics-worker-001"
+python software/integrations/isaac_sim/nominal_route_physics_worker.py `
+  --request "$root/arm253-nominal-route-physics-attempt-request-001/request.json" `
+  --review "$root/arm252-nominal-route-physics-experiment-review-001/review.json" `
+  --experiment "$root/arm251-nominal-route-physics-experiment-001/experiment.json" `
+  --nominal-profile "$root/arm250-base-board-nominal-profile-001/profile.json" `
+  --route-plan "$root/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json" `
+  --correction-plan "$root/arm235-state-policy-transit-clearance-correction-plan-001/plan.json" `
+  --toolchain-lock software/config/isaac_sim_toolchain_lock.json `
+  --proposed-output-directory "$root/arm254-nominal-route-physics-attempt-001" `
+  --output "$out/worker.json"
+```
+
+The retained preparation is:
+
+`C:\IsaacSim\artifacts\issue190\arm254-nominal-route-physics-worker-001\worker.json`
+
+- worker canonical SHA-256:
+  `f1fb3eaeb23f2dd70a6c29b2dd13e50b6390b9b0bbaadf64b5aaeff84ba142f7`
+- worker file SHA-256:
+  `8a8dcea01c68eb6e8e4af88e163c87f6b37943ab72c9abed1c7b171178a610d5`
+
+Its status is `READY_FOR_INDEPENDENT_WORKER_ENVELOPE_REVIEW`. The production
+CLI has no execution mode, so it cannot consume the authorization statement or
+start Isaac. The next increment must implement and independently review a
+hash-pinned Isaac backend that produces the six fixed outputs. Only after that
+review may the envelope admit the already defined, separately authorized single
+attempt. A passing SPACE result remains only the first primitive toward the
+representative multi-key and vision-conditioned automatic-typing stages.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
