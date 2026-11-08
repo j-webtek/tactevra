@@ -1310,3 +1310,12 @@ geometry, and independent-review audits. Editable sessions and audit reports
 remain external and hash-bound. The workbench infers no value, reads no
 instrument or device, and grants no hardware or physical authority. All byte,
 duplicate-byte, and reduction limits remain unchanged.
+
+The ARM-250 nominal base/board simulation-profile increment adds two tracked
+Python paths, advancing the reviewed tracked-file ceiling from 6,744 to 6,746.
+It compiles only controlled RC03 design priors into a hash-bound,
+simulation-only profile and explicitly leaves installed board bow and full
+clamp bounds unresolved. The profile is incompatible with installed collision
+evidence, emits no controller or wire command, and grants no hardware or
+physical authority. All byte, duplicate-byte, and reduction limits remain
+unchanged.
