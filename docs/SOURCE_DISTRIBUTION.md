@@ -1319,3 +1319,12 @@ clamp bounds unresolved. The profile is incompatible with installed collision
 evidence, emits no controller or wire command, and grants no hardware or
 physical authority. All byte, duplicate-byte, and reduction limits remain
 unchanged.
+
+The ARM-251 nominal route-physics binding adds two tracked Python paths,
+advancing the reviewed tracked-file ceiling from 6,746 to 6,748. It binds the
+external ARM-250 nominal profile, corrected SPACE route, transit-clearance
+contract, and selected Isaac toolchain into one compact experiment contract.
+The large route inputs and produced experiment remain external and hash-bound.
+Incomplete clamp geometry and installed uncertainty are deferred rather than
+embedded in the archive, and the binding starts no simulator, GPU, controller,
+or robot. All byte, duplicate-byte, and reduction limits remain unchanged.

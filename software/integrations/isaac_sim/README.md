@@ -2851,6 +2851,40 @@ Its status is `READY_FOR_SIMULATION_ONLY_EXPERIMENTS`; installed metrology
 continues independently and remains pending. No simulator, GPU, camera,
 controller, or robot is accessed while producing the profile.
 
+ARM-251 is the first governed consumer of that profile. It binds the exact
+ARM-250 design prior to the corrected `SPACE` episode, the ARM-235 sequence
+`654..940` transit/hover regeneration contract, and the selected Isaac 6.1
+toolchain. The resulting experiment contains one nominal-fixture baseline:
+the board collision solid is active, but the incomplete clamp volume and all
+installed-uncertainty sweeps are excluded. Independent review remains required
+before one separately controlled simulator attempt.
+
+Build the retained experiment contract:
+
+```powershell
+$out = 'C:/IsaacSim/artifacts/issue190/arm251-nominal-route-physics-experiment-001'
+python software/integrations/isaac_sim/nominal_route_physics_experiment.py `
+  --nominal-profile C:/IsaacSim/artifacts/issue190/arm250-base-board-nominal-profile-001/profile.json `
+  --route-plan C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --correction-plan C:/IsaacSim/artifacts/issue190/arm235-state-policy-transit-clearance-correction-plan-001/plan.json `
+  --toolchain-lock software/config/isaac_sim_toolchain_lock.json `
+  --output "$out/experiment.json"
+```
+
+The retained contract is:
+
+`C:\IsaacSim\artifacts\issue190\arm251-nominal-route-physics-experiment-001\experiment.json`
+
+- experiment canonical SHA-256:
+  `fec3f78e2c8403a7977a0942a53f71871add59701e073c5077b30139b5b34c66`
+- experiment file SHA-256:
+  `476a04d69abcf64d08fe5254cec93b2a2a8aef32c17f788cbb2a0eafd23e2585`
+
+Its status is `READY_FOR_NOMINAL_ROUTE_PHYSICS_EXPERIMENT_REVIEW`. The
+compiler starts no simulator or GPU, materializes no corrected joint targets,
+allows no simulator truth into model inputs, and cannot promote an installed
+or physical gate.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
