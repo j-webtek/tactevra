@@ -1302,3 +1302,11 @@ hash-bound. The compiler performs deterministic aggregation and conservative
 uncertainty propagation only; it reads no instrument or device and grants no
 physical authority. Logical-byte, single-blob, duplicate-byte, and reduction
 limits remain unchanged.
+
+The ARM-249 metrology-session workbench adds no tracked path and keeps the
+reviewed tracked-file ceiling at 6,744. It extends the existing ARM-248 tool
+and focused tests with exact session cloning and non-throwing completeness,
+geometry, and independent-review audits. Editable sessions and audit reports
+remain external and hash-bound. The workbench infers no value, reads no
+instrument or device, and grants no hardware or physical authority. All byte,
+duplicate-byte, and reduction limits remain unchanged.
