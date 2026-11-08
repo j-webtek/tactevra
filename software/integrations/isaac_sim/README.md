@@ -3152,6 +3152,36 @@ The retained primary and reproduction files share file SHA-256
 and canonical preflight SHA-256
 `5f3153301e64d526bd837c7084e01fbbcc644491f03cdffef0f5e2a252c119a8`.
 
+ARM-262 implements the import-safe native conservative-sweep binding in
+`nominal_route_native_sweep_binding.py`. It maps the seven certified local
+spheres through the admitted Isaac articulation transform view, derives a
+configuration-independent path-deviation bound from the governed URDF chain,
+converts millimetres to the pinned metre stage, and calls environment-only
+PhysX sphere overlap/sweep queries. Moving self-collision is checked separately
+with relative center segments and summed path-deviation bounds; the runtime
+rejects any exclusion set other than the six certified pairs. The definition
+CLI starts no Isaac runtime and the binding remains pending independent review.
+
+Build the authoritative review input with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_native_sweep_binding.py `
+  --readiness "$root/arm261-native-binding-readiness-001/readiness.json" `
+  --proof-review "$root/arm260-native-proof-input-review-002/review.json" `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --binding-source software/integrations/isaac_sim/nominal_route_native_sweep_binding.py `
+  --output "$root/arm262-native-sweep-binding-003/binding.json"
+```
+
+The authoritative `-003` primary and reproduction files share file SHA-256
+`e620ae81b082a6a1ce957af4b2419464a6d87f5c5c790cf99bc0f8987448c3da`
+and canonical binding SHA-256
+`3fc667eabeddee46833c3d181bca1d438a9eb874d51a72565a5b083d110495fc`.
+The preliminary `-001` and `-002` artifacts predate the final overlap and
+independent-review admission boundaries and are superseded; they must not be
+reviewed or executed.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
