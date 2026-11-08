@@ -1381,3 +1381,9 @@ discrete overlap sampling. No scene or trajectory is loaded, the reserved
 route attempt remains unconsumed, and no controller, hardware, wire, or
 physical authority is introduced. All byte, duplicate-byte, and reduction
 limits remain unchanged.
+
+ARM-257 adds two tracked Python paths and advances the reviewed tracked-file
+ceiling from 6,758 to 6,760. The import-safe core implements conservative
+bounding-sphere interval sweeps, reviewed self-collision exclusions, recursive
+refinement, and fail-closed budget handling. It loads no Isaac runtime, scene,
+or trajectory and introduces no physical authority.

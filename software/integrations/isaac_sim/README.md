@@ -3068,6 +3068,14 @@ deviation, orientation-invariant link envelopes, and separate moving
 self-collision checks. No robot scene or trajectory was loaded and the
 one-attempt route budget remains unconsumed.
 
+ARM-257 implements that import-safe proof kernel in
+`nominal_route_conservative_sweep_adapter.py`. A future native binding supplies
+certified per-link sphere interval bounds, PhysX sphere sweeps, and moving
+self-collision queries. The kernel inflates each sphere by its certified
+center-path deviation plus 0.5 mm, recursively refines conservative hits,
+allows only reviewed pair exclusions, and fails closed on invalid bounds or
+budget exhaustion. Importing it cannot start Isaac or access hardware.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
