@@ -2732,6 +2732,47 @@ requirements. It accepts zero measurement sources and completes zero measured
 fields; the supplied photos remain valuable context but are not silently
 upgraded into installed metrology.
 
+ARM-248 turns the remaining physical dependency into one exact repeated-reading
+protocol. Board width, depth, and thickness each use three readings; installed
+bow uses a 3x3 top-surface deviation grid; the base pose uses repeated origin,
++x-datum, and +y-datum vectors; and clamp limits use repeated minimum/maximum
+vectors. The compiler uses the maximum repeat residual plus instrument
+resolution as conservative uncertainty, reconstructs a proper base rotation,
+and emits the exact ARM-246 observation schema only after independent review.
+
+Create the blank protocol without accessing hardware:
+
+```powershell
+python software/integrations/isaac_sim/base_board_installed_metrology.py `
+  --evidence-pack "$root/arm247-base-board-context-evidence-001/evidence-pack.json" `
+  --output "$root/arm248-base-board-installed-metrology-001/protocol.json"
+```
+
+After the session template is filled and independently accepted, compile it:
+
+```powershell
+python software/integrations/isaac_sim/base_board_installed_metrology.py `
+  --evidence-pack "$root/arm247-base-board-context-evidence-001/evidence-pack.json" `
+  --session C:/path/to/reviewed-metrology-session.json `
+  --output C:/path/to/reviewed-raw-observation.json
+```
+
+The generated observation remains subject to the ARM-246 compiler and ARM-243
+submission gate. ARM-248 itself reads no camera, gauge, controller, or robot;
+starts no simulator or GPU; and grants no physical authority.
+
+The retained blank protocol is:
+
+`C:\IsaacSim\artifacts\issue190\arm248-base-board-installed-metrology-001\protocol.json`
+
+- protocol content SHA-256:
+  `96d5954b63e8953517450781b6dc37acdfbe18862acccfddac396958bf753507`
+- protocol file SHA-256:
+  `277bf4102775e0955cb51c30bce07ef0b255cee0085f20cf70d5a3fb4a0fbfab`
+
+It remains `BLOCKED_READINGS_AND_INDEPENDENT_REVIEW_REQUIRED`; no measurement
+value or reviewer decision is inferred from the retained photographs.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

@@ -1293,3 +1293,12 @@ forbids context photos from filling precision-metrology fields. No image,
 measurement corpus, simulator asset, controller record, or authority-bearing
 output enters the source archive. Logical-byte, single-blob, duplicate-byte,
 and reduction limits remain unchanged.
+
+The ARM-248 installed-metrology compiler adds two governed paths: one offline,
+zero-authority repeated-reading compiler and one focused unit-test module. The
+reviewed tracked-file ceiling advances from 6,742 to the exact observed 6,744
+files. Blank protocols and completed measurement sessions remain external and
+hash-bound. The compiler performs deterministic aggregation and conservative
+uncertainty propagation only; it reads no instrument or device and grants no
+physical authority. Logical-byte, single-blob, duplicate-byte, and reduction
+limits remain unchanged.
