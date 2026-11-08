@@ -1099,7 +1099,17 @@ ScheduleGen. Neither is a physical success rate.
     common provenance requirement is retained. All packets remain pending and
     no measurement, manifest row, profile, route, replay, hardware access, or
     physical authority is created.
-32. Expand only after each predecessor produces reviewable evidence.
+32. **LM4 capture submission gate:** ARM-243 materializes the six ARM-242
+    packets as exact hash-bound templates and validates one independently
+    completed packet at a time. Acceptance requires evidence hashes,
+    instrument identity and resolution, coordinate frame, exact body coverage,
+    every packet-specific field, positive uncertainty, valid local-frame
+    envelope primitives, and measured reviewer acceptance. Success creates
+    only eligibility for a later ICQ-1 fragment build; it cannot modify the
+    manifest or profiles, run collision screening, start Isaac/GPU work,
+    access hardware, or grant physical authority. The retained templates are
+    intentionally uncompleted and remain blocked on real capture submissions.
+33. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

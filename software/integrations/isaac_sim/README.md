@@ -2535,6 +2535,44 @@ python software/integrations/isaac_sim/nonrobot_measurement_capture_packets.py `
   --output $out
 ```
 
+ARM-243 turns the ARM-242 packet definitions into six exact, separately
+fillable submission templates. The gate binds every template to the retained
+ARM-242 report and packet hashes. It accepts a completed packet only when the
+evidence hashes, instrument identity and resolution, coordinate frame, exact
+body coverage, required acceptance fields, positive uncertainty values,
+local-frame primitives, and measured reviewer acceptance are complete. A
+passing assessment establishes eligibility only for a later ICQ-1 fragment
+build; it does not modify the measurement manifest or installed profiles, run
+collision screening, start Isaac/GPU work, access hardware, or grant physical
+authority.
+
+The retained template set is:
+
+`C:\IsaacSim\artifacts\issue190\arm243-capture-submission-gate-001\templates.json`
+
+- template content SHA-256:
+  `26305c60cdcfbd5a3557ee9ec8252b10bf649506cacbb16ebc00e19ad3ed8eac`
+- template file SHA-256:
+  `7697ad6df47cdf03137ae74d3031d9d4860c7b564fbd8884a81c02b334275a9d`
+
+It remains `BLOCKED_CAPTURE_SUBMISSIONS_REQUIRED`: all six templates are
+uncompleted, all `12` bodies remain pending, and no evidence or acceptance
+value is fabricated.
+
+Reproduce the templates with:
+
+```powershell
+$arm242 = 'C:/IsaacSim/artifacts/issue190/arm242-nonrobot-measurement-capture-packets-001/report.json'
+$out = 'C:/IsaacSim/artifacts/issue190/arm243-capture-submission-gate-001/templates.json'
+python software/integrations/isaac_sim/capture_packet_submission_gate.py `
+  --arm242-report $arm242 `
+  --output $out
+```
+
+To assess one separately completed template, add
+`--submission <completed-packet.json>` and select a separate assessment output
+path. Assessment never edits the source template or ARM-242 report.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
