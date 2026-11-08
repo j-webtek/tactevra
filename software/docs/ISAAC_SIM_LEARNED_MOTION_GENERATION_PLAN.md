@@ -1226,7 +1226,14 @@ ScheduleGen. Neither is a physical success rate.
     the repository does not yet contain a certified seven-link sphere profile
     or a continuous-clearance-scoped pair policy; the diagnostic policy is not
     silently promoted. No Isaac runtime is started and no attempt is consumed.
-46. Expand only after each predecessor produces reviewable evidence.
+46. **LM4 native-binding proof-input proposals:** ARM-259 deterministically
+    encloses each of the seven pinned upstream model-link mesh bounds with one
+    conservative local sphere and derives exactly the six direct parent/child
+    exclusions from the governed URDF. The results are proposals pending a
+    separate source-and-arithmetic review; non-watertight meshes limit solid
+    claims but not retained-vertex containment, and installed tool, clamp,
+    cable, or camera geometry is not claimed.
+47. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
