@@ -1128,7 +1128,17 @@ ScheduleGen. Neither is a physical success rate.
     fields are complete; the exact installed capture and independent review
     remain required. No manifest, profile, simulation, hardware access, or
     physical authority is created.
-35. Expand only after each predecessor produces reviewable evidence.
+35. **LM4 base/board raw capture compiler:** ARM-246 binds the ARM-243 template
+    and ARM-245 reconciliation into one minimal observation form. A completed
+    form must carry retained evidence, instrument identity/resolution, measured
+    board and base/clamp values, verified frame-B registration, positive
+    uncertainties, and acceptance by a reviewer distinct from the observer.
+    The compiler deterministically derives
+    the exact ten ARM-243 fields and rejects malformed geometry or review. The
+    retained form is deliberately blank and blocked; nominal comparison values
+    cannot become measurements. It creates no manifest, profile, simulation,
+    hardware access, command, or physical authority.
+36. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
