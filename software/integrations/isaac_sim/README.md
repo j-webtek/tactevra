@@ -2648,6 +2648,52 @@ python software/integrations/isaac_sim/base_board_prior_reconciliation.py `
   --output "$root/arm245-base-board-prior-reconciliation-001/report.json"
 ```
 
+ARM-246 turns that remaining dependency into one minimal raw observation form
+and a deterministic compiler. The form asks only for retained evidence,
+instrument resolution, independent review, measured board dimensions and bow,
+verified frame-B registration, the installed base origin/rotation, complete
+clamp bounds, and uncertainties.
+The compiler derives the exact ten ARM-243 acceptance values, including both
+conservative oriented boxes and the clamp footprint. It rejects pending or
+self-review, unknown evidence, non-positive uncertainty, inverted bounds, and
+non-rigid rotations. Nominal ARM-245 values remain visible comparison targets
+and cannot fill observations.
+
+The retained blank kit is:
+
+`C:\IsaacSim\artifacts\issue190\arm246-base-board-raw-capture-compiler-001\capture-kit.json`
+
+- capture-kit content SHA-256:
+  `9f76023f4da1d194acee2e2e7f1450580e506da28208aecb6a3bb4f2ca61f904`
+- capture-kit file SHA-256:
+  `e0d0b83a41645a0c513b3f99dbd95748f9c11a2678c5cfaff0fe4c966f68c2bd`
+
+It remains `BLOCKED_RAW_OBSERVATIONS_AND_REVIEW_REQUIRED`; no measurements are
+invented and no submission is completed. It does not modify a manifest or
+profile, start Isaac, access hardware, issue commands, or grant physical
+authority.
+
+Reproduce the blank kit with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/base_board_raw_capture_compiler.py `
+  --templates "$root/arm243-capture-submission-gate-001/templates.json" `
+  --reconciliation "$root/arm245-base-board-prior-reconciliation-001/report.json" `
+  --output "$root/arm246-base-board-raw-capture-compiler-001/capture-kit.json"
+```
+
+After a separately retained observation is filled and independently accepted,
+compile it without hardware access:
+
+```powershell
+python software/integrations/isaac_sim/base_board_raw_capture_compiler.py `
+  --templates "$root/arm243-capture-submission-gate-001/templates.json" `
+  --capture-kit "$root/arm246-base-board-raw-capture-compiler-001/capture-kit.json" `
+  --observation C:/path/to/reviewed-observation.json `
+  --output C:/path/to/base-board-submission.json
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
