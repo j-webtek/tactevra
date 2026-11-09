@@ -3248,6 +3248,53 @@ the binding, start Isaac, load a scene, play a trajectory, submit a joint
 target, contact a key, create the governed attempt, or grant hardware or
 physical authority.
 
+ARM-265 adds `nominal_route_native_clearance_adapter.py` and its separate
+`nominal_route_native_clearance_adapter_review.py`. The adapter implements only
+the ARM-255 `check_continuous_clearance` surface: it composes the ARM-257
+recursive proof with the reviewed ARM-262 native binding, exact 0.5 mm margin,
+six certified exclusions, depth-12 fail-closed refinement, and environment-only
+scene-query requirement. The independent review reproduces the exact definition,
+inspects its call surface, and exercises direct-clear and recursive-refinement
+paths with non-Isaac doubles. Its acceptance status is
+`ACCEPTED_FOR_ZERO_AUTHORITY_RUNTIME_COMPOSITION`; canonical IK, tool/key
+metrics, and root drift remain separate runtime-composition dependencies.
+
+Build and independently review the adapter with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_native_clearance_adapter.py `
+  --preflight "$root/arm264-native-binding-integration-preflight-001/preflight.json" `
+  --binding "$root/arm262-native-sweep-binding-003/binding.json" `
+  --binding-review "$root/arm263-native-sweep-binding-review-001/review.json" `
+  --proof-source software/integrations/isaac_sim/nominal_route_conservative_sweep_adapter.py `
+  --binding-source software/integrations/isaac_sim/nominal_route_native_sweep_binding.py `
+  --adapter-source software/integrations/isaac_sim/nominal_route_native_clearance_adapter.py `
+  --output "$root/arm265-native-clearance-adapter-001/adapter.json"
+python software/integrations/isaac_sim/nominal_route_native_clearance_adapter_review.py `
+  --adapter "$root/arm265-native-clearance-adapter-001/adapter.json" `
+  --adapter-source software/integrations/isaac_sim/nominal_route_native_clearance_adapter.py `
+  --preflight "$root/arm264-native-binding-integration-preflight-001/preflight.json" `
+  --binding "$root/arm262-native-sweep-binding-003/binding.json" `
+  --binding-review "$root/arm263-native-sweep-binding-review-001/review.json" `
+  --proof-source software/integrations/isaac_sim/nominal_route_conservative_sweep_adapter.py `
+  --binding-source software/integrations/isaac_sim/nominal_route_native_sweep_binding.py `
+  --output "$root/arm265-native-clearance-adapter-review-001/review.json"
+```
+
+The retained adapter primary and reproduction share file SHA-256
+`b5e8891053531cd799e6367b4ff24140c268757e4a57a3a19691fc48d1e76df4`
+and canonical adapter SHA-256
+`e5fb18e441e4ac97ee571a2399a55d441fcb149c9e6d6c766cbc660988aa4634`.
+The retained review primary and reproduction share file SHA-256
+`1ababaac40fc50840f31aa921e3d3b00514cb4416e6c92190bc51095b4381b13`
+and canonical review SHA-256
+`f83cd6b50c6dc93ed37ea4743bc50174e97e1a498a71b8b08c98969011d44243`.
+No ARM-265 command starts Isaac, loads a scene, consumes a governed attempt,
+submits a trajectory or joint target, contacts a key, or grants hardware or
+physical authority. The next required stage is zero-authority nominal-route
+runtime-composition preparation.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

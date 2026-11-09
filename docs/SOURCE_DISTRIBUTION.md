@@ -1442,3 +1442,14 @@ records the required zero-authority composition order. It does not implement
 the composition adapter, construct an Isaac object, load a scene, consume the
 governed attempt, or grant trajectory, hardware, or physical authority. All
 byte, duplicate-byte, and reduction limits remain unchanged.
+
+ARM-265 adds four tracked Python paths and advances the reviewed tracked-file
+ceiling from 6,772 to 6,776. Its import-safe adapter composes the ARM-257
+continuous-clearance proof over the reviewed ARM-262 native binding with the
+exact 0.5 mm margin, six certified exclusions, depth-12 fail-closed refinement,
+and environment-only scene-query boundary. A separate reviewer reproduces the
+definition, inspects the call surface, and exercises direct-clear and recursive
+refinement behavior using non-Isaac doubles. The accepted receipt admits only
+later zero-authority runtime composition; it does not start Isaac, load a scene,
+consume the governed attempt, or grant trajectory, hardware, or physical
+authority. All byte, duplicate-byte, and reduction limits remain unchanged.
