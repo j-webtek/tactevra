@@ -1305,7 +1305,16 @@ ScheduleGen. Neither is a physical success rate.
     reproduces the definition, rejects joint-submission surfaces, and verifies
     the calculation with non-runtime doubles. Root drift, full runtime
     composition, native tracking, and execution remain separate gates.
-56. Expand only after each predecessor produces reviewable evidence.
+56. **LM4 terminal root-drift adapter and review:** ARM-269 implements the
+    backend's final read-only `root_drift` boundary. It samples the supplied
+    native root view exactly once at the terminal checkpoint, compares it with
+    the post-setup baseline, treats opposite quaternion signs as the same
+    rotation, and rejects drift beyond 0.05 mm or 0.1 degree. Independent
+    review reproduces the definition, inspects the operation surface, verifies
+    the single-read calculation, and proves out-of-tolerance failure with
+    non-runtime doubles. Complete runtime composition, native execution, and
+    physical use remain separate gates.
+57. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
