@@ -3212,8 +3212,41 @@ The retained primary and reproduction files share file SHA-256
 `b13a1de38086c865040b81e49045ec3405b6d1b9c12876bec7a3fe45416d7620`
 and canonical binding-review SHA-256
 `a271316bf5deb863fdb67832a1291158a8292f7950a2e8a8c1b8189b2ef10b91`.
-The next stage is a zero-authority native-binding integration preflight; the
-review receipt alone is not launch or attempt authority.
+
+ARM-264 adds `nominal_route_native_binding_integration_preflight.py`. The
+non-starting preflight binds the exact ARM-255 backend, ARM-257 recursive
+proof core, ARM-262 binding, ARM-263 review, and their source files. It checks
+that `NominalRoutePhysicsRuntime.check_continuous_clearance` can be composed
+through the ARM-257 function with the three native methods supplied by the
+ARM-262 class. It fixes the 0.5 mm margin, six certified exclusions,
+environment-only query-scene requirement, fail-closed disposition, and exact
+composition order. The status is
+`READY_TO_IMPLEMENT_ZERO_AUTHORITY_NATIVE_CLEARANCE_ADAPTER`; the adapter is
+not yet implemented or admitted.
+
+Build and reproduce the integration preflight with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_native_binding_integration_preflight.py `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --binding "$root/arm262-native-sweep-binding-003/binding.json" `
+  --binding-review "$root/arm263-native-sweep-binding-review-001/review.json" `
+  --backend-source software/integrations/isaac_sim/nominal_route_physics_backend.py `
+  --adapter-source software/integrations/isaac_sim/nominal_route_conservative_sweep_adapter.py `
+  --binding-source software/integrations/isaac_sim/nominal_route_native_sweep_binding.py `
+  --output "$root/arm264-native-binding-integration-preflight-001/preflight.json"
+```
+
+The retained primary and reproduction files share file SHA-256
+`af8c7e59d8edb1f2c137b4f032f37ae0d1df03282dd43fa02474ac8164d0ff4a`
+and canonical preflight SHA-256
+`e87de97b9c6ab066113f8eff8ad55712d134e073da035f4d447f3ee941914e69`.
+The next stage must implement and independently review the import-safe
+zero-authority native-clearance composition adapter. ARM-264 does not construct
+the binding, start Isaac, load a scene, play a trajectory, submit a joint
+target, contact a key, create the governed attempt, or grant hardware or
+physical authority.
 
 Build the non-executing ARM-232 request with:
 

@@ -182,6 +182,7 @@ TESTS = (
     "software/tests/unit/test_nominal_route_proof_input_review.py",
     "software/tests/unit/test_nominal_route_native_sweep_binding.py",
     "software/tests/unit/test_nominal_route_native_sweep_binding_review.py",
+    "software/tests/unit/test_nominal_route_native_binding_integration_preflight.py",
 )
 
 
