@@ -1492,3 +1492,14 @@ argument/result-preserving delegation with non-runtime doubles. The reviewed
 tracked-file ceiling advances to 6,790; byte ceilings remain unchanged. No
 native object is constructed, no backend is called, and no execution, hardware,
 or physical authority is granted.
+
+ARM-271 adds the native-runtime construction plan, its independent offline
+reviewer, and focused tests. The plan pins the initialized articulation,
+environment-only scene query, one-prim key and root views, shared canonical IK
+solver identity, exact adapter constructor arguments, and the post-settle
+baseline-capture order needed to build the ARM-270 composition. Independent
+review reproduces the plan and checks the live constructor signatures and
+native API evidence. The reviewed tracked-file ceiling advances to 6,793; byte
+ceilings remain unchanged. No native object is constructed, no protocol method
+or backend is called, and no simulation, hardware, or physical authority is
+granted.

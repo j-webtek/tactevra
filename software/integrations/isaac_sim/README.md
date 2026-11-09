@@ -3505,6 +3505,34 @@ The review status is `ACCEPTED_FOR_ZERO_AUTHORITY_NATIVE_RUNTIME_CONSTRUCTION`.
 The next separate gate is a reviewed plan for native runtime object
 construction; backend execution and simulation remain unadmitted.
 
+ARM-271 adds `nominal_route_native_runtime_construction_plan.py` and an
+independent reviewer. The plan pins the supplied initialized articulation,
+environment-only PhysX scene query, one-prim key and root views, shared
+canonical IK solver identity, exact adapter constructor bindings, and the
+post-settle baseline-capture order. It ends by returning the ARM-270
+composition without calling any protocol method. The reviewer reproduces the
+plan, compares every pinned constructor binding with the current source
+signature, and checks the native pose-read and scene-query evidence.
+
+The authoritative plan is
+`C:/IsaacSim/artifacts/issue190/arm271-native-runtime-construction-plan-002/plan.json`.
+Its primary and reproduction files share SHA-256
+`a912687cf0b2e1595d4c6de7b038ce5c17d11056a23f3648d1d3ae2ad8f56b25`
+and canonical plan SHA-256
+`ab258550a9a598ae3e65bc509cf781d8641ae7cae92ff793383e0f51d7bccea8`.
+The authoritative review is
+`C:/IsaacSim/artifacts/issue190/arm271-native-runtime-construction-plan-review-002/review.json`.
+Its primary and reproduction files share SHA-256
+`f5b7bc5cdaf0e8728ee213415e614ea4fe176c8770a92a4e577607d5eb12ccce`
+and canonical review SHA-256
+`d6141674573401a760e82a6831fa41a0421a4bca4b3a2339acd55566a807bff0`.
+The review status is
+`ACCEPTED_FOR_ZERO_AUTHORITY_NATIVE_RUNTIME_FACTORY_IMPLEMENTATION`.
+The superseded `-001` plan and review directories are retained as diagnostic
+drafts only. The next gate is implementation and independent review of the
+zero-authority factory; no native object construction, backend execution, or
+simulation attempt is admitted by ARM-271.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
