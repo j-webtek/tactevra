@@ -3410,6 +3410,49 @@ and canonical review SHA-256
 The review status is `ACCEPTED_FOR_ZERO_AUTHORITY_RUNTIME_COMPOSITION`.
 The next adapter is terminal `root_drift`; complete runtime composition follows.
 
+ARM-269 adds `nominal_route_root_drift_adapter.py` and an independent reviewer.
+The adapter implements only `root_drift`: it reads the supplied native root
+world pose exactly once at the terminal checkpoint and compares it with the
+post-setup, pre-motion baseline. Translation is converted from stage units to
+millimetres; WXYZ quaternion distance is sign invariant. Drift above 0.05 mm
+or 0.1 degree fails closed. Neither CLI imports Isaac, starts a simulator,
+submits a joint target, or consumes an attempt.
+
+Build and review the adapter with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_root_drift_adapter.py `
+  --readiness "$root/arm266-runtime-composition-readiness-001/readiness.json" `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --metrics-adapter "$root/arm268-tool-key-metrics-adapter-002/adapter.json" `
+  --metrics-review "$root/arm268-tool-key-metrics-adapter-review-002/review.json" `
+  --mechanics-source software/integrations/isaac_sim/representative_key_mechanics.py `
+  --adapter-source software/integrations/isaac_sim/nominal_route_root_drift_adapter.py `
+  --output "$root/arm269-root-drift-adapter-001/adapter.json"
+python software/integrations/isaac_sim/nominal_route_root_drift_adapter_review.py `
+  --adapter "$root/arm269-root-drift-adapter-001/adapter.json" `
+  --adapter-source software/integrations/isaac_sim/nominal_route_root_drift_adapter.py `
+  --readiness "$root/arm266-runtime-composition-readiness-001/readiness.json" `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --metrics-adapter "$root/arm268-tool-key-metrics-adapter-002/adapter.json" `
+  --metrics-review "$root/arm268-tool-key-metrics-adapter-review-002/review.json" `
+  --mechanics-source software/integrations/isaac_sim/representative_key_mechanics.py `
+  --output "$root/arm269-root-drift-adapter-review-001/review.json"
+```
+
+Primary and reproduction adapter files share SHA-256
+`8c5ed1c2313c3dd5f906f35b1b1ba1028884eb8471c92cc8218fd647f509d25c`
+and canonical adapter SHA-256
+`28c9fe7bf0b15d457d228281b6d9874499925214adf849d54d95b04c289fb499`.
+Primary and reproduction review files share SHA-256
+`8490cb9d97a2d13a38181e863d915373ee626bf5e0418212e1f314026e735480`
+and canonical review SHA-256
+`073a708c257604d8e80589303a658a83370e3fb045b7016dd23f8a1b93d63864`.
+The review status is `ACCEPTED_FOR_ZERO_AUTHORITY_RUNTIME_COMPOSITION`.
+All four ARM-255 runtime methods now have accepted offline adapters; complete
+zero-authority runtime composition is the next separate gate.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

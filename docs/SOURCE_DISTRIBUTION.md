@@ -1474,3 +1474,11 @@ submission and reports determinate clearance and displacement in millimetres.
 The reviewed tracked-file ceiling advances to 6,784; byte ceilings remain
 unchanged. The adapter and reviewer start no simulator, consume no attempt,
 contact no key, and grant no hardware or physical authority.
+
+ARM-269 adds the terminal root-drift adapter, its independent offline reviewer,
+and focused tests. The adapter reads one supplied native root world pose,
+compares it with the post-setup baseline using sign-invariant WXYZ quaternion
+distance, and fails closed beyond 0.05 mm translation or 0.1 degree rotation.
+The reviewed tracked-file ceiling advances to 6,787; byte ceilings remain
+unchanged. The adapter and reviewer start no simulator, submit no joint target,
+consume no attempt, and grant no hardware or physical authority.
