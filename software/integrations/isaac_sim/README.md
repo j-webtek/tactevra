@@ -3290,6 +3290,35 @@ The retained review primary and reproduction share file SHA-256
 `1ababaac40fc50840f31aa921e3d3b00514cb4416e6c92190bc51095b4381b13`
 and canonical review SHA-256
 `f83cd6b50c6dc93ed37ea4743bc50174e97e1a498a71b8b08c98969011d44243`.
+
+ARM-266 adds `nominal_route_runtime_composition_readiness.py`. This import-safe
+gate pins ARM-255 and the accepted ARM-265 adapter, records
+`check_continuous_clearance` as the one reviewed runtime method, and orders the
+three remaining dependencies: `regenerate_row`, `measure_tool_key`, and
+`root_drift`. It does not construct runtime objects, import or start Isaac,
+consume the governed attempt, submit joint targets, or grant hardware or
+physical authority.
+
+Build the readiness artifact with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_runtime_composition_readiness.py `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --adapter "$root/arm265-native-clearance-adapter-001/adapter.json" `
+  --adapter-review "$root/arm265-native-clearance-adapter-review-001/review.json" `
+  --backend-source software/integrations/isaac_sim/nominal_route_physics_backend.py `
+  --adapter-source software/integrations/isaac_sim/nominal_route_native_clearance_adapter.py `
+  --readiness-source software/integrations/isaac_sim/nominal_route_runtime_composition_readiness.py `
+  --output "$root/arm266-runtime-composition-readiness-001/readiness.json"
+```
+
+The retained primary and reproduction files share file SHA-256
+`572f97eb6c4b52f77b823da767ec270fa9e4c78112e9de69c284133bb91f8b75`
+and canonical readiness SHA-256
+`7259e53c0e5522a090a0cdce9c36034fc793bcd093cdfdcce63bee9b99f14bab`.
+and canonical review SHA-256
+`f83cd6b50c6dc93ed37ea4743bc50174e97e1a498a71b8b08c98969011d44243`.
 No ARM-265 command starts Isaac, loads a scene, consumes a governed attempt,
 submits a trajectory or joint target, contacts a key, or grants hardware or
 physical authority. The next required stage is zero-authority nominal-route
