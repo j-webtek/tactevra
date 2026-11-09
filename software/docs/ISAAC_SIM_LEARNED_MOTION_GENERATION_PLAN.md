@@ -1262,7 +1262,16 @@ ScheduleGen. Neither is a physical success rate.
     accepted receipt admits construction of this exact binding only inside a
     future separately admitted worker; it does not admit an Isaac launch,
     trajectory, joint targets, key contact, attempt, or physical operation.
-51. Expand only after each predecessor produces reviewable evidence.
+51. **LM4 zero-authority native-binding integration preflight:** ARM-264
+    hash-binds the ARM-255 backend protocol, ARM-257 proof core, ARM-262 native
+    binding, ARM-263 acceptance receipt, and all three implementation sources.
+    Static signature review confirms that the native binding supplies the
+    exact three operations consumed by the recursive proof and that the proof
+    can satisfy the backend's continuous-clearance method. The receipt fixes
+    the composition order and next adapter boundary but does not implement or
+    execute that adapter, construct Isaac objects, load a scene, submit joint
+    targets, contact a key, consume the attempt, or grant physical authority.
+52. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

@@ -1433,3 +1433,12 @@ only construction of the exact reviewed binding inside a future separately
 admitted worker. It starts no runtime, consumes no governed attempt, and grants
 no trajectory, hardware, or physical authority. All byte, duplicate-byte, and
 reduction limits remain unchanged.
+
+ARM-264 adds two tracked Python paths and advances the reviewed tracked-file
+ceiling from 6,770 to 6,772. Its import-safe integration preflight hash-binds
+the ARM-255 backend protocol, ARM-257 conservative proof core, ARM-262 native
+binding, and ARM-263 review, then verifies the exact static call surfaces and
+records the required zero-authority composition order. It does not implement
+the composition adapter, construct an Isaac object, load a scene, consume the
+governed attempt, or grant trajectory, hardware, or physical authority. All
+byte, duplicate-byte, and reduction limits remain unchanged.
