@@ -3360,12 +3360,55 @@ and canonical review SHA-256
 `45ab4fde0d228893b0adc3e2c25ccb7ac15939742f24712c0b31e358ca41592a`.
 The review status is `ACCEPTED_FOR_ZERO_AUTHORITY_RUNTIME_COMPOSITION`.
 The next adapter is `measure_tool_key`; root drift follows it.
+
+ARM-268 adds `nominal_route_tool_key_metrics_adapter.py` and an independent
+reviewer. The adapter implements only `measure_tool_key`: it computes the
+requested row's canonical tool-tip surface point with pinned forward
+kinematics, reads the supplied native key world pose, and reports clearance
+from the key top plus displacement from the settled key-center baseline. It
+does not set an articulation position or target. The definition and review
+CLIs import no Isaac module and cannot start a simulator or consume an attempt.
+
+Build and review the adapter with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$route = "$root/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json"
+python software/integrations/isaac_sim/nominal_route_tool_key_metrics_adapter.py `
+  --readiness "$root/arm266-runtime-composition-readiness-001/readiness.json" `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --route $route `
+  --ik-adapter "$root/arm267-canonical-ik-row-adapter-001/adapter.json" `
+  --ik-adapter-review "$root/arm267-canonical-ik-row-adapter-review-001/review.json" `
+  --ik-source software/src/rocell/kinematics/ik.py `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --mechanics-source software/integrations/isaac_sim/representative_key_mechanics.py `
+  --adapter-source software/integrations/isaac_sim/nominal_route_tool_key_metrics_adapter.py `
+  --output "$root/arm268-tool-key-metrics-adapter-002/adapter.json"
+python software/integrations/isaac_sim/nominal_route_tool_key_metrics_adapter_review.py `
+  --adapter "$root/arm268-tool-key-metrics-adapter-002/adapter.json" `
+  --adapter-source software/integrations/isaac_sim/nominal_route_tool_key_metrics_adapter.py `
+  --readiness "$root/arm266-runtime-composition-readiness-001/readiness.json" `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --route $route `
+  --ik-adapter "$root/arm267-canonical-ik-row-adapter-001/adapter.json" `
+  --ik-adapter-review "$root/arm267-canonical-ik-row-adapter-review-001/review.json" `
+  --ik-source software/src/rocell/kinematics/ik.py `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --mechanics-source software/integrations/isaac_sim/representative_key_mechanics.py `
+  --output "$root/arm268-tool-key-metrics-adapter-review-002/review.json"
+```
+
+Primary and reproduction adapter files share SHA-256
+`e4b059e0fc78343eda7959c2e97ac66565db93fe859e8a0dc0e5591eee8e41da`
+and canonical adapter SHA-256
+`5b2327498efe78ced7d7c5ef88db170f0596d59b83a22a56df5e8b5f60493f19`.
+Primary and reproduction review files share SHA-256
+`3077bc83c25f8cd491ace003469e6add6d275a8de79894a70f8344a2256167a7`
 and canonical review SHA-256
-`f83cd6b50c6dc93ed37ea4743bc50174e97e1a498a71b8b08c98969011d44243`.
-No ARM-265 command starts Isaac, loads a scene, consumes a governed attempt,
-submits a trajectory or joint target, contacts a key, or grants hardware or
-physical authority. The next required stage is zero-authority nominal-route
-runtime-composition preparation.
+`53d25636a6a26778a51b57ae05468fe890f8eaec4f908b34101367972ce92517`.
+The review status is `ACCEPTED_FOR_ZERO_AUTHORITY_RUNTIME_COMPOSITION`.
+The next adapter is terminal `root_drift`; complete runtime composition follows.
 
 Build the non-executing ARM-232 request with:
 

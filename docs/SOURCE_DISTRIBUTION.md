@@ -1465,3 +1465,12 @@ solver with the previous accepted row as its first seed. The reviewed
 tracked-file ceiling advances to 6,781; byte ceilings remain unchanged. The
 adapter and reviewer start no simulator, submit no joint targets, consume no
 attempt, and grant no hardware or physical authority.
+
+ARM-268 adds the tool/key metrics adapter, its independent offline reviewer,
+and focused tests. The adapter evaluates each regenerated row's canonical
+tool-tip surface point through pinned forward kinematics and combines it with
+the supplied native key pose and settled key baseline. It performs no joint
+submission and reports determinate clearance and displacement in millimetres.
+The reviewed tracked-file ceiling advances to 6,784; byte ceilings remain
+unchanged. The adapter and reviewer start no simulator, consume no attempt,
+contact no key, and grant no hardware or physical authority.

@@ -1297,7 +1297,15 @@ ScheduleGen. Neither is a physical success rate.
     non-runtime doubles. Acceptance covers only per-row IK composition; tool/key
     metrics, root drift, complete runtime composition, and execution remain
     separate gates.
-55. Expand only after each predecessor produces reviewable evidence.
+55. **LM4 tool/key metrics adapter and review:** ARM-268 implements the
+    backend's `measure_tool_key` boundary without commanding an articulation.
+    It derives the requested row's world-frame tool-tip surface point from the
+    pinned FK model, reads the supplied native key pose, and computes both
+    tool/key clearance and settled-baseline displacement. Independent review
+    reproduces the definition, rejects joint-submission surfaces, and verifies
+    the calculation with non-runtime doubles. Root drift, full runtime
+    composition, native tracking, and execution remain separate gates.
+56. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
