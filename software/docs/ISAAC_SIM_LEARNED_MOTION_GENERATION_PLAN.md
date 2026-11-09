@@ -1253,7 +1253,16 @@ ScheduleGen. Neither is a physical success rate.
     moving self-collision analytically with exactly the six certified
     exclusions. The import-safe definition is pending independent review and
     cannot launch Isaac or consume the governed attempt.
-50. Expand only after each predecessor produces reviewable evidence.
+50. **LM4 native conservative-sweep binding independent review:** ARM-263
+    reopens the exact ARM-262 artifact, implementation source, certified
+    lineage, and governed URDF. It independently rederives every path bound and
+    exercises transform mapping, metre conversion, endpoint overlap,
+    continuous environment sweep, moving self-collision, exclusion integrity,
+    and environment-only scene enforcement through non-Isaac doubles. The
+    accepted receipt admits construction of this exact binding only inside a
+    future separately admitted worker; it does not admit an Isaac launch,
+    trajectory, joint targets, key contact, attempt, or physical operation.
+51. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
