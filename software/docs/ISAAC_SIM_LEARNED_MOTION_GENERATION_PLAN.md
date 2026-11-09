@@ -1288,7 +1288,16 @@ ScheduleGen. Neither is a physical success rate.
     then terminal root drift. The gate remains fail-closed and constructs no
     runtime objects, starts no simulator, consumes no attempt, and grants no
     physical authority.
-54. Expand only after each predecessor produces reviewable evidence.
+54. **LM4 canonical IK row adapter and review:** ARM-267 implements the
+    backend's `regenerate_row` boundary without starting Isaac. For each row it
+    reconstructs the source Cartesian tool-tip pose through the pinned model,
+    invokes the canonical RoArm-M3 IK solver, and supplies the previous
+    accepted row as the first continuity seed. Independent review reproduces
+    the definition, inspects the FK-to-IK call surface, and exercises it with
+    non-runtime doubles. Acceptance covers only per-row IK composition; tool/key
+    metrics, root drift, complete runtime composition, and execution remain
+    separate gates.
+55. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

@@ -1457,3 +1457,11 @@ authority. All byte, duplicate-byte, and reduction limits remain unchanged.
 ARM-266 adds the import-safe runtime-composition readiness gate and its focused
 unit test. The reviewed tracked-file ceiling advances to 6,778; byte ceilings
 remain unchanged.
+
+ARM-267 adds the canonical IK row adapter, its independent offline reviewer,
+and focused tests. The adapter preserves each governed source row's Cartesian
+tool-tip pose through pinned forward kinematics, then calls the canonical IK
+solver with the previous accepted row as its first seed. The reviewed
+tracked-file ceiling advances to 6,781; byte ceilings remain unchanged. The
+adapter and reviewer start no simulator, submit no joint targets, consume no
+attempt, and grant no hardware or physical authority.
