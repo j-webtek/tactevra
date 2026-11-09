@@ -190,6 +190,7 @@ TESTS = (
     "software/tests/unit/test_nominal_route_tool_key_metrics_adapter.py",
     "software/tests/unit/test_nominal_route_root_drift_adapter.py",
     "software/tests/unit/test_nominal_route_complete_runtime_composition.py",
+    "software/tests/unit/test_nominal_route_native_runtime_construction_plan.py",
 )
 
 

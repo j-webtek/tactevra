@@ -1322,7 +1322,16 @@ ScheduleGen. Neither is a physical success rate.
     surfaces, and verifies argument/result preservation with non-runtime
     doubles. Native runtime construction, backend execution, and any simulation
     attempt remain separate gates.
-58. Expand only after each predecessor produces reviewable evidence.
+58. **LM4 native-runtime construction plan and review:** ARM-271 pins the
+    already-initialized articulation, environment-only scene query, one-prim
+    key and root views, and one canonical IK solver shared by the IK and
+    metrics adapters. It fixes exact constructor arguments, one post-settle
+    baseline read per view, and the construction order ending in an uncalled
+    ARM-270 composition. Independent review reproduces the plan and verifies
+    current constructor signatures and native evidence. Factory implementation,
+    native object construction, backend execution, and any simulation attempt
+    remain separate gates.
+59. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
