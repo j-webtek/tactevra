@@ -1281,7 +1281,14 @@ ScheduleGen. Neither is a physical success rate.
     receipt admits later zero-authority runtime composition only; canonical IK,
     tool/key metrics, and root drift remain separate dependencies, and no
     launch, attempt, trajectory, key contact, or physical authority is granted.
-53. Expand only after each predecessor produces reviewable evidence.
+53. **LM4 nominal-route runtime-composition readiness:** ARM-266 pins the exact
+    ARM-255 backend and accepted ARM-265 clearance adapter lineage, proves that
+    continuous clearance is the one reviewed backend method, and orders the
+    remaining adapters: canonical per-row IK regeneration, tool/key metrics,
+    then terminal root drift. The gate remains fail-closed and constructs no
+    runtime objects, starts no simulator, consumes no attempt, and grants no
+    physical authority.
+54. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

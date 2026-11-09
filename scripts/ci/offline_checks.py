@@ -185,6 +185,7 @@ TESTS = (
     "software/tests/unit/test_nominal_route_native_binding_integration_preflight.py",
     "software/tests/unit/test_nominal_route_native_clearance_adapter.py",
     "software/tests/unit/test_nominal_route_native_clearance_adapter_review.py",
+    "software/tests/unit/test_nominal_route_runtime_composition_readiness.py",
 )
 
 

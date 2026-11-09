@@ -1453,3 +1453,7 @@ refinement behavior using non-Isaac doubles. The accepted receipt admits only
 later zero-authority runtime composition; it does not start Isaac, load a scene,
 consume the governed attempt, or grant trajectory, hardware, or physical
 authority. All byte, duplicate-byte, and reduction limits remain unchanged.
+
+ARM-266 adds the import-safe runtime-composition readiness gate and its focused
+unit test. The reviewed tracked-file ceiling advances to 6,778; byte ceilings
+remain unchanged.
