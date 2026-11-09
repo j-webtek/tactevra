@@ -1340,7 +1340,16 @@ ScheduleGen. Neither is a physical success rate.
     counts, shared identity, and the absence of protocol calls. Native-object
     creation, worker integration, backend execution, and simulation remain
     separate gates.
-60. Expand only after each predecessor produces reviewable evidence.
+60. **LM4 native-runtime worker-integration plan and review:** ARM-273 pins the
+    ARM-254 worker, ARM-255 backend, and ARM-272 factory lineage and specifies
+    the future one-attempt call order. ARM-254 remains the sole output claim;
+    scene settle precedes factory construction; one factory runtime is passed
+    to one backend call; outputs precede shutdown; and every failure stops
+    without retry. Independent review reproduces the plan, verifies the exact
+    current call signatures, and retains the missing worker/backend review
+    documents as explicit prerequisites. Integration implementation, launch,
+    backend execution, and any simulation attempt remain separate gates.
+61. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

@@ -1514,3 +1514,14 @@ with non-Isaac doubles. The reviewed tracked-file ceiling advances to 6,796;
 byte ceilings remain unchanged. The factory creates no Isaac-native object,
 steps no physics, calls no backend or runtime protocol method, and grants no
 hardware or physical authority.
+
+ARM-273 adds the native-runtime worker-integration plan, its independent
+offline reviewer, and focused tests. The plan pins the ARM-254 worker,
+ARM-255 backend, and ARM-272 factory boundaries; keeps ARM-254 as the sole
+attempt-directory claimant; and fixes the future order from claim through
+scene settle, factory construction, one backend call, output retention, and
+shutdown. Independent review reproduces the plan and verifies the exact live
+call signatures and zero-authority ordering. The reviewed tracked-file ceiling
+advances to 6,799; byte ceilings remain unchanged. No attempt is claimed, no
+simulator is started, and no runtime, backend, hardware, or physical authority
+is granted.
