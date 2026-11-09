@@ -1331,7 +1331,16 @@ ScheduleGen. Neither is a physical success rate.
     current constructor signatures and native evidence. Factory implementation,
     native object construction, backend execution, and any simulation attempt
     remain separate gates.
-59. Expand only after each predecessor produces reviewable evidence.
+59. **LM4 zero-authority native-runtime factory and review:** ARM-272 implements
+    the accepted ARM-271 assembly order over already-supplied initialized and
+    settled objects. It captures one key and one root baseline, constructs one
+    canonical solver shared by IK and metrics, assembles the four adapters, and
+    returns the uncalled ARM-270 composition. Independent review exercises the
+    factory with non-Isaac doubles and verifies construction order, baseline
+    counts, shared identity, and the absence of protocol calls. Native-object
+    creation, worker integration, backend execution, and simulation remain
+    separate gates.
+60. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
