@@ -1271,7 +1271,17 @@ ScheduleGen. Neither is a physical success rate.
     the composition order and next adapter boundary but does not implement or
     execute that adapter, construct Isaac objects, load a scene, submit joint
     targets, contact a key, consume the attempt, or grant physical authority.
-52. Expand only after each predecessor produces reviewable evidence.
+52. **LM4 native-clearance composition adapter and independent review:**
+    ARM-265 implements the backend's continuous-clearance method by composing
+    the ARM-257 recursive proof with the reviewed ARM-262 native binding. The
+    adapter fixes the 0.5 mm margin, six exclusions, depth-12 fail-closed
+    refinement, and environment-only scene boundary. An independent reviewer
+    reproduces the definition, inspects the source call surface, and exercises
+    direct-clear and recursive-refinement paths with non-Isaac doubles. The
+    receipt admits later zero-authority runtime composition only; canonical IK,
+    tool/key metrics, and root drift remain separate dependencies, and no
+    launch, attempt, trajectory, key contact, or physical authority is granted.
+53. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 
