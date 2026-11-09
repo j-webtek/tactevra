@@ -1503,3 +1503,14 @@ native API evidence. The reviewed tracked-file ceiling advances to 6,793; byte
 ceilings remain unchanged. No native object is constructed, no protocol method
 or backend is called, and no simulation, hardware, or physical authority is
 granted.
+
+ARM-272 adds the zero-authority native-runtime factory, its independent offline
+reviewer, and focused tests. From already-supplied initialized objects, the
+factory captures one post-settle key baseline and one root baseline, constructs
+one canonical solver shared by IK and metrics, assembles all four reviewed
+adapters, and returns the uncalled ARM-270 composition. Independent review
+reproduces the definition and verifies construction order and object identity
+with non-Isaac doubles. The reviewed tracked-file ceiling advances to 6,796;
+byte ceilings remain unchanged. The factory creates no Isaac-native object,
+steps no physics, calls no backend or runtime protocol method, and grants no
+hardware or physical authority.

@@ -3533,6 +3533,26 @@ drafts only. The next gate is implementation and independent review of the
 zero-authority factory; no native object construction, backend execution, or
 simulation attempt is admitted by ARM-271.
 
+ARM-272 adds `nominal_route_native_runtime_factory.py` and an independent
+reviewer. Given already-supplied initialized objects and an already-settled
+scene, the factory reads the key and root baselines once, constructs one
+canonical IK solver shared by the IK and metrics adapters, assembles the four
+reviewed runtime adapters, and returns the uncalled ARM-270 composition.
+
+Primary and reproduction factory files share SHA-256
+`6572a0a9166106c0321349ef4b8276154f06ab775ec478a941869e6b5c7ce854`
+and canonical factory SHA-256
+`1ff2ffdd97b5ec8514a86fdb21e1cac3aae8a445d388a8b10a9fd6775e6fe818`.
+Primary and reproduction review files share SHA-256
+`0418f5c0e6d4e9fe35de36be68a9f46a05dbccb2ba4ea0f15231a8828542aca0`
+and canonical review SHA-256
+`5ec24c47b771d8ecb63b1db839562a62f973b5b2aa3a0ba7cb75d7da1d7bf6f7`.
+The review status is
+`ACCEPTED_FOR_ZERO_AUTHORITY_NATIVE_RUNTIME_FACTORY_USE`. The next separate
+gate is planning a native worker integration. ARM-272 does not create
+Isaac-native objects, launch Isaac, step physics, call a backend or protocol
+method, consume an attempt, or grant hardware or physical authority.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
