@@ -3553,6 +3553,31 @@ gate is planning a native worker integration. ARM-272 does not create
 Isaac-native objects, launch Isaac, step physics, call a backend or protocol
 method, consume an attempt, or grant hardware or physical authority.
 
+ARM-273 adds `nominal_route_native_runtime_worker_integration_plan.py` and an
+independent reviewer. The plan connects the ARM-254 one-attempt worker,
+ARM-255 deterministic backend, and ARM-272 runtime factory at the contract
+level. It keeps ARM-254 as the only output-directory claimant and fixes the
+future order: claim, launch, exact scene load, settle, native-object supply,
+one factory construction, one backend call, output retention, and shutdown
+without retry.
+
+Primary and reproduction plan files share SHA-256
+`945fa5bb7cdefd453a6cd880be7ac1aa995224769aeb3a31c0e158800ba45cfa`
+and canonical plan SHA-256
+`aa779b19778ef40daacf8f5c0f62ca2aaccf2e27c1b3643d2a3a70d5f7981576`.
+Primary and reproduction review files share SHA-256
+`e026d58361b84535c0c3553d6d5de824696aeda6e1670dd5d279297d19f8a3f2`
+and canonical review SHA-256
+`6d7056068f822ffc4b0b9e8ca7ae85d24a789ca6a5c27ba43b63ceb4e4ebd5be`.
+The accepted `-002` plan and review supersede the retained `-001` diagnostic
+drafts. Review status is
+`ACCEPTED_FOR_ZERO_AUTHORITY_NATIVE_RUNTIME_WORKER_INTEGRATION_IMPLEMENTATION`.
+The next separate gate is implementation and review of that zero-authority
+integration, including materialization of the worker and backend review
+documents expected by their existing execution surfaces. ARM-273 claims no
+attempt, starts no simulator, and calls no worker, factory, backend, or runtime
+method.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
