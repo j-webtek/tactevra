@@ -3182,6 +3182,39 @@ The preliminary `-001` and `-002` artifacts predate the final overlap and
 independent-review admission boundaries and are superseded; they must not be
 reviewed or executed.
 
+ARM-263 adds `nominal_route_native_sweep_binding_review.py`, an independent,
+import-safe reviewer for the exact ARM-262 definition and implementation. It
+reopens the ARM-260 and ARM-261 canonical lineage, reproduces the ARM-262
+definition byte for byte, independently rederives the URDF path-deviation
+coefficients, inspects the Python method/call surface, and uses non-Isaac test
+doubles to verify native transform mapping, millimetre-to-metre query
+conversion, endpoint overlaps, continuous environment sweeps, moving
+self-collision, exact exclusions, and environment-only query-scene rejection.
+Its accepted receipt satisfies the ARM-262 constructor gate but admits runtime
+construction only inside a future separately admitted worker. It does not
+start Isaac, load a scene, play a trajectory, submit a joint target, contact a
+key, create the governed attempt, or grant hardware or physical authority.
+
+Build and reproduce the independent review with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_native_sweep_binding_review.py `
+  --binding "$root/arm262-native-sweep-binding-003/binding.json" `
+  --readiness "$root/arm261-native-binding-readiness-001/readiness.json" `
+  --proof-review "$root/arm260-native-proof-input-review-002/review.json" `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --binding-source software/integrations/isaac_sim/nominal_route_native_sweep_binding.py `
+  --output "$root/arm263-native-sweep-binding-review-001/review.json"
+```
+
+The retained primary and reproduction files share file SHA-256
+`b13a1de38086c865040b81e49045ec3405b6d1b9c12876bec7a3fe45416d7620`
+and canonical binding-review SHA-256
+`a271316bf5deb863fdb67832a1291158a8292f7950a2e8a8c1b8189b2ef10b91`.
+The next stage is a zero-authority native-binding integration preflight; the
+review receipt alone is not launch or attempt authority.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

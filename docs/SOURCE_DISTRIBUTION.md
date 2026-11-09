@@ -1422,3 +1422,14 @@ queries, and checks moving self-collision with exactly the reviewed exclusions.
 The definition remains pending independent review; it starts no runtime,
 consumes no governed attempt, and grants no hardware or physical authority.
 All byte, duplicate-byte, and reduction limits remain unchanged.
+
+ARM-263 adds two tracked Python paths and advances the reviewed tracked-file
+ceiling from 6,768 to 6,770. Its independent reviewer reopens the exact ARM-262
+artifact, implementation source, certified inputs, and governed URDF;
+independently rederives the path-deviation coefficients; and exercises native
+transform, query-unit, endpoint-overlap, continuous-sweep, self-collision, and
+exclusion behavior through non-Isaac test doubles. The accepted receipt admits
+only construction of the exact reviewed binding inside a future separately
+admitted worker. It starts no runtime, consumes no governed attempt, and grants
+no trajectory, hardware, or physical authority. All byte, duplicate-byte, and
+reduction limits remain unchanged.
