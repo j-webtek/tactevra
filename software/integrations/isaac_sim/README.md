@@ -3317,6 +3317,49 @@ The retained primary and reproduction files share file SHA-256
 `572f97eb6c4b52f77b823da767ec270fa9e4c78112e9de69c284133bb91f8b75`
 and canonical readiness SHA-256
 `7259e53c0e5522a090a0cdce9c36034fc793bcd093cdfdcce63bee9b99f14bab`.
+
+ARM-267 adds `nominal_route_canonical_ik_row_adapter.py` and its independent
+reviewer. The adapter implements only `regenerate_row`: it reconstructs the
+source row's tool-tip pose through pinned forward kinematics, calls the
+canonical RoArm-M3 IK solver, and uses the previous accepted row as the first
+seed. This preserves the Cartesian route while allowing deterministic branch
+regeneration. The adapter performs kinematic math only and cannot start Isaac,
+submit a joint target, consume the attempt, or access hardware.
+
+Build and review the adapter with:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$route = "$root/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json"
+python software/integrations/isaac_sim/nominal_route_canonical_ik_row_adapter.py `
+  --readiness "$root/arm266-runtime-composition-readiness-001/readiness.json" `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --route $route `
+  --ik-source software/src/rocell/kinematics/ik.py `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --adapter-source software/integrations/isaac_sim/nominal_route_canonical_ik_row_adapter.py `
+  --output "$root/arm267-canonical-ik-row-adapter-001/adapter.json"
+python software/integrations/isaac_sim/nominal_route_canonical_ik_row_adapter_review.py `
+  --adapter "$root/arm267-canonical-ik-row-adapter-001/adapter.json" `
+  --adapter-source software/integrations/isaac_sim/nominal_route_canonical_ik_row_adapter.py `
+  --readiness "$root/arm266-runtime-composition-readiness-001/readiness.json" `
+  --backend "$root/arm255-nominal-route-physics-backend-001/backend.json" `
+  --route $route `
+  --ik-source software/src/rocell/kinematics/ik.py `
+  --urdf software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf `
+  --output "$root/arm267-canonical-ik-row-adapter-review-001/review.json"
+```
+
+Primary and reproduction adapter files share SHA-256
+`b3e799c4964bec898772730502f3c81cf22f9e0ded7447f76d21b6a284786f1a`
+and canonical adapter SHA-256
+`0c6b35d2392604687bc52bf723b9422967cc9631c5e33557a56cf7f2c5e4829a`.
+Primary and reproduction review files share SHA-256
+`cb61e4005777e0f75556fb238b18608be029375da2b4b11a1be75b0da74fe42f`
+and canonical review SHA-256
+`45ab4fde0d228893b0adc3e2c25ccb7ac15939742f24712c0b31e358ca41592a`.
+The review status is `ACCEPTED_FOR_ZERO_AUTHORITY_RUNTIME_COMPOSITION`.
+The next adapter is `measure_tool_key`; root drift follows it.
 and canonical review SHA-256
 `f83cd6b50c6dc93ed37ea4743bc50174e97e1a498a71b8b08c98969011d44243`.
 No ARM-265 command starts Isaac, loads a scene, consumes a governed attempt,
