@@ -3453,6 +3453,58 @@ The review status is `ACCEPTED_FOR_ZERO_AUTHORITY_RUNTIME_COMPOSITION`.
 All four ARM-255 runtime methods now have accepted offline adapters; complete
 zero-authority runtime composition is the next separate gate.
 
+ARM-270 adds `nominal_route_complete_runtime_composition.py` and an independent
+reviewer. The composition pins the exact ARM-255 backend plus the accepted
+ARM-265, ARM-267, ARM-268, and ARM-269 adapter/review artifacts and sources. It
+exposes the backend's four-method protocol by delegating each method exactly
+once to its reviewed component. The definition and review CLIs construct no
+native object, import no Isaac module, call no backend, and consume no attempt.
+
+Build and review the composition with the accepted artifacts:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$common = @(
+  '--backend', "$root/arm255-nominal-route-physics-backend-001/backend.json",
+  '--clearance-adapter', "$root/arm265-native-clearance-adapter-001/adapter.json",
+  '--clearance-review', "$root/arm265-native-clearance-adapter-review-001/review.json",
+  '--clearance-adapter-source', 'software/integrations/isaac_sim/nominal_route_native_clearance_adapter.py',
+  '--clearance-review-source', 'software/integrations/isaac_sim/nominal_route_native_clearance_adapter_review.py',
+  '--ik-adapter', "$root/arm267-canonical-ik-row-adapter-001/adapter.json",
+  '--ik-review', "$root/arm267-canonical-ik-row-adapter-review-001/review.json",
+  '--ik-adapter-source', 'software/integrations/isaac_sim/nominal_route_canonical_ik_row_adapter.py',
+  '--ik-review-source', 'software/integrations/isaac_sim/nominal_route_canonical_ik_row_adapter_review.py',
+  '--metrics-adapter', "$root/arm268-tool-key-metrics-adapter-002/adapter.json",
+  '--metrics-review', "$root/arm268-tool-key-metrics-adapter-review-002/review.json",
+  '--metrics-adapter-source', 'software/integrations/isaac_sim/nominal_route_tool_key_metrics_adapter.py',
+  '--metrics-review-source', 'software/integrations/isaac_sim/nominal_route_tool_key_metrics_adapter_review.py',
+  '--drift-adapter', "$root/arm269-root-drift-adapter-001/adapter.json",
+  '--drift-review', "$root/arm269-root-drift-adapter-review-001/review.json",
+  '--drift-adapter-source', 'software/integrations/isaac_sim/nominal_route_root_drift_adapter.py',
+  '--drift-review-source', 'software/integrations/isaac_sim/nominal_route_root_drift_adapter_review.py'
+)
+python software/integrations/isaac_sim/nominal_route_complete_runtime_composition.py @common `
+  --composition-source software/integrations/isaac_sim/nominal_route_complete_runtime_composition.py `
+  --output "$root/arm270-complete-runtime-composition-001/composition.json"
+python software/integrations/isaac_sim/nominal_route_complete_runtime_composition_review.py `
+  --composition "$root/arm270-complete-runtime-composition-001/composition.json" `
+  --composition-source software/integrations/isaac_sim/nominal_route_complete_runtime_composition.py `
+  @common `
+  --output "$root/arm270-complete-runtime-composition-review-001/review.json"
+```
+
+Primary and reproduction composition files share SHA-256
+`7d091f477dc1986b505693cbf8faed0d27cebd605860520f29e3535f6b15aa32`
+and canonical composition SHA-256
+`05b0bc6e8c63022fcecde6fab02302de0abd63432084a6e84fe8e6c916ed2d19`.
+Primary and reproduction review files share SHA-256
+`5657126f17c4415caed380e5aaf5194f985f8a93c1423764a3cfd471acb95645`
+and canonical review SHA-256
+`75909dfe78ddc0c5ce8ec0c8bb84660e9cd38086d077b570277733a243f0fca1`.
+The review status is `ACCEPTED_FOR_ZERO_AUTHORITY_NATIVE_RUNTIME_CONSTRUCTION`.
+The next separate gate is a reviewed plan for native runtime object
+construction; backend execution and simulation remain unadmitted.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

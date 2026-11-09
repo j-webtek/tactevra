@@ -1314,7 +1314,15 @@ ScheduleGen. Neither is a physical success rate.
     the single-read calculation, and proves out-of-tolerance failure with
     non-runtime doubles. Complete runtime composition, native execution, and
     physical use remain separate gates.
-57. Expand only after each predecessor produces reviewable evidence.
+57. **LM4 complete zero-authority runtime composition and review:** ARM-270
+    binds the four accepted adapter objects behind the exact ARM-255 runtime
+    protocol. The composition performs one-to-one delegation only; it does not
+    construct native objects or call the backend. Independent review reproduces
+    all pinned definitions and source hashes, inspects the four delegation
+    surfaces, and verifies argument/result preservation with non-runtime
+    doubles. Native runtime construction, backend execution, and any simulation
+    attempt remain separate gates.
+58. Expand only after each predecessor produces reviewable evidence.
 
 ## Completion criterion
 

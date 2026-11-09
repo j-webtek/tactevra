@@ -1482,3 +1482,13 @@ distance, and fails closed beyond 0.05 mm translation or 0.1 degree rotation.
 The reviewed tracked-file ceiling advances to 6,787; byte ceilings remain
 unchanged. The adapter and reviewer start no simulator, submit no joint target,
 consume no attempt, and grant no hardware or physical authority.
+
+ARM-270 adds the complete zero-authority runtime composition, its independent
+offline reviewer, and focused tests. The composition binds the accepted
+clearance, canonical-IK, tool/key-metrics, and root-drift adapters behind the
+four-method ARM-255 protocol using delegation only. Independent review
+reproduces every pinned artifact and source hash and verifies one-to-one
+argument/result-preserving delegation with non-runtime doubles. The reviewed
+tracked-file ceiling advances to 6,790; byte ceilings remain unchanged. No
+native object is constructed, no backend is called, and no execution, hardware,
+or physical authority is granted.
