@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,9 @@ SOURCE = (
     / "isaac_sim"
     / "nominal_route_native_session_smoke.py"
 )
+INTEGRATION = SOURCE.parent
+if str(INTEGRATION) not in sys.path:
+    sys.path.insert(0, str(INTEGRATION))
 SPEC = importlib.util.spec_from_file_location("native_session_smoke", SOURCE)
 assert SPEC and SPEC.loader
 MODULE = importlib.util.module_from_spec(SPEC)
@@ -181,6 +185,46 @@ def test_inert_smoke_accepts_usd_float_round_trip_and_quaternion_sign(tmp_path):
     )
     assert result["status"].startswith("PASS_INERT_NATIVE_SESSION")
     assert driver.calls[-1] == "shutdown"
+
+
+def test_inert_smoke_accepts_exact_pinned_mechanics_binding(tmp_path):
+    changed = observation()
+    changed["mechanics_profile"] = {
+        "profile_sha256": MODULE.PROFILE_SHA256,
+        "rigid_body_count": 7,
+        "rigid_body_paths": [f"/body/{index}" for index in range(7)],
+        "total_mass_kg": 1.021,
+        "dof_count": 6,
+        "dof_names": [f"joint{index}" for index in range(1, 7)],
+        "dof_parameters": {
+            "damping": 10.0,
+            "maximum_effort": 100.0,
+            "maximum_velocity_rad_s": 2.0,
+            "stiffness": 100.0,
+        },
+    }
+    result = MODULE.run_inert_smoke(
+        Driver(result=changed),
+        output_directory=tmp_path / "smoke",
+        governed_attempt_directory=tmp_path / "governed",
+    )
+    assert result["status"] == "PASS_INERT_NATIVE_SESSION_WITH_PINNED_MECHANICS"
+
+
+def test_inert_smoke_rejects_changed_mechanics_binding(tmp_path):
+    changed = observation()
+    changed["mechanics_profile"] = {
+        "profile_sha256": "0" * 64,
+        "rigid_body_count": 7,
+        "dof_count": 6,
+        "total_mass_kg": 1.021,
+    }
+    with pytest.raises(MODULE.InertSmokeError, match="mechanics profile"):
+        MODULE.run_inert_smoke(
+            Driver(result=changed),
+            output_directory=tmp_path / "smoke",
+            governed_attempt_directory=tmp_path / "governed",
+        )
 
 
 def test_articulation_adapter_exposes_native_link_view():

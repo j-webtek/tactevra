@@ -1543,3 +1543,14 @@ joint targets, contacting a key, or claiming the governed attempt. The smoke
 also identifies the actual nested base prim and supplies narrow articulation
 and USD root-pose adapters needed by the next concrete-session gate. All byte,
 duplicate-byte, and reduction limits remain unchanged.
+
+ARM-276 adds an import-safe native mechanics-profile binder and focused tests,
+advancing the reviewed tracked-file ceiling from 6,804 to 6,806. The binder
+validates the existing hash-pinned, simulation-only geometry prior; applies and
+reads back mass, center of mass, diagonal inertia, and principal axes for all
+seven rigid bodies; and binds the provisional gains and limits for all six
+DOFs without setting positions or targets. A retained inert Isaac receipt
+proves the corrected route pose and mechanics profile initialize together with
+zero timeline plays, physics steps, joint targets, key contacts, governed
+attempts, or hardware authority. All byte, duplicate-byte, and reduction limits
+remain unchanged.
