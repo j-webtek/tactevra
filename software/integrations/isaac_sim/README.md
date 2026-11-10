@@ -3015,6 +3015,25 @@ attempt directory is claimed. It never retries, submits joint targets, plays a
 trajectory, or grants hardware or physical authority. Store its receipt outside
 the governed attempt directory until the worker performs its atomic claim.
 
+After a consumed attempt fails before physics because host commit is exhausted,
+build a new non-executing recovery request. The recovery request binds the old
+request, its retained failure, and a passing memory receipt, but requires a new
+authorization and a fresh preflight at launch:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_recovery_attempt_request.py `
+  --source-request "$root/arm253-nominal-route-physics-attempt-request-001/request.json" `
+  --failure-status "$root/arm254-nominal-route-physics-attempt-001/status.json" `
+  --memory-preflight "$root/arm279-memory-preflight-001/receipt.json" `
+  --proposed-output-directory "$root/arm280-nominal-route-physics-attempt-001" `
+  --output "$root/arm280-nominal-route-physics-recovery-request-001/request.json"
+```
+
+This request cannot claim its output or launch Isaac. Its next stage is an
+independent review of a recovery claimant that refreshes the memory gate before
+the atomic attempt claim.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
