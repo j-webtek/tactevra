@@ -3602,6 +3602,43 @@ step physics, execute the backend, consume an attempt, or grant hardware or
 physical authority. The next gate is a separately authorized exact one-attempt
 use or an independently defined inert dry run.
 
+ARM-275 implements and executes that inert dry run. The import-safe launcher
+hash-checks the pinned robot USD, nominal layout, and corrected SPACE route
+before starting Isaac Sim 6.1 once. It authors the 610 x 457 x 18 mm nominal
+board and SPACE at board-frame center `(224, 112, 18) mm`, initializes physics
+without playing the timeline or taking a step, and verifies the articulation,
+link inventory, fixed-root prim, and scene-query surface. It does not invoke
+ARM-254 or ARM-255, submit a joint target, touch a key, create the governed
+attempt directory, or grant hardware or physical authority.
+
+The retained passing receipt is
+`C:/IsaacSim/artifacts/issue190/arm275-inert-native-session-smoke-002/receipt.json`
+(raw SHA-256
+`845e6139f189759db9e49dca4f2bebec3fe8c2f7afe3eeadf1f5c606d8c60233`).
+It proves six ordered DOFs, seven links, `overlap_sphere_any` and
+`sweep_sphere_any`, and the expected SPACE pose. It also resolves two native
+integration mismatches before the governed attempt: Isaac exposes link
+transforms on its native physics articulation view, and the actual base prim
+is `/roarm_m3/Geometry/world/base_link`, not the planned
+`/roarm_m3/base_link` alias. ARM-275 supplies a narrow articulation adapter and
+a USD-backed root pose view so the nested base does not create a conflicting
+PhysX tensor view. The next gate is to correct and independently review the
+ARM-271/272 factory metadata and concrete session binding, including application
+of the already-pinned mass/inertia profile, before any authorized route attempt.
+
+Run a new, explicitly numbered inert diagnostic with:
+
+```powershell
+$env:OMNI_KIT_ACCEPT_EULA = 'YES' # only after accepting NVIDIA's EULA
+& C:/IsaacSim/env_6_1_0/Scripts/python.exe `
+  software/integrations/isaac_sim/nominal_route_native_session_smoke.py `
+  --robot-usd C:/IsaacSim/artifacts/issue190/wp1-import-003/roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda `
+  --layout software/config/nominal_target_profiles.json `
+  --route C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --output-directory C:/IsaacSim/artifacts/issue190/arm275-inert-native-session-smoke-NEW `
+  --governed-attempt-directory C:/IsaacSim/artifacts/issue190/arm254-nominal-route-physics-attempt-001
+```
+
 Build the non-executing ARM-232 request with:
 
 ```powershell
