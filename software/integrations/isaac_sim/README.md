@@ -3000,6 +3000,21 @@ review may the envelope admit the already defined, separately authorized single
 attempt. A passing SPACE result remains only the first primitive toward the
 representative multi-key and vision-conditioned automatic-typing stages.
 
+Before entering the separately governed `run_one_attempt` call, run the
+read-only host-memory gate:
+
+```powershell
+python software/integrations/isaac_sim/nominal_route_memory_preflight.py `
+  --output C:/IsaacSim/artifacts/issue190/arm253-memory-preflight-next-001/receipt.json
+```
+
+The gate admits launch only when at least 32 GiB of system commit and 16 GiB
+of physical memory remain available and commit utilization is no greater than
+90 percent. A failure exits with code 2 before Isaac starts or the governed
+attempt directory is claimed. It never retries, submits joint targets, plays a
+trajectory, or grants hardware or physical authority. Store its receipt outside
+the governed attempt directory until the worker performs its atomic claim.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
