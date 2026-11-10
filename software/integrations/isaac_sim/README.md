@@ -3054,6 +3054,25 @@ The definition does not collect memory, claim an attempt, or start Isaac. It
 must pass an independent claimant review before the exact authorization can be
 accepted.
 
+ARM-282 independently checks the claimant's retained lineage and source order:
+the exact new authorization must precede memory collection; a passing receipt
+must be retained before the claimant becomes single-use; and single-use
+consumption must precede its sole worker delegation. The review imports neither
+Isaac nor hardware control:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_recovery_claimant_review.py `
+  --claimant "$root/arm281-nominal-route-physics-recovery-claimant-001/claimant.json" `
+  --claimant-source software/integrations/isaac_sim/nominal_route_physics_recovery_claimant.py `
+  --review-source software/integrations/isaac_sim/nominal_route_physics_recovery_claimant_review.py `
+  --output "$root/arm282-nominal-route-physics-recovery-claimant-review-001/review.json"
+```
+
+A passing review admits only a separately authorized simulation attempt. It
+does not itself collect memory, claim the output, start Isaac, or grant physical
+authority.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
