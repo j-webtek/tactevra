@@ -3664,6 +3664,21 @@ The next gate is to correct the ARM-271/272 native root metadata to
 `/roarm_m3/Geometry/world/base_link` and reuse this binder in the concrete
 single-use session before any separately authorized physics-stepped route.
 
+ARM-277 completed that correction and concrete-session gate. The retained
+`arm277-concrete-native-session-settle-001/receipt.json` records exactly 30
+settle-only steps with maximum root translation drift
+`1.19209391136188e-07 m` and unchanged orientation. It used no trajectory,
+joint target, key contact, governed attempt, hardware, or physical authority.
+
+ARM-278 adds `nominal_route_concrete_native_attempt_binding.py`. It validates
+the retained ARM-277 receipt and pinned robot, board, route, and mechanics
+inputs; binds every reviewed ARM-262 through ARM-274 runtime component; and
+constructs the one-attempt backend behind a deferred concrete Isaac session.
+Running the ARM-278 CLI is a zero-authority preflight: it does not instantiate
+the session, start Isaac, claim the ARM-254 attempt directory, or call the
+backend. The resulting receipt retains the exact authorization statement that
+must be supplied separately before ARM-254 may perform one governed attempt.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

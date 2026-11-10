@@ -1565,3 +1565,14 @@ exactly 30 settle-only physics steps. Maximum root translation drift was
 joint position, joint target, key contact, governed attempt, hardware access,
 or physical authority was used. All byte, duplicate-byte, and reduction limits
 remain unchanged.
+
+ARM-278 adds an import-safe concrete native attempt binder and focused tests,
+advancing the reviewed tracked-file ceiling from 6,810 to 6,812. The binder
+hash-pins the retained ARM-277 settle evidence, robot USD, board layout, route,
+and mechanics profile; loads the reviewed ARM-262 through ARM-274 adapter and
+factory chain; applies the nested-root metadata correction; and constructs the
+single-use backend behind a deferred concrete-session factory. Its retained
+receipt proves that binding creates no session, claims no attempt, starts no
+simulator, steps no physics, submits no target, and grants no hardware or
+physical authority. The exact ARM-253 authorization remains a separate
+requirement. All byte, duplicate-byte, and reduction limits remain unchanged.

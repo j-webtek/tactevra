@@ -198,6 +198,7 @@ TESTS = (
     "software/tests/unit/test_nominal_route_native_mechanics_profile.py",
     "software/tests/unit/test_nominal_route_native_root_path_correction.py",
     "software/tests/unit/test_nominal_route_concrete_native_session_smoke.py",
+    "software/tests/unit/test_nominal_route_concrete_native_attempt_binding.py",
 )
 
 
