@@ -3638,9 +3638,31 @@ $env:OMNI_KIT_ACCEPT_EULA = 'YES' # only after accepting NVIDIA's EULA
   --robot-usd C:/IsaacSim/artifacts/issue190/wp1-import-003/roarm_m3_kinematic_40dbd84/roarm_m3_kinematic_40dbd84.usda `
   --layout software/config/nominal_target_profiles.json `
   --route C:/IsaacSim/artifacts/issue190/arm231-state-policy-fixed-fixture-correction-001/episode-ef340d0ad2740c118d87/native_mechanics_plan.json `
+  --mechanics-profile software/config/isaac_lm0b_geometry_prior_profile.json `
   --output-directory C:/IsaacSim/artifacts/issue190/arm275-inert-native-session-smoke-NEW `
   --governed-attempt-directory C:/IsaacSim/artifacts/issue190/arm254-nominal-route-physics-attempt-001
 ```
+
+ARM-276 binds the existing provisional mechanics profile to that native inert
+session. `nominal_route_native_mechanics_profile.py` verifies profile SHA-256
+`768829bc8c131efe41e8866b6a18900a24b3f77e2ef97b367b55cffbfcf9881a`,
+applies and reads back mass, center of mass, diagonal inertia, and principal
+axes for all seven native rigid bodies, and applies the pinned gains and limits
+to all six DOFs. It does not set a joint position or target.
+
+The retained passing receipt is
+`C:/IsaacSim/artifacts/issue190/arm276-inert-native-mechanics-smoke-002/receipt.json`
+(raw SHA-256
+`f2a41738cb7fd75df69d46e576ec1319a9d35fc0ea0642401e6b9724663d3f5a`).
+It records total modeled mass `1.021 kg`, seven rigid-body bindings, six drive
+bindings, the corrected route pose, and zero timeline plays, physics steps,
+joint targets, key contacts, governed attempts, or hardware actions. The Isaac
+log contains no invalid-inertia or negative-mass warning. This remains
+provisional simulation evidence: the profile is geometry-derived and is not
+physical system-identification, torque, timing, contact, or safety evidence.
+The next gate is to correct the ARM-271/272 native root metadata to
+`/roarm_m3/Geometry/world/base_link` and reuse this binder in the concrete
+single-use session before any separately authorized physics-stepped route.
 
 Build the non-executing ARM-232 request with:
 

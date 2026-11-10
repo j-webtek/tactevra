@@ -15,6 +15,16 @@ import math
 from pathlib import Path
 from typing import Any, Mapping, Protocol
 
+from nominal_route_native_mechanics_profile import (
+    EXPECTED_BODY_COUNT,
+    EXPECTED_DOF_COUNT,
+    EXPECTED_TOTAL_MASS_KG,
+    PROFILE_SHA256,
+    bind_drive_properties,
+    bind_mass_properties,
+    load_pinned_profile,
+)
+
 
 SCHEMA = "tactevra.isaac_lm4_inert_native_session_smoke.v1"
 ROBOT_SHA256 = "a0ec437fb4d647f354007dc352a3af8b13576eaf4931d69d60a510bf235ebea2"
@@ -142,7 +152,8 @@ def run_inert_smoke(
             "expected_root_orientation_wxyz",
             "scene_query_methods",
         }
-        if set(observation) != required:
+        allowed = required | {"mechanics_profile"}
+        if set(observation) not in (required, allowed):
             raise InertSmokeError("native observation fields changed")
         if (
             observation["articulation_prim_path"] != ARTICULATION_PATH
@@ -180,9 +191,25 @@ def run_inert_smoke(
         # fixed-root placement check in any operationally meaningful way.
         if position_error > 5e-6 or abs(orientation_dot - 1.0) > 1e-6:
             raise InertSmokeError("fixed root world pose does not match route")
+        mechanics = observation.get("mechanics_profile")
+        if mechanics is not None and (
+            mechanics.get("profile_sha256") != PROFILE_SHA256
+            or mechanics.get("rigid_body_count") != EXPECTED_BODY_COUNT
+            or mechanics.get("dof_count") != EXPECTED_DOF_COUNT
+            or not math.isclose(
+                float(mechanics.get("total_mass_kg", math.nan)),
+                EXPECTED_TOTAL_MASS_KG,
+                abs_tol=1e-12,
+            )
+        ):
+            raise InertSmokeError("native mechanics profile binding changed")
         receipt = {
             "schema": SCHEMA,
-            "status": "PASS_INERT_NATIVE_SESSION_READY_FOR_FACTORY_PATH_CORRECTION",
+            "status": (
+                "PASS_INERT_NATIVE_SESSION_WITH_PINNED_MECHANICS"
+                if mechanics is not None
+                else "PASS_INERT_NATIVE_SESSION_READY_FOR_FACTORY_PATH_CORRECTION"
+            ),
             "smoke_id": output_directory.name,
             "observation": observation,
             "root_path_finding": {
@@ -217,7 +244,13 @@ def run_inert_smoke(
 class IsaacInertSmokeDriver:
     """Concrete Isaac 6.1 driver; construction itself starts no simulator."""
 
-    def __init__(self, robot_usd: Path, layout: Path, route: Path) -> None:
+    def __init__(
+        self,
+        robot_usd: Path,
+        layout: Path,
+        route: Path,
+        mechanics_profile: Path | None = None,
+    ) -> None:
         for path, digest, label in (
             (robot_usd, ROBOT_SHA256, "robot USD"),
             (layout, LAYOUT_SHA256, "nominal layout"),
@@ -228,6 +261,11 @@ class IsaacInertSmokeDriver:
         self._robot_usd = robot_usd.resolve()
         self._layout = json.loads(layout.read_bytes())
         self._route = json.loads(route.read_bytes())
+        self._mechanics_profile = (
+            load_pinned_profile(mechanics_profile)
+            if mechanics_profile is not None
+            else None
+        )
         self._app: Any = None
 
     def start(self) -> None:
@@ -256,7 +294,12 @@ class IsaacInertSmokeDriver:
         stage = omni.usd.get_context().get_stage()
         scene = UsdPhysics.Scene.Define(stage, "/World/physicsScene")
         scene.CreateGravityDirectionAttr().Set(Gf.Vec3f(0.0, 0.0, -1.0))
-        scene.CreateGravityMagnitudeAttr().Set(9.80665)
+        gravity = (
+            float(self._mechanics_profile["gravity_m_s2"])
+            if self._mechanics_profile is not None
+            else 9.80665
+        )
+        scene.CreateGravityMagnitudeAttr().Set(gravity)
 
         root = stage.GetPrimAtPath(ARTICULATION_PATH)
         actual_root = stage.GetPrimAtPath(ACTUAL_ROOT_PATH)
@@ -288,6 +331,12 @@ class IsaacInertSmokeDriver:
         fixed.CreateBody1Rel().SetTargets([actual_root.GetPath()])
         fixed.CreateJointEnabledAttr().Set(True)
 
+        mass_binding = (
+            bind_mass_properties(stage, self._mechanics_profile)
+            if self._mechanics_profile is not None
+            else None
+        )
+
         board = UsdGeom.Cube.Define(stage, BOARD_PATH)
         board.CreateSizeAttr(2.0)
         board_xform = UsdGeom.Xformable(board.GetPrim())
@@ -316,10 +365,20 @@ class IsaacInertSmokeDriver:
         )
         UsdPhysics.CollisionAPI.Apply(key.GetPrim())
 
+        if self._mechanics_profile is not None:
+            SimulationManager.set_physics_dt(
+                float(self._mechanics_profile["physics_dt_s"])
+            )
         SimulationManager.initialize_physics()
         for _ in range(5):
             self._app.update()
-        articulation = IsaacArticulationLinkView(Articulation(ARTICULATION_PATH))
+        native_articulation = Articulation(ARTICULATION_PATH)
+        drive_binding = (
+            bind_drive_properties(native_articulation, self._mechanics_profile)
+            if self._mechanics_profile is not None
+            else None
+        )
+        articulation = IsaacArticulationLinkView(native_articulation)
         links = articulation.get_link_transforms()
         query = get_physx_scene_query_interface()
 
@@ -338,7 +397,7 @@ class IsaacInertSmokeDriver:
         methods = sorted(
             name for name in dir(query) if name.startswith(("overlap_", "sweep_"))
         )
-        return {
+        result = {
             "isaacsim_distribution": importlib.metadata.version("isaacsim"),
             "kit_version": omni.kit.app.get_app().get_app_version(),
             "articulation_prim_path": ARTICULATION_PATH,
@@ -366,6 +425,9 @@ class IsaacInertSmokeDriver:
             ],
             "scene_query_methods": methods,
         }
+        if mass_binding is not None and drive_binding is not None:
+            result["mechanics_profile"] = {**mass_binding, **drive_binding}
+        return result
 
     def shutdown(self) -> None:
         if self._app is not None:
@@ -378,10 +440,16 @@ def main() -> int:
     parser.add_argument("--robot-usd", type=Path, required=True)
     parser.add_argument("--layout", type=Path, required=True)
     parser.add_argument("--route", type=Path, required=True)
+    parser.add_argument("--mechanics-profile", type=Path)
     parser.add_argument("--output-directory", type=Path, required=True)
     parser.add_argument("--governed-attempt-directory", type=Path, required=True)
     args = parser.parse_args()
-    driver = IsaacInertSmokeDriver(args.robot_usd, args.layout, args.route)
+    driver = IsaacInertSmokeDriver(
+        args.robot_usd,
+        args.layout,
+        args.route,
+        mechanics_profile=args.mechanics_profile,
+    )
     receipt = run_inert_smoke(
         driver,
         output_directory=args.output_directory,
