@@ -3578,6 +3578,30 @@ documents expected by their existing execution surfaces. ARM-273 claims no
 attempt, starts no simulator, and calls no worker, factory, backend, or runtime
 method.
 
+ARM-274 adds `nominal_route_native_runtime_worker_integration.py` and an
+independent reviewer. The integration materializes the exact worker and
+backend reviews required by ARM-254 and ARM-255, then exposes a single-use
+backend callable. The callable refuses to create a native session until the
+ARM-254 claim receipt exists, performs the pinned start/load/initialize/settle
+order, passes the ARM-272 factory result by identity into ARM-255, and always
+shuts the session down through a `finally` guard. A second invocation is
+rejected, so no retry path is present.
+
+Primary and reproduction integration files share SHA-256
+`fb1c6de09b3c56dae645d8df57885b58776beced2ea233edd800c71aa185b882`
+and canonical integration SHA-256
+`2f6a42acd90df0371121cf6e601975ade77ccb5017a4880c762cc41ca1703f32`.
+Primary and reproduction review files share SHA-256
+`da12202c2684950a11803991907a17d716c3945cba74740f6739a5ab9d15b322`
+and canonical review SHA-256
+`7bc98370804e1473220bb0952b9b159bb19bada66ca5b82c626aca52964e06c5`.
+Review status is
+`ACCEPTED_FOR_SEPARATELY_AUTHORIZED_ONE_ATTEMPT_WORKER_USE`. ARM-274 itself
+does not invoke ARM-254, create a native session, launch Isaac, load a scene,
+step physics, execute the backend, consume an attempt, or grant hardware or
+physical authority. The next gate is a separately authorized exact one-attempt
+use or an independently defined inert dry run.
+
 Build the non-executing ARM-232 request with:
 
 ```powershell

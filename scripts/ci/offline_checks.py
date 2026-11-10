@@ -193,6 +193,7 @@ TESTS = (
     "software/tests/unit/test_nominal_route_native_runtime_construction_plan.py",
     "software/tests/unit/test_nominal_route_native_runtime_factory.py",
     "software/tests/unit/test_nominal_route_native_runtime_worker_integration_plan.py",
+    "software/tests/unit/test_nominal_route_native_runtime_worker_integration.py",
 )
 
 
