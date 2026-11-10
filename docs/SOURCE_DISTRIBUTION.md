@@ -1554,3 +1554,14 @@ proves the corrected route pose and mechanics profile initialize together with
 zero timeline plays, physics steps, joint targets, key contacts, governed
 attempts, or hardware authority. All byte, duplicate-byte, and reduction limits
 remain unchanged.
+
+ARM-277 adds a single-use compatibility boundary for the discovered nested USD
+root path, a concrete native-session lifecycle, one bounded settle smoke, and
+focused tests, advancing the reviewed tracked-file ceiling from 6,806 to 6,810.
+The retained Isaac receipt proves the corrected native root, articulation,
+scene query, key view, and pinned mechanics profile remain coherent through
+exactly 30 settle-only physics steps. Maximum root translation drift was
+1.19209391136188e-07 metres and orientation was unchanged. No trajectory,
+joint position, joint target, key contact, governed attempt, hardware access,
+or physical authority was used. All byte, duplicate-byte, and reduction limits
+remain unchanged.

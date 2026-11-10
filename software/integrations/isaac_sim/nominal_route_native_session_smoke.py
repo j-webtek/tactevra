@@ -70,6 +70,10 @@ class UsdWorldPoseView:
         self._prim = prim
         self._usd_geom = usd_geom
 
+    @property
+    def prim_path(self) -> str:
+        return str(self._prim.GetPath())
+
     def get_world_poses(self) -> tuple[list[list[float]], list[list[float]]]:
         matrix = self._usd_geom.Xformable(
             self._prim
@@ -267,6 +271,15 @@ class IsaacInertSmokeDriver:
             else None
         )
         self._app: Any = None
+        self._stage: Any = None
+        self._key: Any = None
+        self._actual_root: Any = None
+        self._translation: list[float] | None = None
+        self._yaw: float | None = None
+        self._mass_binding: Mapping[str, Any] | None = None
+        self._native: dict[str, Any] | None = None
+        self._observation: dict[str, Any] | None = None
+        self._physics_steps = 0
 
     def start(self) -> None:
         if self._app is not None:
@@ -275,16 +288,18 @@ class IsaacInertSmokeDriver:
 
         self._app = SimulationApp({"headless": True, "multi_gpu": False})
 
+    def start_headless(self) -> None:
+        self.start()
+
     def load_and_initialize(self) -> Mapping[str, Any]:
+        self.load_scene()
+        self.initialize_physics()
+        return self.observation()
+
+    def load_scene(self) -> None:
         if self._app is None:
             raise InertSmokeError("Isaac must start before scene load")
-        import importlib.metadata
-
-        import omni.kit.app
         import omni.usd
-        from isaacsim.core.experimental.prims import Articulation
-        from isaacsim.core.simulation_manager import SimulationManager
-        from omni.physx import get_physx_scene_query_interface
         from pxr import Gf, UsdGeom, UsdPhysics
 
         if not omni.usd.get_context().open_stage(str(self._robot_usd)):
@@ -365,6 +380,24 @@ class IsaacInertSmokeDriver:
         )
         UsdPhysics.CollisionAPI.Apply(key.GetPrim())
 
+        self._stage = stage
+        self._key = key.GetPrim()
+        self._actual_root = actual_root
+        self._translation = translation
+        self._yaw = yaw
+        self._mass_binding = mass_binding
+
+    def initialize_physics(self) -> None:
+        if self._stage is None or self._app is None:
+            raise InertSmokeError("scene must load before physics initialization")
+        import importlib.metadata
+
+        import omni.kit.app
+        from isaacsim.core.experimental.prims import Articulation
+        from isaacsim.core.simulation_manager import SimulationManager
+        from omni.physx import get_physx_scene_query_interface
+        from pxr import UsdGeom
+
         if self._mechanics_profile is not None:
             SimulationManager.set_physics_dt(
                 float(self._mechanics_profile["physics_dt_s"])
@@ -388,8 +421,10 @@ class IsaacInertSmokeDriver:
             return item.tolist() if hasattr(item, "tolist") else list(item)
 
         link_values = values(links)
-        key_matrix = UsdGeom.Xformable(key.GetPrim()).ComputeLocalToWorldTransform(0.0)
-        root_matrix = UsdGeom.Xformable(actual_root).ComputeLocalToWorldTransform(0.0)
+        key_matrix = UsdGeom.Xformable(self._key).ComputeLocalToWorldTransform(0.0)
+        root_matrix = UsdGeom.Xformable(
+            self._actual_root
+        ).ComputeLocalToWorldTransform(0.0)
         key_translation = key_matrix.ExtractTranslation()
         root_translation = root_matrix.ExtractTranslation()
         root_quaternion = root_matrix.RemoveScaleShear().ExtractRotationQuat()
@@ -397,13 +432,20 @@ class IsaacInertSmokeDriver:
         methods = sorted(
             name for name in dir(query) if name.startswith(("overlap_", "sweep_"))
         )
-        result = {
+        assert self._translation is not None and self._yaw is not None
+        self._native = {
+            "articulation": articulation,
+            "scene_query": query,
+            "key_view": UsdWorldPoseView(self._key, UsdGeom),
+            "root_view": UsdWorldPoseView(self._actual_root, UsdGeom),
+        }
+        result: dict[str, Any] = {
             "isaacsim_distribution": importlib.metadata.version("isaacsim"),
             "kit_version": omni.kit.app.get_app().get_app_version(),
             "articulation_prim_path": ARTICULATION_PATH,
             "actual_root_prim_path": ACTUAL_ROOT_PATH,
             "planned_root_alias": PLANNED_ROOT_ALIAS,
-            "planned_root_alias_exists": stage.GetPrimAtPath(
+            "planned_root_alias_exists": self._stage.GetPrimAtPath(
                 PLANNED_ROOT_ALIAS
             ).IsValid(),
             "dof_names": list(articulation.dof_names),
@@ -416,18 +458,44 @@ class IsaacInertSmokeDriver:
                 float(root_quaternion.GetReal()),
                 *[float(root_imaginary[index]) for index in range(3)],
             ],
-            "expected_root_position_m": translation,
+            "expected_root_position_m": self._translation,
             "expected_root_orientation_wxyz": [
-                math.cos(yaw / 2.0),
+                math.cos(self._yaw / 2.0),
                 0.0,
                 0.0,
-                math.sin(yaw / 2.0),
+                math.sin(self._yaw / 2.0),
             ],
             "scene_query_methods": methods,
         }
-        if mass_binding is not None and drive_binding is not None:
-            result["mechanics_profile"] = {**mass_binding, **drive_binding}
-        return result
+        if self._mass_binding is not None and drive_binding is not None:
+            result["mechanics_profile"] = {
+                **self._mass_binding,
+                **drive_binding,
+            }
+        self._observation = result
+
+    def observation(self) -> Mapping[str, Any]:
+        if self._observation is None:
+            raise InertSmokeError("physics must initialize before observation")
+        return dict(self._observation)
+
+    def native_objects(self) -> Mapping[str, Any]:
+        if self._native is None:
+            raise InertSmokeError("physics must initialize before native objects")
+        return dict(self._native)
+
+    def settle_scene(self) -> None:
+        if self._native is None or self._mechanics_profile is None:
+            raise InertSmokeError("pinned mechanics must initialize before settle")
+        from isaacsim.core.simulation_manager import SimulationManager
+
+        steps = int(self._mechanics_profile["initial_settle_steps"])
+        SimulationManager.step(steps=steps)
+        self._physics_steps += steps
+
+    @property
+    def physics_steps(self) -> int:
+        return self._physics_steps
 
     def shutdown(self) -> None:
         if self._app is not None:
