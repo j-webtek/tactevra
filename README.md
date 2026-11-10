@@ -225,14 +225,16 @@ they can reach a controller.
 | Simulation lane | Project role | Current standing |
 | --- | --- | --- |
 | **Deterministic Tactevra simulation** | Portable contract, trajectory, controller-lifecycle, camera, fault, and replay testing | Runs in ordinary hardware-free development and CI |
-| **NVIDIA Isaac Sim** | Higher-fidelity USD workcell, articulation/FK comparison, model-target overlays, source-bound schedule replay, and collision-geometry investigation | Isaac Sim 6.1 has run headlessly; governed import/FK, RC03 scene, first H-hover prefix, and finite collision studies are retained |
+| **NVIDIA Isaac Sim** | Higher-fidelity USD workcell, articulation/FK comparison, model-target overlays, source-bound schedule replay, and collision-geometry investigation | Isaac Sim 6.1 has run headlessly; governed import/FK, RC03 scene, first H-hover prefix, finite collision studies, and a 30-step pinned-mechanics native settle are retained |
 | **MuJoCo Warp (Google DeepMind + NVIDIA)** | Proposed high-throughput physics lane for parallel contact, mechanics, and recovery populations | Evaluation direction only; no MJWarp physics replay is merged on `main` |
 
 Isaac currently acts as an **advisory oracle** downstream of Tactevra's strict
 admission boundary. Its retained evidence can expose disagreement or block a
 route, but it cannot emit arm commands or promote a physical safety gate. The
 exact Isaac 6.1.0.0 internal integration runner is selected with a reviewed
-compatibility exception; installed geometry, continuous clearance, contact
+compatibility exception. The imported nested root path and pinned mechanics
+profile now survive one bounded, zero-command 30-step native settle with
+sub-micrometre root drift; installed geometry, continuous clearance, contact
 mechanics, and measured calibration remain open.
 
 The [simulation overview](docs/SIMULATION.md) explains what has actually run,
