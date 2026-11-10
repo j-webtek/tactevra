@@ -3034,6 +3034,26 @@ This request cannot claim its output or launch Isaac. Its next stage is an
 independent review of a recovery claimant that refreshes the memory gate before
 the atomic attempt claim.
 
+ARM-281 binds that request to a fresh ARM-254 worker preparation. Its runtime
+adapter accepts only the new ARM-280 authorization, collects and retains a fresh
+passing memory receipt before delegating the atomic directory claim, and becomes
+single-use once admitted. Building the claimant definition remains inert:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_recovery_claimant.py `
+  --recovery-request "$root/arm280-nominal-route-physics-recovery-request-001/request.json" `
+  --worker-preparation "$root/arm280-nominal-route-physics-worker-001/worker.json" `
+  --claimant-source software/integrations/isaac_sim/nominal_route_physics_recovery_claimant.py `
+  --memory-preflight-source software/integrations/isaac_sim/nominal_route_memory_preflight.py `
+  --worker-source software/integrations/isaac_sim/nominal_route_physics_worker.py `
+  --output "$root/arm281-nominal-route-physics-recovery-claimant-001/claimant.json"
+```
+
+The definition does not collect memory, claim an attempt, or start Isaac. It
+must pass an independent claimant review before the exact authorization can be
+accepted.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
