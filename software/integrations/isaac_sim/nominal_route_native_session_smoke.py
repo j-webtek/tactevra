@@ -138,6 +138,8 @@ def run_inert_smoke(
             "key_position_m",
             "root_position_m",
             "root_orientation_wxyz",
+            "expected_root_position_m",
+            "expected_root_orientation_wxyz",
             "scene_query_methods",
         }
         if set(observation) != required:
@@ -154,6 +156,30 @@ def run_inert_smoke(
             )
         ):
             raise InertSmokeError("native scene inventory changed")
+        expected_root_position = observation["expected_root_position_m"]
+        expected_root_orientation = observation["expected_root_orientation_wxyz"]
+        position_error = max(
+            abs(float(actual) - expected)
+            for actual, expected in zip(
+                observation["root_position_m"], expected_root_position, strict=True
+            )
+        )
+        orientation_dot = abs(
+            sum(
+                float(actual) * expected
+                for actual, expected in zip(
+                    observation["root_orientation_wxyz"],
+                    expected_root_orientation,
+                    strict=True,
+                )
+            )
+        )
+        # The route is authored in millimetres, while USD stores the composed
+        # transform through single-precision scene values.  Allow a few
+        # micrometres for that representation round-trip without weakening the
+        # fixed-root placement check in any operationally meaningful way.
+        if position_error > 5e-6 or abs(orientation_dot - 1.0) > 1e-6:
+            raise InertSmokeError("fixed root world pose does not match route")
         receipt = {
             "schema": SCHEMA,
             "status": "PASS_INERT_NATIVE_SESSION_READY_FOR_FACTORY_PATH_CORRECTION",
@@ -180,6 +206,8 @@ def run_inert_smoke(
             "governed_attempt_directory_created": governed_attempt_directory.exists(),
             **_zero_authority(),
         }
+        if "observation" in locals():
+            failure["observation"] = observation
         _write_json(receipt_path, failure)
         raise
     finally:
@@ -239,21 +267,14 @@ class IsaacInertSmokeDriver:
         translation = [
             float(placement[index]) / 1000.0 for index in (3, 7, 11)
         ]
-        before = UsdGeom.Xformable(actual_root).ComputeLocalToWorldTransform(0.0)
-        before_translation = before.ExtractTranslation()
-        matrix = Gf.Matrix4d(1.0)
-        matrix.SetRotate(
+        base_local = UsdGeom.Xformable(actual_root).ComputeLocalToWorldTransform(0.0)
+        desired_world = Gf.Matrix4d(1.0)
+        desired_world.SetRotate(
             Gf.Rotation(Gf.Vec3d(0.0, 0.0, 1.0), math.degrees(yaw))
         )
-        matrix.SetTranslateOnly(
-            Gf.Vec3d(
-                *[
-                    translation[index] - float(before_translation[index])
-                    for index in range(3)
-                ]
-            )
-        )
-        UsdGeom.Xformable(root).AddTransformOp().Set(matrix)
+        desired_world.SetTranslateOnly(Gf.Vec3d(*translation))
+        root_transform = base_local.GetInverse() * desired_world
+        UsdGeom.Xformable(root).AddTransformOp().Set(root_transform)
         fixed = UsdPhysics.FixedJoint.Define(stage, "/roarm_m3/Arm275FixedBase")
         fixed.CreateLocalPos0Attr().Set(Gf.Vec3f(*translation))
         fixed.CreateLocalRot0Attr().Set(
@@ -335,6 +356,13 @@ class IsaacInertSmokeDriver:
             "root_orientation_wxyz": [
                 float(root_quaternion.GetReal()),
                 *[float(root_imaginary[index]) for index in range(3)],
+            ],
+            "expected_root_position_m": translation,
+            "expected_root_orientation_wxyz": [
+                math.cos(yaw / 2.0),
+                0.0,
+                0.0,
+                math.sin(yaw / 2.0),
             ],
             "scene_query_methods": methods,
         }

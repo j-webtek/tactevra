@@ -32,7 +32,14 @@ def observation():
         "link_count": 7,
         "key_position_m": [0.224, 0.112, 0.018],
         "root_position_m": [0.305, 0.457, 0.0],
-        "root_orientation_wxyz": [0.707, 0.0, 0.0, -0.707],
+        "root_orientation_wxyz": [2**-0.5, 0.0, 0.0, -(2**-0.5)],
+        "expected_root_position_m": [0.305, 0.457, 0.0],
+        "expected_root_orientation_wxyz": [
+            2**-0.5,
+            0.0,
+            0.0,
+            -(2**-0.5),
+        ],
         "scene_query_methods": ["overlap_sphere_any", "sweep_sphere_any"],
     }
 
@@ -93,6 +100,20 @@ def test_inert_smoke_shutdowns_on_native_failure_without_retry(tmp_path):
     assert "native failure" in failure
 
 
+def test_inert_smoke_retains_observation_on_acceptance_failure(tmp_path):
+    changed = observation()
+    changed["root_position_m"] = [0.4, 0.5, 0.1]
+    driver = Driver(result=changed)
+    with pytest.raises(MODULE.InertSmokeError, match="world pose"):
+        MODULE.run_inert_smoke(
+            driver,
+            output_directory=tmp_path / "smoke",
+            governed_attempt_directory=tmp_path / "governed",
+        )
+    failure = (tmp_path / "smoke" / "receipt.json").read_text()
+    assert '"root_position_m"' in failure
+
+
 def test_inert_smoke_shutdowns_on_start_failure(tmp_path):
     driver = Driver(start_failure=RuntimeError("bootstrap failure"))
     with pytest.raises(RuntimeError, match="bootstrap failure"):
@@ -127,6 +148,38 @@ def test_inert_smoke_fails_closed_when_planned_alias_exists(tmp_path):
             output_directory=tmp_path / "smoke",
             governed_attempt_directory=tmp_path / "governed",
         )
+    assert driver.calls[-1] == "shutdown"
+
+
+def test_inert_smoke_fails_closed_on_root_pose_error(tmp_path):
+    changed = observation()
+    changed["root_position_m"] = [0.306, 0.457, 0.0]
+    driver = Driver(result=changed)
+    with pytest.raises(MODULE.InertSmokeError, match="world pose"):
+        MODULE.run_inert_smoke(
+            driver,
+            output_directory=tmp_path / "smoke",
+            governed_attempt_directory=tmp_path / "governed",
+        )
+    assert driver.calls[-1] == "shutdown"
+
+
+def test_inert_smoke_accepts_usd_float_round_trip_and_quaternion_sign(tmp_path):
+    changed = observation()
+    changed["root_position_m"] = [0.3049997, 0.4569989, 0.0000001]
+    changed["root_orientation_wxyz"] = [
+        -(2**-0.5),
+        0.0,
+        0.0,
+        2**-0.5,
+    ]
+    driver = Driver(result=changed)
+    result = MODULE.run_inert_smoke(
+        driver,
+        output_directory=tmp_path / "smoke",
+        governed_attempt_directory=tmp_path / "governed",
+    )
+    assert result["status"].startswith("PASS_INERT_NATIVE_SESSION")
     assert driver.calls[-1] == "shutdown"
 
 

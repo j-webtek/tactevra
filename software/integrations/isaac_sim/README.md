@@ -3612,11 +3612,14 @@ ARM-254 or ARM-255, submit a joint target, touch a key, create the governed
 attempt directory, or grant hardware or physical authority.
 
 The retained passing receipt is
-`C:/IsaacSim/artifacts/issue190/arm275-inert-native-session-smoke-002/receipt.json`
+`C:/IsaacSim/artifacts/issue190/arm275-inert-native-session-smoke-006/receipt.json`
 (raw SHA-256
-`845e6139f189759db9e49dca4f2bebec3fe8c2f7afe3eeadf1f5c606d8c60233`).
+`308285882971931e39e1268a9cd2028b38677d31e9227c12611237845c2734a0`).
 It proves six ordered DOFs, seven links, `overlap_sphere_any` and
-`sweep_sphere_any`, and the expected SPACE pose. It also resolves two native
+`sweep_sphere_any`, and the corrected route's fixed-root pose of
+`(385, 532, 70.1) mm` at yaw `-105 degrees`. The pose validator allows only a
+5-micrometre position round-trip tolerance for USD scene-value precision and
+compares quaternion rotations sign-invariantly. It also resolves two native
 integration mismatches before the governed attempt: Isaac exposes link
 transforms on its native physics articulation view, and the actual base prim
 is `/roarm_m3/Geometry/world/base_link`, not the planned
