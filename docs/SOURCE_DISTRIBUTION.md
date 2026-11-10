@@ -1533,3 +1533,13 @@ call signatures and zero-authority ordering. The reviewed tracked-file ceiling
 advances to 6,799; byte ceilings remain unchanged. No attempt is claimed, no
 simulator is started, and no runtime, backend, hardware, or physical authority
 is granted.
+
+ARM-275 adds the inert Isaac native-session smoke and focused lifecycle tests,
+advancing the reviewed tracked-file ceiling from 6,802 to 6,804. The retained
+live receipt proves the pinned robot, nominal board, SPACE key, six-DOF
+articulation, seven-link native view, and required sphere query methods can be
+initialized together without playing the timeline, stepping physics, submitting
+joint targets, contacting a key, or claiming the governed attempt. The smoke
+also identifies the actual nested base prim and supplies narrow articulation
+and USD root-pose adapters needed by the next concrete-session gate. All byte,
+duplicate-byte, and reduction limits remain unchanged.
