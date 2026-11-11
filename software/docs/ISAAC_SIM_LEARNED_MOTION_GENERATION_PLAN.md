@@ -1425,6 +1425,14 @@ ScheduleGen. Neither is a physical success rate.
 79. The next implementation step is a single-use ARM-290 claimant and ARM-291
     independent review. Only that reviewed lineage may later accept the exact
     ARM-289 authorization with fresh EULA and memory gates.
+80. **LM4 terminalized recovery claimant (ARM-290):** bind the ARM-289 request,
+    worker, and ARM-287/ARM-288 correction lineage into a single-use adapter.
+    Definition construction remains inert. Runtime admission requires an
+    independent ARM-291 review, the exact ARM-289 authorization, and retained
+    fresh passing EULA and memory receipts. Delegation consumes the callable
+    before worker invocation, while failure terminalization remains required
+    before simulator shutdown. The next step is ARM-291 independent review;
+    no simulation, hardware, or physical authority is granted here.
 
 ## Completion criterion
 
