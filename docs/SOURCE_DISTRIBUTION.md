@@ -62,6 +62,15 @@ policy baseline now points to this merged commit so future checks have a stable,
 post-reduction reference. Containment ceilings remain deliberately above the
 baseline to detect material growth without making normal small changes brittle.
 
+The ARM-292/ARM-293 native link-inventory gate adds three governed Python
+paths: one exact zero-motion diagnostic, one independent static reviewer, and
+one focused test module. The reviewed tracked-file ceiling moves from 6,837 to
+the exact observed 6,840 files. The measured tree is 675,665,557 logical bytes
+with 4,890,152 governed duplicate bytes. No simulator asset, trajectory corpus,
+camera frame, generated diagnostic receipt, controller transcript, or
+hardware-authority artifact is added; all byte, duplicate, and reduction
+limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

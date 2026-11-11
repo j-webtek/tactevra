@@ -168,28 +168,37 @@ Isaac mechanics components, a governed one-attempt worker, and retained
 authorization/preflight lineage. These are substantial foundations, but they do
 not yet prove a successful native route-physics attempt or real typing.
 
-The independently reviewed EULA- and memory-gated ARM-284 claimant was
-completed and its one authorized native `SPACE` attempt was consumed. Both
-launch gates passed and Isaac reached native PhysX initialization, but a
-fast-shutdown control-flow defect prevented the worker from replacing its
-pending claim with terminal failure evidence. The immutable retained outcome is
-documented in [ARM_284_ATTEMPT_POSTMORTEM.md](ARM_284_ATTEMPT_POSTMORTEM.md).
+ARM-284 first exposed and retained the fast-shutdown terminalization defect.
+ARM-287/ARM-288 corrected and reviewed that lifecycle, and ARM-289 then consumed
+one fresh EULA- and memory-gated native `SPACE` authorization. Isaac loaded the
+pinned scene and initialized PhysX; runtime construction failed closed because
+the articulation adapter did not expose native `link_names`. Unlike ARM-284,
+ARM-289 retained the exact terminal failure before shutdown. The immutable
+outcomes are documented in
+[ARM_284_ATTEMPT_POSTMORTEM.md](ARM_284_ATTEMPT_POSTMORTEM.md) and
+[ARM_289_ATTEMPT_POSTMORTEM.md](ARM_289_ATTEMPT_POSTMORTEM.md). The adapter and
+integration correction is merged; a zero-motion native confirmation remains
+required before another route-physics lineage is justified.
 
 The immediate path is:
 
-1. retain the materialized ARM-287/ARM-288 correction lineage and inert ARM-289
-   recovery request;
-2. merge and reproduce the implemented ARM-290 claimant and ARM-291 independent
-   review; ARM-284 is consumed and is never replayed;
-3. execute one newly authorized native `SPACE` route-physics attempt with fresh
-   EULA and memory gates, preserving its terminal result before shutdown;
-4. diagnose any failed acceptance metric and correct the digital twin or route
+1. retain ARM-289 as the consumed terminal failure that exposed the missing
+   native link inventory; never replay it;
+2. preserve the merged adapter/binding correction and its cross-platform test
+   evidence;
+3. merge and reproduce the inert ARM-292 exact-inventory request and ARM-293
+   independent zero-motion review;
+4. execute one separately authorized ARM-294 native inventory diagnostic with
+   zero physics steps, retaining success or failure before shutdown;
+5. only after a passing ARM-294 receipt, rebuild a newly numbered native
+   `SPACE` route-physics lineage with fresh EULA and memory gates;
+6. diagnose any failed acceptance metric and correct the digital twin or route
    through another reviewed increment rather than replaying the attempt;
-5. on a passing result, freeze the single-key simulation benchmark and expand
+7. on a passing result, freeze the single-key simulation benchmark and expand
    to a representative multi-key set;
-6. add vision-conditioned localization and rolling-horizon sequence planning;
-7. qualify randomized simulation coverage; and
-8. design separately authorized physical correlation campaigns only after the
+8. add vision-conditioned localization and rolling-horizon sequence planning;
+9. qualify randomized simulation coverage; and
+10. design separately authorized physical correlation campaigns only after the
    corresponding simulation gates pass.
 
 ## Governance
