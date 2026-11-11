@@ -71,6 +71,13 @@ governed duplicate bytes. No simulator asset, trajectory corpus, camera frame,
 controller transcript, or hardware-authority artifact is added; all byte,
 duplicate, and reduction limits remain unchanged.
 
+The ARM-289 inert terminalized-recovery request adds two governed paths: one
+zero-authority evidence binder and one focused unit-test module. The reviewed
+tracked-file ceiling moves from 6,830 to the exact expected 6,832 files. No
+simulator asset, generated result, trajectory corpus, camera frame, controller
+transcript, or authority-bearing artifact is added; all byte, duplicate, and
+reduction limits remain unchanged.
+
 The ARM-274 zero-authority native-runtime worker integration adds three
 governed paths: the import-safe single-use integration, its independent static
 reviewer, and focused lifecycle tests. The reviewed tracked-file ceiling moves
