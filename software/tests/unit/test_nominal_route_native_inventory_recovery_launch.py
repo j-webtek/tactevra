@@ -3,6 +3,7 @@ from __future__ import annotations
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
 import sys
 from types import SimpleNamespace
 
@@ -35,6 +36,27 @@ def test_import_is_inert():
     assert MODULE.RUNTIME_SOURCE_FILES["physics_worker"] == (
         "nominal_route_physics_worker.py"
     )
+
+
+def test_standalone_import_binds_software_source_root():
+    probe = (
+        "import importlib.util; "
+        f"p=r'{SOURCE}'; "
+        "s=importlib.util.spec_from_file_location('arm295_standalone', p); "
+        "m=importlib.util.module_from_spec(s); "
+        "s.loader.exec_module(m); "
+        "import rocell; "
+        "print(rocell.__file__)"
+    )
+    completed = subprocess.run(
+        [sys.executable, "-I", "-c", probe],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert str(ROOT / "software/src/rocell") in completed.stdout
 
 
 def test_qualified_interpreter_accepts_same_executable(tmp_path):

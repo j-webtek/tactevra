@@ -3465,6 +3465,17 @@ bound throughout this integration. The launcher now also rejects any other
 interpreter before claimant construction. No automatic retry occurred; a fresh
 exact ARM-295 authorization is required before a corrected invocation.
 
+The next separately authorized invocation did reach that qualified interpreter
+but terminated during import because the standalone launcher had not placed the
+repository's `software/src` package root on `sys.path`; Python therefore could
+not resolve `rocell`. It created no attempt directory and no EULA or memory
+receipt. The launcher now derives and validates `software/src` from its own
+repository location before importing the reviewed runtime graph, so it does not
+depend on a caller-supplied `PYTHONPATH` or an unrelated installed package. A
+subprocess regression test imports the launcher with Python isolation enabled.
+No retry occurred, and another fresh exact ARM-295 authorization is required
+before any later invocation.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
