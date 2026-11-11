@@ -1499,6 +1499,20 @@ ScheduleGen. Neither is a physical success rate.
     The command now uses the qualified 6.1.0 environment interpreter and the
     launcher rejects any other interpreter before claimant construction. A
     fresh exact ARM-295 authorization remains mandatory.
+94. **Retained terminal ARM-295 result:** one separately authorized attempt
+    passed fresh EULA and memory gates and started Isaac Sim 6.1, then failed
+    closed during runtime construction because the concrete binding supplied
+    no canonical IK constructor inputs. The terminal receipt records
+    `FAILED_RETAINED_NO_RETRY`; no trajectory, hardware, or physical authority
+    was exercised.
+95. **Corrected canonical IK binding:** the concrete attempt binding now loads
+    the exact-byte pinned model and all geometry, tool, ready-pose, bound, and
+    policy inputs from the locked simulation context. Unit and repository
+    context checks cover the former missing-argument boundary without starting
+    Isaac or claiming another attempt.
+96. **Next reviewed increment:** preserve ARM-295 unchanged and create a newly
+    numbered lineage that pins this correction. Its inert review must prove
+    constructor completeness before any new one-use authorization is requested.
 
 ## Completion criterion
 

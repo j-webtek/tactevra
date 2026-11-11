@@ -3476,6 +3476,21 @@ subprocess regression test imports the launcher with Python isolation enabled.
 No retry occurred, and another fresh exact ARM-295 authorization is required
 before any later invocation.
 
+ARM-295 was subsequently authorized and executed exactly once on 2026-11-11.
+Both fresh gates passed and Isaac Sim 6.1 started and shut down cleanly, but the
+attempt terminalized at `construct_runtime`: the concrete binding supplied an
+empty solver keyword mapping, so `RoArmM3NumericalIk` lacked its pinned model,
+board transform, tool offset, and fixed gripper input. The retained status is
+`FAILED_RETAINED_NO_RETRY`; no trajectory playback, hardware access, or
+physical authority occurred. ARM-295 is consumed and must not be replayed.
+
+The binding now derives all canonical solver inputs from the locked simulation
+context and exact-byte verified URDF, including reviewed ready pose, controller
+bounds, gripper bounds, and IK policy. Regression coverage proves those inputs
+reach the deferred backend without constructing a session. See
+`software/docs/ARM_295_ATTEMPT_POSTMORTEM.md`. A future runtime attempt requires
+a new number, newly pinned/reviewed lineage, and separate exact authorization.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol

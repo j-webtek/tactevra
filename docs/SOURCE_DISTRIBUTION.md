@@ -103,6 +103,15 @@ no simulator asset, live gate receipt, attempt output, trajectory corpus, camera
 frame, controller transcript, or hardware-authority artifact; all byte,
 duplicate-byte, and reduction limits remain unchanged.
 
+The retained ARM-295 postmortem and canonical-IK binding correction add one
+governed documentation path while updating the binding, focused tests, and
+maintained plans in place. The reviewed tracked-file ceiling moves from 6,851
+to the exact observed 6,852 files. The retained simulator receipts remain in
+the external evidence store and are represented only by hashes; no simulator
+asset, trajectory corpus, camera frame, controller transcript, or
+authority-bearing artifact is added. All byte, duplicate-byte, and reduction
+limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

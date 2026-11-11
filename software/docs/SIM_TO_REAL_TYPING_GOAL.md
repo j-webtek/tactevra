@@ -208,6 +208,14 @@ The immediate path is:
 12. design separately authorized physical correlation campaigns only after the
    corresponding simulation gates pass.
 
+ARM-294 has since passed its zero-motion inventory purpose, and ARM-295 was
+executed once. ARM-295 passed its fresh launch gates but terminalized before
+route evaluation because the concrete binding omitted required canonical IK
+inputs. That defect is corrected by deriving the model, frame transform, tool
+offset, gripper state, ready pose, bounds, and IK policy from the locked
+simulation context. ARM-295 remains immutable; the next route-physics test must
+be a newly numbered and independently authorized increment.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.
