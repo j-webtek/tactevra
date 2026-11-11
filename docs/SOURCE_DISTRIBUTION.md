@@ -71,6 +71,14 @@ camera frame, generated diagnostic receipt, controller transcript, or
 hardware-authority artifact is added; all byte, duplicate, and reduction
 limits remain unchanged.
 
+The ARM-294 post-runtime receipt review adds two governed Python paths: one
+independent non-Isaac verifier and one focused test module. The reviewed
+tracked-file ceiling moves from 6,840 to the exact observed 6,842 files. The
+measured tree is 675,685,678 logical bytes with 4,890,152 governed duplicate
+bytes. No simulator asset, generated receipt, route attempt, trajectory corpus,
+camera frame, controller transcript, or hardware-authority artifact is added;
+all byte, duplicate, and reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

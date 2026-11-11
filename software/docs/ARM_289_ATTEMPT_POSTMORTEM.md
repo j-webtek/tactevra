@@ -72,4 +72,8 @@ and ARM-293 independently verifies that its runtime contains no physics step,
 settle, joint/trajectory, route-worker, retry, hardware, or physical-authority
 surface. Their retained request and review are inert. The next runtime gate is
 one separately authorized ARM-294 zero-motion observation; only a passing
-receipt can justify rebuilding a newly numbered route-physics attempt.
+receipt can justify rebuilding a newly numbered route-physics attempt. The
+post-runtime receipt reviewer independently rebinds that receipt to ARM-292 and
+ARM-293, verifies the exact seven-link/transform evidence and zero-authority
+fields, and refuses review if the ARM-295 directory already exists. It imports
+no Isaac or transport library and grants no attempt authority.

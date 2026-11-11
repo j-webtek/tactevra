@@ -3305,6 +3305,28 @@ directory, and the merged source hashes. A passing diagnostic proves only the
 repaired native inventory boundary; it does not prove route physics, contact,
 typing, or real-arm safety.
 
+After ARM-294 terminates, independently review its retained receipt before
+constructing ARM-295. The receipt reviewer imports no Isaac or transport
+library and starts no simulator. It accepts only the exact seven-link order,
+one seven-transform batch, zero physics steps, zero joint/trajectory evidence,
+the reviewed ARM-292/ARM-293 lineage, and an absent ARM-295 directory. It emits
+an inert, hash-bound review and grants no route-attempt or physical authority:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_native_link_inventory_receipt_review.py `
+  --receipt "$root/arm294-native-link-inventory-diagnostic-001/receipt.json" `
+  --request "$root/arm292-native-link-inventory-request-001/request.json" `
+  --arm293-review "$root/arm293-native-link-inventory-review-001/review.json" `
+  --governed-attempt-directory "$root/arm295-nominal-route-physics-attempt-001" `
+  --output "$root/arm294-native-link-inventory-receipt-review-001/review.json"
+```
+
+The reviewer must not be invoked against a failed or incomplete diagnostic.
+Its accepted output permits only rebuilding a newly numbered route-physics
+lineage with fresh gates; a separate exact authorization remains mandatory
+before any later simulation attempt.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
