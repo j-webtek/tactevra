@@ -3131,6 +3131,25 @@ snapshot, and exclusive retention of both receipts before becoming single-use
 and delegating once. It cannot run without a matching independent ARM-286
 review, and it provides no trajectory, joint, hardware, or physical authority.
 
+ARM-286 independently checks the claimant hash, worker lineage, backend pin,
+zero-authority fields, and the source-level execution order. It specifically
+requires authorization before EULA collection, EULA success before memory
+collection, both exclusive receipt writes before single-use consumption, and
+single-use consumption before worker delegation:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_eula_recovery_claimant_review.py `
+  --claimant "$root/arm285-nominal-route-physics-eula-recovery-claimant-001/claimant.json" `
+  --claimant-source software/integrations/isaac_sim/nominal_route_physics_eula_recovery_claimant.py `
+  --review-source software/integrations/isaac_sim/nominal_route_physics_eula_recovery_claimant_review.py `
+  --output "$root/arm286-nominal-route-physics-eula-recovery-claimant-review-001/review.json"
+```
+
+The review is non-executing: it does not collect live gates, claim an attempt,
+start Isaac, or reuse the consumed ARM-280 authorization. A passing review only
+allows a later caller to present the separate, exact ARM-284 authorization.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
