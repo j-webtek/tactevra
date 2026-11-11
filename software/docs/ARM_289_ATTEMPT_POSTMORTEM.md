@@ -88,3 +88,13 @@ modules cannot run Isaac, accept authorization, claim an attempt, invoke a
 backend, or authorize physical motion. No ARM-295 artifact can be materialized
 until ARM-294 actually passes and its retained receipt is independently
 accepted.
+
+The claimant layer is now also implemented without materializing an ARM-295
+artifact. It clones the proven fail-closed worker envelope to the new governed
+output, pins the accepted plan/review and gate sources, and makes the legacy
+ARM-253 worker statement an internal compatibility token rather than external
+authority. Its independent reviewer verifies that exact ARM-295 authorization
+and current-source checks precede EULA collection, memory collection, exclusive
+receipt retention, single-use consumption, and one worker delegation. Runtime
+construction still depends on real accepted ARM-294 evidence; the source alone
+does not authorize or claim ARM-295.

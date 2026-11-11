@@ -3375,6 +3375,48 @@ only construction of a separately reviewed claimant with fresh preflight
 gates. It does not reuse ARM-289 authority and does not itself authorize an
 ARM-295 launch.
 
+Build and independently review that claimant only after the accepted plan and
+plan review exist. The builder clones the previously reviewed worker envelope
+to the ARM-295 output; its ARM-253 authorization string remains an internal
+worker compatibility token and is explicitly not accepted as external launch
+authority:
+
+```powershell
+$claimant = "$root/arm295-native-inventory-recovery-claimant-001/claimant.json"
+$claimantSource = "$integration/nominal_route_native_inventory_recovery_claimant.py"
+$claimantReviewSource = "$integration/nominal_route_native_inventory_recovery_claimant_review.py"
+python $claimantSource `
+  --plan $plan `
+  --plan-review "$root/arm295-native-inventory-recovery-plan-review-001/review.json" `
+  --base-worker "$root/arm254-nominal-route-physics-worker-001/worker.json" `
+  --claimant-source $claimantSource `
+  --claimant-review-source $claimantReviewSource `
+  --eula-preflight-source "$integration/nominal_route_isaac_eula_preflight.py" `
+  --memory-preflight-source "$integration/nominal_route_memory_preflight.py" `
+  --worker-source "$integration/nominal_route_physics_worker.py" `
+  --output $claimant
+python $claimantReviewSource `
+  --claimant $claimant `
+  --claimant-source $claimantSource `
+  --plan $plan `
+  --plan-review "$root/arm295-native-inventory-recovery-plan-review-001/review.json" `
+  --base-worker "$root/arm254-nominal-route-physics-worker-001/worker.json" `
+  --claimant-review-source $claimantReviewSource `
+  --eula-preflight-source "$integration/nominal_route_isaac_eula_preflight.py" `
+  --memory-preflight-source "$integration/nominal_route_memory_preflight.py" `
+  --worker-source "$integration/nominal_route_physics_worker.py" `
+  --output "$root/arm295-native-inventory-recovery-claimant-review-001/review.json"
+```
+
+The accepted claimant review reports
+`next_required_stage=SEPARATE_EXACT_ARM295_ONE_ATTEMPT_AUTHORIZATION`. It does
+not observe that statement, collect live gates, create any governed output, or
+start Isaac. At runtime, the claimant must revalidate the corrected runtime
+source hashes, observe the exact new ARM-295 statement, collect passing EULA
+then memory evidence, exclusively retain both receipts, and only then delegate
+once to the fail-closed worker. Any mismatch or partial receipt state prevents
+reuse and automatic retry.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol

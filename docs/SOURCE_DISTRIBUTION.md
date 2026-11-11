@@ -88,6 +88,14 @@ attempt claim, trajectory corpus, camera frame, controller transcript, or
 hardware-authority artifact is added; all byte, duplicate, and reduction limits
 remain unchanged.
 
+The ARM-295 fresh-gate claimant adds three governed Python paths: a single-use
+claimant, its independent static/evidence reviewer, and focused fail-closed
+tests. The reviewed tracked-file ceiling moves from 6,846 to the exact observed
+6,849 files. The measured tree is 675,796,507 logical bytes with 4,890,152
+governed duplicate bytes. No simulator asset, live gate receipt, attempt output,
+trajectory corpus, camera frame, controller transcript, or hardware-authority
+artifact is added; all byte, duplicate, and reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

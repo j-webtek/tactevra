@@ -1479,6 +1479,18 @@ ScheduleGen. Neither is a physical success rate.
     absent and emit only permission to construct a separately reviewed,
     fresh-preflight-bound claimant. It grants no launch, attempt, motion,
     hardware, or physical authority.
+89. **Fresh-gate ARM-295 claimant:** clone the already reviewed one-attempt
+    worker envelope to the new governed output while retaining the historical
+    ARM-253 token only as an internal compatibility value. Runtime admission
+    requires the exact new ARM-295 statement, unchanged corrected runtime
+    sources, fresh passing EULA and memory evaluations, and exclusive retention
+    of both receipts before the single worker delegation.
+90. **Independent ARM-295 claimant review:** rebind the claimant to the accepted
+    plan/review, base worker, gate sources, and worker source. Statically verify
+    authorization, source validation, EULA, memory, exclusive receipt writes,
+    single-use consumption, and worker delegation order. Acceptance may expose
+    one simulation-only launch gate, but grants no hardware or physical
+    authority and does not itself observe or consume authorization.
 
 ## Completion criterion
 
