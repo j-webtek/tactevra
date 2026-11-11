@@ -1467,6 +1467,18 @@ ScheduleGen. Neither is a physical success rate.
     and zero-authority field. Refuse the review if the future ARM-295 directory
     exists. Acceptance permits only fresh route-lineage construction; it does
     not admit a simulation attempt or physical motion.
+87. **Fresh ARM-295 lineage plan:** only after an accepted ARM-294 receipt
+    review, bind the exact corrected runtime sources, immutable ARM-289 terminal
+    evidence, a new attempt directory, and distinct fresh EULA and memory
+    receipt locations. The builder refuses pre-created outputs, records that all
+    earlier attempt authorizations are non-reusable, and performs no runtime or
+    backend construction.
+88. **Independent ARM-295 lineage review:** re-hash the retained receipt review,
+    ARM-289 status, plan source, and every corrected runtime source without
+    importing the builder or Isaac. Reconfirm that all governed outputs remain
+    absent and emit only permission to construct a separately reviewed,
+    fresh-preflight-bound claimant. It grants no launch, attempt, motion,
+    hardware, or physical authority.
 
 ## Completion criterion
 

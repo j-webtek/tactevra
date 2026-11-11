@@ -77,3 +77,14 @@ post-runtime receipt reviewer independently rebinds that receipt to ARM-292 and
 ARM-293, verifies the exact seven-link/transform evidence and zero-authority
 fields, and refuses review if the ARM-295 directory already exists. It imports
 no Isaac or transport library and grants no attempt authority.
+
+The next inert layer is also implemented: an ARM-295 lineage-plan builder binds
+an accepted ARM-294 receipt review to the immutable ARM-289 terminal failure,
+the corrected runtime-source inventory, and three distinct still-absent output
+locations (attempt, EULA receipt, and memory receipt). A separate reviewer
+re-hashes every input and source, statically rejects runtime/transport surfaces,
+and grants only permission to construct a fresh-preflight-bound claimant. These
+modules cannot run Isaac, accept authorization, claim an attempt, invoke a
+backend, or authorize physical motion. No ARM-295 artifact can be materialized
+until ARM-294 actually passes and its retained receipt is independently
+accepted.
