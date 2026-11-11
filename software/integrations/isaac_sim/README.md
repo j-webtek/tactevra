@@ -3491,6 +3491,15 @@ reach the deferred backend without constructing a session. See
 `software/docs/ARM_295_ATTEMPT_POSTMORTEM.md`. A future runtime attempt requires
 a new number, newly pinned/reviewed lineage, and separate exact authorization.
 
+ARM-296 adds the missing inert constructor-completeness proof. It validates the
+retained ARM-295 failure and corrected binding, constructs the production IK
+solver and complete four-adapter runtime around protocol sentinels, then stops.
+The independent reviewer verifies the receipt and the gate source without
+reconstructing the runtime. Neither command imports Isaac or grants attempt,
+physics, trajectory, target, hardware, or physical authority. See
+`software/docs/ARM_296_CONSTRUCTOR_COMPLETENESS_GATE.md`. The resulting receipt
+and review are prerequisites, not authorization, for a newly numbered attempt.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol

@@ -1513,6 +1513,18 @@ ScheduleGen. Neither is a physical success rate.
 96. **Next reviewed increment:** preserve ARM-295 unchanged and create a newly
     numbered lineage that pins this correction. Its inert review must prove
     constructor completeness before any new one-use authorization is requested.
+97. **ARM-296 constructor completeness:** the inert gate now validates the exact
+    retained ARM-295 terminal status and corrected binding source, loads the
+    eight canonical IK inputs from the locked context, and constructs the real
+    solver, all four production adapters, and the complete runtime composition.
+    Independent review requires one key and one root baseline read and zero
+    articulation, scene-query, runtime, physics, target, trajectory, hardware,
+    or physical calls. This crosses the former `construct_runtime` failure
+    boundary without consuming or authorizing a simulator attempt.
+98. **Next runtime lineage:** preserve ARM-295 and ARM-296 unchanged, allocate a
+    new attempt number, pin the accepted ARM-296 receipt/review and all corrected
+    runtime sources, and independently review the single-use claimant before
+    requesting a fresh exact simulation authorization.
 
 ## Completion criterion
 
