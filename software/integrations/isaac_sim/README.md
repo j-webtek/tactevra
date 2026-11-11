@@ -3220,6 +3220,24 @@ An ARM-290 definition remains inert. ARM-291 must independently verify the
 claimant and its terminalization ordering before any new simulation
 authorization can be accepted. ARM-284 remains consumed and is never replayed.
 
+ARM-291 performs that independent static review. It checks the exact claimant
+and source hashes, fresh-gate and receipt order, single-use consumption before
+worker delegation, terminalization-before-shutdown contract, and zero hardware
+or physical authority. Review construction itself remains inert:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_claimant_review.py `
+  --claimant "$root/arm290-terminalized-route-physics-recovery-claimant-001/claimant.json" `
+  --claimant-source software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_claimant.py `
+  --review-source software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_claimant_review.py `
+  --output "$root/arm291-terminalized-route-physics-recovery-claimant-review-001/review.json"
+```
+
+A passing ARM-291 document consumes no authorization and starts no simulator.
+Only after this exact source and artifact lineage is merged and reproduced may
+a fresh exact ARM-289 authorization be considered.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
