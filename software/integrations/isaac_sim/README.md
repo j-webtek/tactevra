@@ -3092,6 +3092,23 @@ The EULA gate must pass and its receipt must be retained before any future
 worker claims an attempt. A failed gate exits with code 2 while reporting zero
 attempt claims, Isaac starts, trajectory playback, and physical authority.
 
+After explicit operator acceptance, ARM-284 binds the consumed ARM-280 failure
+to a passing ARM-283 receipt while requiring a distinct authorization:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_eula_recovery_request.py `
+  --source-request "$root/arm280-nominal-route-physics-recovery-request-001/request.json" `
+  --failure-status "$root/arm280-nominal-route-physics-attempt-001/status.json" `
+  --eula-preflight "$root/arm283-eula-preflight-002/receipt.json" `
+  --proposed-output-directory "$root/arm284-nominal-route-physics-attempt-001" `
+  --output "$root/arm284-nominal-route-physics-eula-recovery-request-001/request.json"
+```
+
+The request is inert. A future claimant must refresh both the memory and EULA
+gates before claim, become single-use before worker delegation, and pass an
+independent review before the new ARM-284 authorization can be accepted.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
