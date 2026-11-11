@@ -79,6 +79,15 @@ bytes. No simulator asset, generated receipt, route attempt, trajectory corpus,
 camera frame, controller transcript, or hardware-authority artifact is added;
 all byte, duplicate, and reduction limits remain unchanged.
 
+The ARM-295 recovered-lineage preparation adds four governed Python paths: an
+inert evidence-bound plan builder, an independent non-Isaac reviewer, and two
+focused test modules. The reviewed tracked-file ceiling moves from 6,842 to the
+exact observed 6,846 files. The measured tree is 675,733,865 logical bytes with
+4,890,152 governed duplicate bytes. No simulator asset, live preflight receipt,
+attempt claim, trajectory corpus, camera frame, controller transcript, or
+hardware-authority artifact is added; all byte, duplicate, and reduction limits
+remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

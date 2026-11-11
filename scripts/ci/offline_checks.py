@@ -201,6 +201,8 @@ TESTS = (
     "software/tests/unit/test_nominal_route_concrete_native_attempt_binding.py",
     "software/tests/unit/test_nominal_route_native_link_inventory_diagnostic.py",
     "software/tests/unit/test_nominal_route_native_link_inventory_receipt_review.py",
+    "software/tests/unit/test_nominal_route_native_inventory_recovery_plan.py",
+    "software/tests/unit/test_nominal_route_native_inventory_recovery_plan_review.py",
 )
 
 

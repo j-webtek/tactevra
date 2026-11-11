@@ -3327,6 +3327,54 @@ Its accepted output permits only rebuilding a newly numbered route-physics
 lineage with fresh gates; a separate exact authorization remains mandatory
 before any later simulation attempt.
 
+After that accepted review exists, construct and independently review the inert
+ARM-295 lineage plan. The plan pins the corrected runtime implementation,
+immutable ARM-289 terminal status, new attempt path, and distinct fresh EULA
+and memory receipt paths. Both commands refuse pre-created governed outputs.
+They do not collect live gates, accept authorization, start Isaac, construct a
+backend, or claim an attempt:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$integration = 'software/integrations/isaac_sim'
+$runtimeSources = @(
+  'concrete_native_attempt_binding', "$integration/nominal_route_concrete_native_attempt_binding.py",
+  'concrete_native_session', "$integration/nominal_route_concrete_native_session_smoke.py",
+  'native_root_path_correction', "$integration/nominal_route_native_root_path_correction.py",
+  'native_session', "$integration/nominal_route_native_session_smoke.py",
+  'native_sweep_binding', "$integration/nominal_route_native_sweep_binding.py",
+  'native_worker_integration', "$integration/nominal_route_native_runtime_worker_integration.py",
+  'physics_backend', "$integration/nominal_route_physics_backend.py",
+  'physics_worker', "$integration/nominal_route_physics_worker.py"
+)
+$sourceArgs = @()
+for ($i = 0; $i -lt $runtimeSources.Count; $i += 2) {
+  $sourceArgs += '--runtime-source', $runtimeSources[$i], $runtimeSources[$i + 1]
+}
+$plan = "$root/arm295-native-inventory-recovery-plan-001/plan.json"
+python "$integration/nominal_route_native_inventory_recovery_plan.py" `
+  --receipt-review "$root/arm294-native-link-inventory-receipt-review-001/review.json" `
+  --arm289-status "$root/arm289-nominal-route-physics-attempt-001/status.json" `
+  @sourceArgs `
+  --proposed-attempt-directory "$root/arm295-nominal-route-physics-attempt-001" `
+  --proposed-eula-receipt "$root/arm295-eula-preflight-001/receipt.json" `
+  --proposed-memory-receipt "$root/arm295-memory-preflight-001/receipt.json" `
+  --output $plan
+python "$integration/nominal_route_native_inventory_recovery_plan_review.py" `
+  --plan $plan `
+  --plan-source "$integration/nominal_route_native_inventory_recovery_plan.py" `
+  --receipt-review "$root/arm294-native-link-inventory-receipt-review-001/review.json" `
+  --arm289-status "$root/arm289-nominal-route-physics-attempt-001/status.json" `
+  @sourceArgs `
+  --output "$root/arm295-native-inventory-recovery-plan-review-001/review.json"
+```
+
+These commands are intentionally not usable before ARM-294 succeeds because
+the required receipt review does not yet exist. An accepted plan review permits
+only construction of a separately reviewed claimant with fresh preflight
+gates. It does not reuse ARM-289 authority and does not itself authorize an
+ARM-295 launch.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
