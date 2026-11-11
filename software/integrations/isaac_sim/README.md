@@ -3191,6 +3191,35 @@ directory, or grant simulator, hardware, or physical authority. A separately
 implemented and independently reviewed claimant remains required before the
 exact ARM-289 authorization may be presented.
 
+ARM-290 implements that claimant as a reviewable, single-use adapter. Its CLI
+only binds the ARM-289 request and worker to the reviewed ARM-287/ARM-288
+terminalization lineage; it does not collect gates, claim an attempt, import
+Isaac, or invoke the worker. Runtime admission additionally requires an
+independent ARM-291 review, the exact ARM-289 authorization, a fresh passing
+EULA receipt, and a fresh passing memory receipt. The claimant marks itself
+used before delegating so a worker exception cannot create a retry surface:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_claimant.py `
+  --recovery-request "$root/arm289-terminalized-route-physics-recovery-request-002/request.json" `
+  --worker-preparation "$root/arm289-nominal-route-physics-worker-001/worker.json" `
+  --integration "$root/arm287-native-runtime-worker-integration-001/integration.json" `
+  --integration-review "$root/arm288-native-runtime-worker-integration-review-001/review.json" `
+  --claimant-source software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_claimant.py `
+  --recovery-request-source software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_request.py `
+  --integration-source software/integrations/isaac_sim/nominal_route_native_runtime_worker_integration.py `
+  --integration-review-source software/integrations/isaac_sim/nominal_route_native_runtime_worker_integration_review.py `
+  --memory-preflight-source software/integrations/isaac_sim/nominal_route_memory_preflight.py `
+  --eula-preflight-source software/integrations/isaac_sim/nominal_route_isaac_eula_preflight.py `
+  --worker-source software/integrations/isaac_sim/nominal_route_physics_worker.py `
+  --output "$root/arm290-terminalized-route-physics-recovery-claimant-001/claimant.json"
+```
+
+An ARM-290 definition remains inert. ARM-291 must independently verify the
+claimant and its terminalization ordering before any new simulation
+authorization can be accepted. ARM-284 remains consumed and is never replayed.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
