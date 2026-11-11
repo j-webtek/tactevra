@@ -3238,6 +3238,21 @@ A passing ARM-291 document consumes no authorization and starts no simulator.
 Only after this exact source and artifact lineage is merged and reproduced may
 a fresh exact ARM-289 authorization be considered.
 
+That ARM-289 authorization was subsequently consumed exactly once. Both fresh
+gates passed, Isaac started, and the corrected ARM-287 lifecycle retained a
+terminal `FAILED_RETAINED_NO_RETRY` result at `construct_runtime`. The failure
+showed that `IsaacArticulationLinkView` forwarded DOF names and link transforms
+but not Isaac's native `link_names`, so the conservative sweep binding observed
+an empty link inventory. The retained concrete binding also still selected the
+superseded ARM-274 integration instead of the reviewed ARM-287 terminalizing
+document. See
+[`ARM_289_ATTEMPT_POSTMORTEM.md`](../../docs/ARM_289_ATTEMPT_POSTMORTEM.md).
+
+The follow-up correction forwards `link_names` and makes the concrete binding
+pin ARM-287 directly. It grants no launch authority. The changed sources and
+dependent evidence require independent review and a rebuilt, newly authorized
+attempt lineage; ARM-289 remains immutable and consumed.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
