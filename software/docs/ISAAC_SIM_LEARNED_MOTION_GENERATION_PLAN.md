@@ -1456,41 +1456,37 @@ ScheduleGen. Neither is a physical success rate.
     independent review rejects physics stepping, settle, joint/trajectory,
     route-worker, transport, retry, and physical-authority surfaces. Request
     and review construction remain non-starting and consume no attempt.
-85. **Next runtime gate (ARM-294):** after merged-source reproduction and a new
-    exact authorization, perform one no-retry native inventory observation.
-    Require zero physics steps and retain success or failure before shutdown.
-    Only a passing receipt may seed a newly numbered route-physics lineage.
-86. **Independent ARM-294 receipt review:** before any ARM-295 lineage is
-    constructed, reopen the retained receipt without importing Isaac, bind it
-    to the reviewed ARM-292/ARM-293 hashes, require the exact seven-link order
-    and one seven-transform batch, and independently verify every zero-motion
-    and zero-authority field. Refuse the review if the future ARM-295 directory
-    exists. Acceptance permits only fresh route-lineage construction; it does
-    not admit a simulation attempt or physical motion.
-87. **Fresh ARM-295 lineage plan:** only after an accepted ARM-294 receipt
-    review, bind the exact corrected runtime sources, immutable ARM-289 terminal
-    evidence, a new attempt directory, and distinct fresh EULA and memory
-    receipt locations. The builder refuses pre-created outputs, records that all
-    earlier attempt authorizations are non-reusable, and performs no runtime or
-    backend construction.
-88. **Independent ARM-295 lineage review:** re-hash the retained receipt review,
-    ARM-289 status, plan source, and every corrected runtime source without
-    importing the builder or Isaac. Reconfirm that all governed outputs remain
-    absent and emit only permission to construct a separately reviewed,
-    fresh-preflight-bound claimant. It grants no launch, attempt, motion,
-    hardware, or physical authority.
-89. **Fresh-gate ARM-295 claimant:** clone the already reviewed one-attempt
-    worker envelope to the new governed output while retaining the historical
-    ARM-253 token only as an internal compatibility value. Runtime admission
-    requires the exact new ARM-295 statement, unchanged corrected runtime
-    sources, fresh passing EULA and memory evaluations, and exclusive retention
-    of both receipts before the single worker delegation.
-90. **Independent ARM-295 claimant review:** rebind the claimant to the accepted
-    plan/review, base worker, gate sources, and worker source. Statically verify
-    authorization, source validation, EULA, memory, exclusive receipt writes,
-    single-use consumption, and worker delegation order. Acceptance may expose
-    one simulation-only launch gate, but grants no hardware or physical
-    authority and does not itself observe or consume authorization.
+85. **Completed runtime gate (ARM-294):** one separately authorized, no-retry
+    native inventory observation passed on `2026-11-11`. It retained the exact
+    seven-link order and one seven-transform batch with zero physics steps,
+    targets, playback, contact, hardware access, or physical authority, then
+    shut Isaac down. ARM-294 is consumed and cannot be replayed.
+86. **Completed independent ARM-294 receipt review:** the non-starting reviewer
+    rebound the retained receipt to ARM-292/ARM-293, verified every zero-motion
+    and zero-authority field, and accepted the evidence while the ARM-295 output
+    remained absent. Acceptance granted only fresh route-lineage construction.
+87. **Completed fresh ARM-295 lineage plan:** the accepted receipt review now
+    binds the exact corrected runtime sources, immutable ARM-289 terminal
+    evidence, new attempt directory, and distinct fresh EULA and memory receipt
+    locations. Construction started no runtime or backend.
+88. **Completed independent ARM-295 lineage review:** the review re-hashed the
+    receipt review, ARM-289 status, plan source, and every corrected runtime
+    source, reconfirmed all governed outputs absent, and permitted only claimant
+    construction without granting launch or physical authority.
+89. **Completed fresh-gate ARM-295 claimant construction:** the claimant clones
+    the reviewed one-attempt worker envelope to the new governed output while
+    retaining the historical ARM-253 token only as an internal compatibility
+    value. It has not collected gates or claimed an attempt.
+90. **Completed independent ARM-295 claimant review:** the reviewer rebound the
+    claimant to the plan/review, base worker, gate sources, and worker source,
+    and verified the authorization-to-delegation order. It accepted only the
+    simulation launch boundary; ARM-295, EULA, and memory outputs remain absent.
+91. **Next runtime gate (ARM-295):** require a separate exact ARM-295 one-attempt
+    authorization. At runtime, revalidate every corrected source, collect fresh
+    passing EULA then memory evidence, retain both receipts exclusively, and
+    delegate once to the terminalizing route-physics worker. Any mismatch or
+    partial output fails closed with no retry. This gate remains simulation-only
+    and grants no hardware or physical authority.
 
 ## Completion criterion
 
