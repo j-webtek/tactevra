@@ -1441,6 +1441,25 @@ ScheduleGen. Neither is a physical success rate.
     construction consumes no attempt and starts no simulator. A future attempt
     still requires the separately supplied exact ARM-289 authorization and
     fresh passing gates against the merged, reproduced lineage.
+82. **LM4 terminalized recovery result (ARM-289):** consume the authorization
+    exactly once. EULA and memory gates passed, Isaac loaded the pinned scene
+    and initialized physics, then runtime construction failed closed because
+    the articulation adapter omitted the native `link_names` property. The
+    failure was retained before shutdown with no route execution, targets,
+    playback, contact, hardware access, or physical authority.
+83. **Native link-inventory correction:** forward the real articulation's link
+    ordering, pin the concrete binding to ARM-287 rather than ARM-274, add
+    regression coverage, and merge only after the full cross-platform suite.
+    ARM-289 remains consumed and cannot validate the correction by replay.
+84. **Zero-motion inventory request and review (ARM-292/ARM-293):** bind the
+    corrected source to the exact seven-link order and transform width. The
+    independent review rejects physics stepping, settle, joint/trajectory,
+    route-worker, transport, retry, and physical-authority surfaces. Request
+    and review construction remain non-starting and consume no attempt.
+85. **Next runtime gate (ARM-294):** after merged-source reproduction and a new
+    exact authorization, perform one no-retry native inventory observation.
+    Require zero physics steps and retain success or failure before shutdown.
+    Only a passing receipt may seed a newly numbered route-physics lineage.
 
 ## Completion criterion
 

@@ -65,3 +65,11 @@ must pass tests, be independently reviewed, and be used to rebuild all affected
 source hashes and binding evidence. A future attempt requires a new identifier,
 a new output directory, fresh EULA and memory receipts, and a new exact
 one-attempt authorization. ARM-289 and its retained evidence remain immutable.
+
+The correction subsequently merged after the full local and cross-platform
+suite. ARM-292 now binds the corrected source to an exact seven-link inventory,
+and ARM-293 independently verifies that its runtime contains no physics step,
+settle, joint/trajectory, route-worker, retry, hardware, or physical-authority
+surface. Their retained request and review are inert. The next runtime gate is
+one separately authorized ARM-294 zero-motion observation; only a passing
+receipt can justify rebuilding a newly numbered route-physics attempt.

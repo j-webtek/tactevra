@@ -3253,6 +3253,58 @@ pin ARM-287 directly. It grants no launch authority. The changed sources and
 dependent evidence require independent review and a rebuilt, newly authorized
 attempt lineage; ARM-289 remains immutable and consumed.
 
+ARM-292 and ARM-293 prepare the narrow verification needed before rebuilding
+that route lineage. ARM-292 binds the corrected native-session source to the
+exact expected articulation order (`base_link`, `link1` through `link5`, then
+`gripper_link`) and a seven-transform readback. ARM-293 independently rejects
+physics stepping, settle calls, joint/trajectory commands, route-worker calls,
+hardware transports, retry, and physical authority. Both construction paths
+are inert; neither starts Isaac or consumes a route attempt.
+
+After the merged sources are reproduced, ARM-294 may run only with its exact
+one-use authorization. It initializes the real Isaac articulation, verifies
+the seven names and transform width, retains success or failure before
+shutdown, and records zero physics steps. It never calls the route worker and
+cannot create the future governed route-attempt directory. Build and review the
+request without starting Isaac:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$diagnostic = 'software/integrations/isaac_sim/nominal_route_native_link_inventory_diagnostic.py'
+$session = 'software/integrations/isaac_sim/nominal_route_native_session_smoke.py'
+$request = "$root/arm292-native-link-inventory-request-001/request.json"
+python $diagnostic build-request `
+  --diagnostic-source $diagnostic `
+  --session-source $session `
+  --proposed-output-directory "$root/arm294-native-link-inventory-diagnostic-001" `
+  --output $request
+python software/integrations/isaac_sim/nominal_route_native_link_inventory_review.py `
+  --request $request `
+  --diagnostic-source $diagnostic `
+  --review-source software/integrations/isaac_sim/nominal_route_native_link_inventory_review.py `
+  --output "$root/arm293-native-link-inventory-review-001/review.json"
+```
+
+The reproduced inert artifacts are:
+
+- ARM-292 request:
+  `C:/IsaacSim/artifacts/issue190/arm292-native-link-inventory-request-001/request.json`
+  (raw SHA-256
+  `f24ad5f049513ae9641d6759eacd1a621987c13969c2d68066666b1efb24a920`);
+- ARM-293 review:
+  `C:/IsaacSim/artifacts/issue190/arm293-native-link-inventory-review-001/review.json`
+  (raw SHA-256
+  `c4628e65fc0fd6aefcb76c5f85bda1b9581dec9dbf5ab852c798759ccdd8066f`).
+
+The review reports `isaac_started=false`, `physics_steps=0`, and
+`next_required_stage=SEPARATE_EXACT_ARM294_ZERO_MOTION_AUTHORIZATION`.
+
+Do not run the ARM-294 subcommand from this documentation alone. It requires
+the exact authorization retained in the ARM-292 request, an absent output
+directory, and the merged source hashes. A passing diagnostic proves only the
+repaired native inventory boundary; it does not prove route physics, contact,
+typing, or real-arm safety.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
