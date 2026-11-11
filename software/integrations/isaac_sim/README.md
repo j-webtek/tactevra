@@ -3109,6 +3109,28 @@ The request is inert. A future claimant must refresh both the memory and EULA
 gates before claim, become single-use before worker delegation, and pass an
 independent review before the new ARM-284 authorization can be accepted.
 
+ARM-285 implements that single-use claimant while remaining inert at build
+time. It binds the corrected ARM-284 request to the original reviewed worker
+lineage and records the exact EULA and memory gate sources:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_eula_recovery_claimant.py `
+  --recovery-request "$root/arm284-nominal-route-physics-eula-recovery-request-002/request.json" `
+  --worker-preparation "$root/arm284-nominal-route-physics-worker-001/worker.json" `
+  --claimant-source software/integrations/isaac_sim/nominal_route_physics_eula_recovery_claimant.py `
+  --memory-preflight-source software/integrations/isaac_sim/nominal_route_memory_preflight.py `
+  --eula-preflight-source software/integrations/isaac_sim/nominal_route_isaac_eula_preflight.py `
+  --worker-source software/integrations/isaac_sim/nominal_route_physics_worker.py `
+  --output "$root/arm285-nominal-route-physics-eula-recovery-claimant-001/claimant.json"
+```
+
+The runtime adapter rejects inexact authorization before collecting either
+gate. It then requires a fresh passing EULA observation, a fresh passing memory
+snapshot, and exclusive retention of both receipts before becoming single-use
+and delegating once. It cannot run without a matching independent ARM-286
+review, and it provides no trajectory, joint, hardware, or physical authority.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
