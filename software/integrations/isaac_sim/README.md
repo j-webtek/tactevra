@@ -3431,6 +3431,32 @@ and `def24e590a0c240340bd7de410cc3fed854e240cd07e28ea4505b85477e84327`.
 ARM-294 is consumed. ARM-295 and its fresh EULA and memory receipts remain
 absent and require a separate exact authorization before any simulation launch.
 
+ARM-295 now has a single reproducible runtime entry point instead of requiring
+an ad-hoc inline Python invocation. The launcher re-hashes the eight corrected
+runtime sources, the four worker source files, the robot USD, the canonical
+import receipt, the virtual commissioning profile, and the route-bound key
+mechanics profile. It then constructs the deferred concrete backend and hands
+those current hashes to the reviewed single-use claimant. Importing the module
+does not construct a session or start Isaac. Do not execute this command until
+the exact ARM-295 statement above has been separately supplied:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$repo = 'C:/icq7'
+$authorization = 'I authorize exactly one ARM-295 recovered nominal SPACE route-physics simulation attempt for episode-ef340d0ad2740c118d87, with no automatic retry, no trajectory playback, and no hardware or physical authority.'
+& 'C:/IsaacSim/python.bat' `
+  "$repo/software/integrations/isaac_sim/nominal_route_native_inventory_recovery_launch.py" `
+  --authorization-statement $authorization `
+  --claimant "$root/arm295-native-inventory-recovery-claimant-001/claimant.json" `
+  --claimant-review "$root/arm295-native-inventory-recovery-claimant-review-001/review.json" `
+  --artifact-root $root `
+  --repo-root $repo
+```
+
+The claimant still owns fresh EULA and memory collection, exclusive receipt
+retention, exact authorization matching, and the sole worker delegation. The
+launcher adds no retry, trajectory, hardware, or physical authority.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
