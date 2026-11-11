@@ -92,6 +92,7 @@ def build_request(
     """Bind the consumed failure and explicit acceptance observation."""
 
     source_hash = _require_hash(source_request, "request_sha256", "ARM-280 request")
+    worker_source_hash = source_request.get("source_request_sha256")
     attempt = source_request.get("attempt_contract", {})
     expected_failure_keys = {
         "status",
@@ -114,6 +115,8 @@ def build_request(
         != SOURCE_AUTHORIZATION
         or source_request.get("episode_id") != "episode-ef340d0ad2740c118d87"
         or source_request.get("target_id") != "SPACE"
+        or not isinstance(worker_source_hash, str)
+        or len(worker_source_hash) != 64
         or attempt.get("maximum_attempt_count") != 1
         or attempt.get("automatic_retry") is not False
         or attempt.get("trajectory_playback") is not False
@@ -149,6 +152,7 @@ def build_request(
         "request_id": "arm284-space-nominal-route-physics-eula-recovery-001",
         "status": "READY_FOR_INDEPENDENT_EULA_RECOVERY_CLAIMANT_REVIEW",
         "source_request_sha256": source_hash,
+        "source_worker_request_sha256": worker_source_hash,
         "source_request_file_sha256": source_request_file_sha256,
         "source_failure_status_file_sha256": failure_status_file_sha256,
         "source_eula_preflight_file_sha256": eula_preflight_file_sha256,

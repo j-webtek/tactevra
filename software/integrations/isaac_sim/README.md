@@ -3102,7 +3102,7 @@ python software/integrations/isaac_sim/nominal_route_physics_eula_recovery_reque
   --failure-status "$root/arm280-nominal-route-physics-attempt-001/status.json" `
   --eula-preflight "$root/arm283-eula-preflight-002/receipt.json" `
   --proposed-output-directory "$root/arm284-nominal-route-physics-attempt-001" `
-  --output "$root/arm284-nominal-route-physics-eula-recovery-request-001/request.json"
+  --output "$root/arm284-nominal-route-physics-eula-recovery-request-002/request.json"
 ```
 
 The request is inert. A future claimant must refresh both the memory and EULA

@@ -30,6 +30,7 @@ def _bundle():
         "required_authorization_statement": module.SOURCE_AUTHORIZATION,
         "episode_id": "episode-ef340d0ad2740c118d87",
         "target_id": "SPACE",
+        "source_request_sha256": "9" * 64,
         "attempt_contract": {
             "maximum_attempt_count": 1,
             "automatic_retry": False,
@@ -80,6 +81,7 @@ def test_arm284_builds_nonexecuting_eula_ready_request() -> None:
 
     assert result["status"] == "READY_FOR_INDEPENDENT_EULA_RECOVERY_CLAIMANT_REVIEW"
     assert result["required_authorization_statement"] == module.EXACT_AUTHORIZATION
+    assert result["source_worker_request_sha256"] == "9" * 64
     assert result["old_authorization_reusable"] is False
     assert result["attempt_contract"]["maximum_attempt_count"] == 1
     assert result["attempt_contract"]["claim_only_after_fresh_eula_preflight"] is True
