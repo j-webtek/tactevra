@@ -98,3 +98,37 @@ and current-source checks precede EULA collection, memory collection, exclusive
 receipt retention, single-use consumption, and one worker delegation. Runtime
 construction still depends on real accepted ARM-294 evidence; the source alone
 does not authorize or claim ARM-295.
+
+## ARM-294 correction validation and ARM-295 handoff
+
+On `2026-11-11`, the operator separately authorized exactly one ARM-294
+zero-motion native link-inventory diagnostic. The diagnostic started Isaac Sim
+6.1 once, initialized the pinned scene, observed the native articulation, and
+shut down successfully. It retained
+`PASS_NATIVE_LINK_INVENTORY_ZERO_MOTION` with the exact ordered links
+`base_link`, `link1` through `link5`, and `gripper_link`, plus one transform
+batch containing seven transforms. The receipt records zero physics steps,
+zero timeline playback, zero joint positions or targets, zero trajectory
+playback, zero key contact, and no hardware or physical authority. ARM-294 is
+consumed and must not be rerun.
+
+The non-starting receipt reviewer accepted that evidence and confirmed that the
+future ARM-295 output remained absent. The plan, plan review, claimant, and
+claimant review were then built from the accepted receipt without starting
+Isaac or collecting live gates. Their retained raw file hashes are:
+
+| Evidence | SHA-256 |
+| --- | --- |
+| `arm294-native-link-inventory-diagnostic-001/receipt.json` | `6f1fdd432f78a8bc138b6d1cd6930bcfd549ecbf934fc5dbfc7daf0261d06480` |
+| `arm294-native-link-inventory-receipt-review-001/review.json` | `ce317154d7531c14e32f8decde0f0e66533bea39ba7e60e6c20f40582c8618c5` |
+| `arm295-native-inventory-recovery-plan-001/plan.json` | `18d16e73086cfdd394b4c76ef55b395e1aa5ab9b009f2bf1f77122a5dd0a5dc5` |
+| `arm295-native-inventory-recovery-plan-review-001/review.json` | `e56e3a175d8ee4a0e88c26bcf32e93fc35aa8d4fa9af6f25d926621f7b49eff9` |
+| `arm295-native-inventory-recovery-claimant-001/claimant.json` | `25962ed86f9402e3072d0b6a7347aa0dea99dfe9b732705ad4145d134b546267` |
+| `arm295-native-inventory-recovery-claimant-review-001/review.json` | `def24e590a0c240340bd7de410cc3fed854e240cd07e28ea4505b85477e84327` |
+
+The accepted claimant review stops at
+`SEPARATE_EXACT_ARM295_ONE_ATTEMPT_AUTHORIZATION`. The ARM-295 attempt,
+fresh EULA receipt, and fresh memory receipt are still absent. Therefore this
+evidence proves the native link correction and establishes a reproducible
+fresh lineage, but it does not prove route physics, contact, key activation,
+typing, or real-arm safety.

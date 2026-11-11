@@ -3417,6 +3417,20 @@ then memory evidence, exclusively retain both receipts, and only then delegate
 once to the fail-closed worker. Any mismatch or partial receipt state prevents
 reuse and automatic retry.
 
+The separately authorized ARM-294 diagnostic completed successfully on
+`2026-11-11`. Its retained receipt has raw SHA-256
+`6f1fdd432f78a8bc138b6d1cd6930bcfd549ecbf934fc5dbfc7daf0261d06480`
+and records the exact seven-link order, one seven-transform batch, and zero
+physics steps. The independent receipt review was accepted with raw SHA-256
+`ce317154d7531c14e32f8decde0f0e66533bea39ba7e60e6c20f40582c8618c5`.
+The subsequently built plan, plan review, claimant, and claimant review have
+raw SHA-256 values `18d16e73086cfdd394b4c76ef55b395e1aa5ab9b009f2bf1f77122a5dd0a5dc5`,
+`e56e3a175d8ee4a0e88c26bcf32e93fc35aa8d4fa9af6f25d926621f7b49eff9`,
+`25962ed86f9402e3072d0b6a7347aa0dea99dfe9b732705ad4145d134b546267`,
+and `def24e590a0c240340bd7de410cc3fed854e240cd07e28ea4505b85477e84327`.
+ARM-294 is consumed. ARM-295 and its fresh EULA and memory receipts remain
+absent and require a separate exact authorization before any simulation launch.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
