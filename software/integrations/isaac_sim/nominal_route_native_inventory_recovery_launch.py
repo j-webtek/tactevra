@@ -16,12 +16,25 @@ from pathlib import Path
 import sys
 from typing import Any, Callable, Mapping
 
-from nominal_route_concrete_native_attempt_binding import (
+# This file is intentionally runnable as a standalone Isaac-Python entry point.
+# The repository uses a ``software/src`` layout, which is not automatically on
+# ``sys.path`` when Python executes a script below ``software/integrations``.
+# Bind the source tree before importing the reviewed runtime graph so a launch
+# does not depend on a caller-supplied PYTHONPATH or an unrelated installation.
+INTEGRATION_ROOT = Path(__file__).resolve().parent
+SOFTWARE_SOURCE_ROOT = INTEGRATION_ROOT.parents[1] / "src"
+if not (SOFTWARE_SOURCE_ROOT / "rocell/__init__.py").is_file():
+    raise RuntimeError(f"RoCell source root unavailable: {SOFTWARE_SOURCE_ROOT}")
+for source_root in (INTEGRATION_ROOT, SOFTWARE_SOURCE_ROOT):
+    if str(source_root) not in sys.path:
+        sys.path.insert(0, str(source_root))
+
+from nominal_route_concrete_native_attempt_binding import (  # noqa: E402
     BindingPaths,
     ConcreteNativeAttemptBinding,
     build_concrete_native_attempt_binding,
 )
-from nominal_route_native_inventory_recovery_claimant import (
+from nominal_route_native_inventory_recovery_claimant import (  # noqa: E402
     NativeInventoryRecoveryClaimant,
 )
 
