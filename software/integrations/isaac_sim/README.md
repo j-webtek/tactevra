@@ -3444,7 +3444,7 @@ the exact ARM-295 statement above has been separately supplied:
 $root = 'C:/IsaacSim/artifacts/issue190'
 $repo = 'C:/icq7'
 $authorization = 'I authorize exactly one ARM-295 recovered nominal SPACE route-physics simulation attempt for episode-ef340d0ad2740c118d87, with no automatic retry, no trajectory playback, and no hardware or physical authority.'
-& 'C:/IsaacSim/python.bat' `
+& 'C:/IsaacSim/env_6_1_0/Scripts/python.exe' `
   "$repo/software/integrations/isaac_sim/nominal_route_native_inventory_recovery_launch.py" `
   --authorization-statement $authorization `
   --claimant "$root/arm295-native-inventory-recovery-claimant-001/claimant.json" `
@@ -3456,6 +3456,14 @@ $authorization = 'I authorize exactly one ARM-295 recovered nominal SPACE route-
 The claimant still owns fresh EULA and memory collection, exclusive receipt
 retention, exact authorization matching, and the sole worker delegation. The
 launcher adds no retry, trajectory, hardware, or physical authority.
+
+The first authorized shell invocation on 2026-11-11 did not reach Python or
+the claimant because the earlier command named the absent
+`C:\IsaacSim\python.bat`. It created no attempt directory and no EULA or memory
+receipt. The corrected entry point above uses the host-qualified Python already
+bound throughout this integration. The launcher now also rejects any other
+interpreter before claimant construction. No automatic retry occurred; a fresh
+exact ARM-295 authorization is required before a corrected invocation.
 
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction

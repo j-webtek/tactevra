@@ -1492,6 +1492,13 @@ ScheduleGen. Neither is a physical success rate.
     delegate once to the terminalizing route-physics worker. Any mismatch or
     partial output fails closed with no retry. This gate remains simulation-only
     and grants no hardware or physical authority.
+93. **Corrected pre-launch interpreter binding:** the first authorized shell
+    invocation failed before Python, claimant construction, gate collection, or
+    attempt claim because the documented `C:\IsaacSim\python.bat` did not exist.
+    All three governed ARM-295 outputs remained absent and no retry occurred.
+    The command now uses the qualified 6.1.0 environment interpreter and the
+    launcher rejects any other interpreter before claimant construction. A
+    fresh exact ARM-295 authorization remains mandatory.
 
 ## Completion criterion
 

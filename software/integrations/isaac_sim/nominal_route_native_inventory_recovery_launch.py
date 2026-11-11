@@ -11,7 +11,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
+import sys
 from typing import Any, Callable, Mapping
 
 from nominal_route_concrete_native_attempt_binding import (
@@ -26,6 +28,32 @@ from nominal_route_native_inventory_recovery_claimant import (
 
 class NativeInventoryRecoveryLaunchError(RuntimeError):
     """Raised before delegation when a retained ARM-295 binding changed."""
+
+
+QUALIFIED_ISAAC_PYTHON = Path(r"C:\IsaacSim\env_6_1_0\Scripts\python.exe")
+
+
+def _validate_qualified_interpreter(
+    expected: Path = QUALIFIED_ISAAC_PYTHON,
+    actual: Path | None = None,
+) -> None:
+    """Fail before claimant construction when the pinned Isaac host is not active."""
+
+    actual = Path(sys.executable) if actual is None else actual
+    try:
+        expected_resolved = expected.resolve(strict=True)
+        actual_resolved = actual.resolve(strict=True)
+    except OSError as exc:
+        raise NativeInventoryRecoveryLaunchError(
+            f"qualified Isaac Python unavailable: expected={expected}, actual={actual}"
+        ) from exc
+    if os.path.normcase(str(expected_resolved)) != os.path.normcase(
+        str(actual_resolved)
+    ):
+        raise NativeInventoryRecoveryLaunchError(
+            "ARM-295 must run under the qualified Isaac Python: "
+            f"expected={expected_resolved}, actual={actual_resolved}"
+        )
 
 
 RUNTIME_SOURCE_FILES = {
@@ -197,6 +225,7 @@ def main() -> int:
     parser.add_argument("--artifact-root", type=Path, required=True)
     parser.add_argument("--repo-root", type=Path, required=True)
     args = parser.parse_args()
+    _validate_qualified_interpreter()
     result = run_authorized_attempt(
         authorization_statement=args.authorization_statement,
         claimant_path=args.claimant.resolve(strict=True),

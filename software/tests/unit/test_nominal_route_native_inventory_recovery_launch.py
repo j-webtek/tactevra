@@ -37,6 +37,28 @@ def test_import_is_inert():
     )
 
 
+def test_qualified_interpreter_accepts_same_executable(tmp_path):
+    executable = tmp_path / "python.exe"
+    executable.write_bytes(b"pinned")
+
+    MODULE._validate_qualified_interpreter(executable, executable)
+
+
+def test_qualified_interpreter_rejects_other_executable(tmp_path):
+    expected = tmp_path / "qualified" / "python.exe"
+    actual = tmp_path / "other" / "python.exe"
+    expected.parent.mkdir()
+    actual.parent.mkdir()
+    expected.write_bytes(b"qualified")
+    actual.write_bytes(b"other")
+
+    with pytest.raises(
+        MODULE.NativeInventoryRecoveryLaunchError,
+        match="must run under the qualified Isaac Python",
+    ):
+        MODULE._validate_qualified_interpreter(expected, actual)
+
+
 def test_runtime_binding_hashes_revalidate_raw_and_canonical_inputs(tmp_path):
     artifact = tmp_path / "artifacts"
     repo = tmp_path / "repo"
