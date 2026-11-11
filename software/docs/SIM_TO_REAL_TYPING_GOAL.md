@@ -190,15 +190,18 @@ The immediate path is:
    independent zero-motion review;
 4. execute one separately authorized ARM-294 native inventory diagnostic with
    zero physics steps, retaining success or failure before shutdown;
-5. only after a passing ARM-294 receipt, rebuild a newly numbered native
+5. independently review the retained ARM-294 receipt, requiring the exact
+   seven-link order, one seven-transform batch, zero motion authority, and an
+   absent ARM-295 directory;
+6. only after that accepted receipt review, rebuild a newly numbered native
    `SPACE` route-physics lineage with fresh EULA and memory gates;
-6. diagnose any failed acceptance metric and correct the digital twin or route
+7. diagnose any failed acceptance metric and correct the digital twin or route
    through another reviewed increment rather than replaying the attempt;
-7. on a passing result, freeze the single-key simulation benchmark and expand
+8. on a passing result, freeze the single-key simulation benchmark and expand
    to a representative multi-key set;
-8. add vision-conditioned localization and rolling-horizon sequence planning;
-9. qualify randomized simulation coverage; and
-10. design separately authorized physical correlation campaigns only after the
+9. add vision-conditioned localization and rolling-horizon sequence planning;
+10. qualify randomized simulation coverage; and
+11. design separately authorized physical correlation campaigns only after the
    corresponding simulation gates pass.
 
 ## Governance

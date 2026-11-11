@@ -1460,6 +1460,13 @@ ScheduleGen. Neither is a physical success rate.
     exact authorization, perform one no-retry native inventory observation.
     Require zero physics steps and retain success or failure before shutdown.
     Only a passing receipt may seed a newly numbered route-physics lineage.
+86. **Independent ARM-294 receipt review:** before any ARM-295 lineage is
+    constructed, reopen the retained receipt without importing Isaac, bind it
+    to the reviewed ARM-292/ARM-293 hashes, require the exact seven-link order
+    and one seven-transform batch, and independently verify every zero-motion
+    and zero-authority field. Refuse the review if the future ARM-295 directory
+    exists. Acceptance permits only fresh route-lineage construction; it does
+    not admit a simulation attempt or physical motion.
 
 ## Completion criterion
 
