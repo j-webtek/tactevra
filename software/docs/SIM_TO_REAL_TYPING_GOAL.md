@@ -179,8 +179,8 @@ The immediate path is:
 
 1. retain the materialized ARM-287/ARM-288 correction lineage and inert ARM-289
    recovery request;
-2. independently review the implemented single-use ARM-290 claimant as
-   ARM-291; ARM-284 is consumed and is never replayed;
+2. merge and reproduce the implemented ARM-290 claimant and ARM-291 independent
+   review; ARM-284 is consumed and is never replayed;
 3. execute one newly authorized native `SPACE` route-physics attempt with fresh
    EULA and memory gates, preserving its terminal result before shutdown;
 4. diagnose any failed acceptance metric and correct the digital twin or route

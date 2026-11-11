@@ -1433,6 +1433,14 @@ ScheduleGen. Neither is a physical success rate.
     before worker invocation, while failure terminalization remains required
     before simulator shutdown. The next step is ARM-291 independent review;
     no simulation, hardware, or physical authority is granted here.
+81. **LM4 terminalized claimant independent review (ARM-291):** statically bind
+    the ARM-290 definition and source while requiring exact authorization and
+    source hashes, EULA-before-memory-before-receipt ordering, single-use
+    consumption before worker delegation, terminal failure retention before
+    simulator shutdown, and zero hardware or physical authority. Review
+    construction consumes no attempt and starts no simulator. A future attempt
+    still requires the separately supplied exact ARM-289 authorization and
+    fresh passing gates against the merged, reproduced lineage.
 
 ## Completion criterion
 
