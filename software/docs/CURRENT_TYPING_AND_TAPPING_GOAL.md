@@ -1,5 +1,14 @@
 # Current goal and execution plan
 
+> **Current durable objective:**
+> [SIM_TO_REAL_TYPING_GOAL.md](SIM_TO_REAL_TYPING_GOAL.md) supersedes the
+> historical immediate execution priority below. The active path is now
+> simulation-first, camera-informed, attachment-separated robotic typing with
+> physics qualification and separately authorized sim-to-real validation.
+> The remainder of this file is retained as command/servo diagnostic history
+> and evidence; statements deferring camera, stylus registration, contact, or
+> Isaac Sim are no longer the current plan.
+
 Updated: 2026-09-17. This document supersedes historical immediate-next-action
 instructions in the movement logs. The practical path document remains the
 overall roadmap; FIRST_COORDINATED_GHOST_STEP.md retains detailed trial evidence.

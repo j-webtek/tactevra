@@ -1,5 +1,11 @@
 # Isaac Sim learned motion generation plan
 
+The durable end-state, qualification ladder, evidence rules, and sim-to-real
+promotion criteria are defined in
+[SIM_TO_REAL_TYPING_GOAL.md](SIM_TO_REAL_TYPING_GOAL.md). This document owns the
+detailed Isaac, dataset, policy, and system-identification progression toward
+that objective.
+
 - **Document status:** Active implementation plan
 - **Primary issue:** [#190 - pinned Isaac Sim simulation oracle](https://github.com/j-webtek/tactevra/issues/190)
 - **Owners:** Simulation, arm/runtime, and AI/model workstreams
@@ -1349,7 +1355,55 @@ ScheduleGen. Neither is a physical success rate.
     current call signatures, and retains the missing worker/backend review
     documents as explicit prerequisites. Integration implementation, launch,
     backend execution, and any simulation attempt remain separate gates.
-61. Expand only after each predecessor produces reviewable evidence.
+61. **LM4 zero-authority worker integration and review:** ARM-274 implements the
+    reviewed ARM-273 call order, materializes the worker/backend review inputs,
+    and exposes one single-use backend callable over a deferred native session.
+    Independent review accepts only later separately authorized one-attempt use;
+    no session, simulator, trajectory, attempt, or physical operation starts.
+62. **LM4 inert native-session smoke:** ARM-275 starts Isaac once without
+    timeline playback or physics stepping, authors the nominal board and SPACE
+    key, and verifies articulation, fixed-root, link, and scene-query surfaces.
+    It identifies the native link-transform and nested root-prim bindings needed
+    by the concrete session while consuming no governed attempt.
+63. **LM4 pinned native mechanics profile:** ARM-276 applies and reads back the
+    provisional seven-body mass, center-of-mass, inertia, gain, and limit profile
+    without setting positions or targets. The result is a simulation prior, not
+    physical system identification or contact qualification.
+64. **LM4 corrected concrete native settle:** ARM-277 corrects the native root
+    metadata and proves a 30-step settle-only session with bounded root drift,
+    no route playback, no key contact, and no governed attempt consumption.
+65. **LM4 concrete one-attempt binding:** ARM-278 binds the corrected session,
+    route, mechanics profile, and reviewed ARM-262 through ARM-274 runtime stack
+    behind the deferred ARM-254 worker. Its CLI remains a non-starting preflight
+    and retains the exact authorization required for one future attempt.
+66. **LM4 fail-closed memory preflight:** ARM-279 observes current Windows commit
+    and physical-memory headroom before launch. An insufficient host fails before
+    Isaac starts or an output is claimed and never grants a retry or authority.
+67. **LM4 memory-recovery request:** ARM-280 binds the consumed memory-bootstrap
+    failure to a passing retained preflight while requiring a distinct exact
+    authorization and a fresh preflight at launch. The request is inert.
+68. **LM4 memory-gated recovery claimant:** ARM-281 binds ARM-280 to a fresh
+    ARM-254 preparation, collects and retains memory evidence before claim, then
+    becomes single-use before its sole worker delegation. Definition is inert.
+69. **LM4 recovery-claimant independent review:** ARM-282 independently verifies
+    claimant lineage and the authorization -> memory -> receipt -> single-use ->
+    worker order. Acceptance admits only a separately authorized simulation.
+70. **LM4 fail-closed Isaac EULA preflight:** ARM-283 observes exact
+    operator-provided `OMNI_KIT_ACCEPT_EULA=YES` without accepting terms or
+    modifying the environment. Failure precedes attempt claim and Isaac start.
+71. **LM4 EULA-ready recovery request:** ARM-284 binds the consumed ARM-280 EULA
+    bootstrap failure to a passing ARM-283 receipt, a distinct output, and a new
+    exact authorization. It requires fresh EULA and memory gates at execution.
+72. **LM4 EULA- and memory-gated claimant:** ARM-285 rejects inexact authority,
+    then requires and exclusively retains both fresh receipts before becoming
+    single-use and delegating once to the reviewed worker. Build time is inert.
+73. **LM4 EULA/memory claimant independent review:** ARM-286 reopens the exact
+    claimant and worker lineage, statically verifies gate and consumption order,
+    and rejects simulator, hardware, retry, or authority surfaces. A passing
+    review admits only presentation of the separate ARM-284 authorization.
+74. Expand only after each predecessor produces reviewable evidence. The next
+    evidence-producing step is one exact, separately authorized ARM-284 native
+    SPACE route-physics attempt; its terminal result is retained without retry.
 
 ## Completion criterion
 
