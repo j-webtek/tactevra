@@ -96,6 +96,13 @@ governed duplicate bytes. No simulator asset, live gate receipt, attempt output,
 trajectory corpus, camera frame, controller transcript, or hardware-authority
 artifact is added; all byte, duplicate, and reduction limits remain unchanged.
 
+The ARM-295 reproducible launch binding adds two governed Python paths: one
+deterministic entry point and one focused fail-closed test module. The reviewed
+tracked-file ceiling moves from 6,849 to the exact observed 6,851 files. It adds
+no simulator asset, live gate receipt, attempt output, trajectory corpus, camera
+frame, controller transcript, or hardware-authority artifact; all byte,
+duplicate-byte, and reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

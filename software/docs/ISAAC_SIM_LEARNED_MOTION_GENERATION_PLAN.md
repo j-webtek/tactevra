@@ -1481,7 +1481,12 @@ ScheduleGen. Neither is a physical success rate.
     claimant to the plan/review, base worker, gate sources, and worker source,
     and verified the authorization-to-delegation order. It accepted only the
     simulation launch boundary; ARM-295, EULA, and memory outputs remain absent.
-91. **Next runtime gate (ARM-295):** require a separate exact ARM-295 one-attempt
+91. **Completed reproducible ARM-295 launch binding:** a dedicated entry point
+    now re-hashes all eight corrected runtime sources, four worker inputs, and
+    four route/runtime bindings before constructing the deferred native backend
+    and delegating to the claimant. Import and validation remain inert; this
+    layer adds no authority and has not created any ARM-295 output.
+92. **Next runtime gate (ARM-295):** require a separate exact ARM-295 one-attempt
     authorization. At runtime, revalidate every corrected source, collect fresh
     passing EULA then memory evidence, retain both receipts exclusively, and
     delegate once to the terminalizing route-physics worker. Any mismatch or
