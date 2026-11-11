@@ -3073,6 +3073,25 @@ A passing review admits only a separately authorized simulation attempt. It
 does not itself collect memory, claim the output, start Isaac, or grant physical
 authority.
 
+The authorized ARM-280 attempt passed its fresh memory gate but stopped during
+Isaac bootstrap because the NVIDIA Omniverse EULA acceptance signal was absent.
+The retained no-retry failure is:
+
+`C:\IsaacSim\artifacts\issue190\arm280-nominal-route-physics-attempt-001\status.json`
+
+ARM-283 prevents that host-readiness condition from consuming a future attempt.
+It only observes exact operator-provided `OMNI_KIT_ACCEPT_EULA=YES`; it cannot
+accept legal terms or modify the environment:
+
+```powershell
+python software/integrations/isaac_sim/nominal_route_isaac_eula_preflight.py `
+  --output C:/IsaacSim/artifacts/issue190/arm283-eula-preflight-001/receipt.json
+```
+
+The EULA gate must pass and its receipt must be retained before any future
+worker claims an attempt. A failed gate exits with code 2 while reporting zero
+attempt claims, Isaac starts, trajectory playback, and physical authority.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
