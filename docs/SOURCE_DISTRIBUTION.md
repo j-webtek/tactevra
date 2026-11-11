@@ -62,6 +62,15 @@ policy baseline now points to this merged commit so future checks have a stable,
 post-reduction reference. Containment ceilings remain deliberately above the
 baseline to detect material growth without making normal small changes brittle.
 
+The ARM-284 retained-attempt postmortem and ARM-287/ARM-288 shutdown
+terminalization increment add one governed documentation path while updating
+the runtime integration, its static reviewer, tests, and maintained plans in
+place. The reviewed tracked-file ceiling moves from 6,829 to the exact observed
+6,830 files. The measured tree is 675,542,565 logical bytes with 4,890,152
+governed duplicate bytes. No simulator asset, trajectory corpus, camera frame,
+controller transcript, or hardware-authority artifact is added; all byte,
+duplicate, and reduction limits remain unchanged.
+
 The ARM-274 zero-authority native-runtime worker integration adds three
 governed paths: the import-safe single-use integration, its independent static
 reviewer, and focused lifecycle tests. The reviewed tracked-file ceiling moves
