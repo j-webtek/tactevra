@@ -114,6 +114,16 @@ def _paths(tmp_path: Path, monkeypatch):
         "EXPECTED_DEPENDENCY_SHA256",
         {relative: _sha(artifact_root / relative) for relative in files},
     )
+    monkeypatch.setattr(
+        MODULE,
+        "_build_solver_kwargs",
+        lambda paths: {
+            "model": "pinned-model",
+            "board_T_world": "board-transform",
+            "hand_tcp_to_tip_z_mm": -61.0,
+            "fixed_gripper_position": "fixed-gripper",
+        },
+    )
     return paths
 
 
@@ -133,6 +143,19 @@ def test_arm278_builds_deferred_single_attempt_binding_without_session(
     assert binding.receipt["backend_constructed"] is True
     assert binding.receipt["session_factory_deferred"] is True
     assert binding.receipt["session_creations"] == 0
+    assert binding.receipt["canonical_ik_inputs_bound"] is True
+    assert binding.receipt["canonical_ik_input_names"] == [
+        "board_T_world",
+        "fixed_gripper_position",
+        "hand_tcp_to_tip_z_mm",
+        "model",
+    ]
+    assert binding.backend._solver_kwargs == {
+        "model": "pinned-model",
+        "board_T_world": "board-transform",
+        "hand_tcp_to_tip_z_mm": -61.0,
+        "fixed_gripper_position": "fixed-gripper",
+    }
     assert binding.receipt["attempt_consumed"] is False
     assert binding.receipt["physics_steps"] == 0
     assert binding.receipt["hardware_access"] is False
@@ -157,6 +180,31 @@ def test_arm278_refuses_changed_pinned_input(tmp_path, monkeypatch):
     monkeypatch.setattr(MODULE, "EXPECTED_LAYOUT_SHA256", "0" * 64)
     with pytest.raises(MODULE.ConcreteNativeAttemptBindingError, match="pinned input"):
         MODULE.build_concrete_native_attempt_binding(paths)
+
+
+def test_solver_kwargs_come_from_locked_repository_context():
+    kwargs = MODULE._build_solver_kwargs(
+        MODULE.BindingPaths(
+            artifact_root=ROOT,
+            repo_root=ROOT,
+            governed_attempt_directory=ROOT / ".never-created-by-solver-input-test",
+        )
+    )
+    assert set(kwargs) == {
+        "model",
+        "board_T_world",
+        "hand_tcp_to_tip_z_mm",
+        "fixed_gripper_position",
+        "ready_arm_joint_positions",
+        "gripper_bounds_rad",
+        "options",
+        "joint_bounds_rad",
+    }
+    assert kwargs["model"].root_link == "world"
+    assert kwargs["board_T_world"].parent_frame == "board"
+    assert kwargs["board_T_world"].child_frame == "world"
+    assert kwargs["hand_tcp_to_tip_z_mm"] <= 0.0
+    assert set(kwargs["ready_arm_joint_positions"]) == set(kwargs["joint_bounds_rad"])
 
 
 def test_arm278_source_contains_no_execution_or_hardware_authority():

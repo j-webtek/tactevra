@@ -104,6 +104,46 @@ class ConcreteNativeAttemptBinding:
     receipt: Mapping[str, Any]
 
 
+def _build_solver_kwargs(paths: BindingPaths) -> dict[str, Any]:
+    """Load the canonical IK inputs from the repository's locked context.
+
+    These values are configuration inputs only.  Loading them does not create
+    an Isaac session, claim an attempt, step physics, or submit a joint target.
+    """
+    try:
+        from rocell.application._pinned_model import load_pinned_urdf
+        from rocell.application.context import load_simulation_context
+        from rocell.kinematics import IkOptions
+
+        context = load_simulation_context(
+            paths.repo_root,
+            paths.repo_root / "software/config/system_manifest.json",
+        )
+        scenario = context.scenario
+        model = load_pinned_urdf(
+            scenario.model_path,
+            scenario.model_sha256,
+        ).model
+    except (ImportError, OSError, TypeError, ValueError) as exc:
+        raise ConcreteNativeAttemptBindingError(
+            "canonical IK inputs are unavailable from the locked simulation context"
+        ) from exc
+
+    return {
+        "model": model,
+        "board_T_world": scenario.board_T_world,
+        "hand_tcp_to_tip_z_mm": scenario.hand_tcp_to_tip_z_mm,
+        "fixed_gripper_position": scenario.fixed_gripper_position,
+        "ready_arm_joint_positions": scenario.ready_arm_joint_positions_rad,
+        "gripper_bounds_rad": scenario.controller_gripper_intersection_rad,
+        "options": IkOptions(
+            max_attempts=scenario.ik_policy.max_attempts,
+            max_iterations_per_attempt=(scenario.ik_policy.max_iterations_per_attempt),
+        ),
+        "joint_bounds_rad": scenario.controller_joint_intersection_rad,
+    }
+
+
 def _file_sha(path: Path) -> str:
     try:
         return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -230,6 +270,7 @@ def build_concrete_native_attempt_binding(
     )
     route = _load(paths.route)
     documents = _load_runtime_documents(paths)
+    solver_kwargs = _build_solver_kwargs(paths)
     corrected_factory = CorrectedRootRuntimeFactory(runtime_factory)
     session_creations = 0
 
@@ -257,7 +298,7 @@ def build_concrete_native_attempt_binding(
         factory_plan=factory_plan,
         factory_plan_review=factory_plan_review,
         documents=documents,
-        solver_kwargs={},
+        solver_kwargs=solver_kwargs,
         native_metadata=corrected_native_metadata(),
     )
     receipt = {
@@ -279,6 +320,8 @@ def build_concrete_native_attempt_binding(
         "session_factory_deferred": True,
         "session_creations": session_creations,
         "root_metadata_correction_bound": True,
+        "canonical_ik_inputs_bound": True,
+        "canonical_ik_input_names": sorted(solver_kwargs),
         "attempt_consumed": False,
         "isaac_started": False,
         "scene_loaded": False,
