@@ -44,7 +44,7 @@ EXPECTED_MECHANICS_SHA256 = (
     "768829bc8c131efe41e8866b6a18900a24b3f77e2ef97b367b55cffbfcf9881a"
 )
 EXPECTED_DEPENDENCY_SHA256 = {
-    "arm274-native-runtime-worker-integration-001/integration.json": "fb1c6de09b3c56dae645d8df57885b58776beced2ea233edd800c71aa185b882",
+    "arm287-native-runtime-worker-integration-001/integration.json": "7bc8694dd28491c1ace7d1139755771009e78a3f1ae296431a162795bd757e64",
     "arm255-nominal-route-physics-backend-001/backend.json": "968140c9b075cc4f6a8d5599edc765cd1b6cde734e32e6632513bd2c94fb6228",
     "arm272-native-runtime-factory-001/factory.json": "6572a0a9166106c0321349ef4b8276154f06ab775ec478a941869e6b5c7ce854",
     "arm272-native-runtime-factory-review-001/review.json": "0418f5c0e6d4e9fe35de36be68a9f46a05dbccb2ba4ea0f15231a8828542aca0",
@@ -208,7 +208,7 @@ def build_concrete_native_attempt_binding(
 
     integration = _load(
         _artifact(
-            paths, "arm274-native-runtime-worker-integration-001", "integration.json"
+            paths, "arm287-native-runtime-worker-integration-001", "integration.json"
         )
     )
     backend_definition = _load(

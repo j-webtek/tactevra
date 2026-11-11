@@ -234,10 +234,12 @@ def test_articulation_adapter_exposes_native_link_view():
 
     class Articulation:
         dof_names = ["joint1"]
+        link_names = ["base_link", "link1"]
         _physics_articulation_view = Native()
 
     adapter = MODULE.IsaacArticulationLinkView(Articulation())
     assert adapter.dof_names == ["joint1"]
+    assert adapter.link_names == ["base_link", "link1"]
     assert adapter.get_link_transforms() == "links"
 
 

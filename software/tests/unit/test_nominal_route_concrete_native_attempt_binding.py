@@ -88,7 +88,7 @@ def _paths(tmp_path: Path, monkeypatch):
         "integration_sha256": worker_integration._sha(integration_core),
     }
     files = {
-        "arm274-native-runtime-worker-integration-001/integration.json": integration,
+        "arm287-native-runtime-worker-integration-001/integration.json": integration,
         "arm255-nominal-route-physics-backend-001/backend.json": {},
         "arm272-native-runtime-factory-001/factory.json": {},
         "arm272-native-runtime-factory-review-001/review.json": {},

@@ -59,6 +59,12 @@ class IsaacArticulationLinkView:
     def dof_names(self) -> list[str]:
         return list(self._articulation.dof_names)
 
+    @property
+    def link_names(self) -> list[str]:
+        """Expose Isaac's native link ordering to downstream proof adapters."""
+
+        return list(self._articulation.link_names)
+
     def get_link_transforms(self) -> Any:
         return self._native.get_link_transforms()
 
