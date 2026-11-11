@@ -177,10 +177,11 @@ documented in [ARM_284_ATTEMPT_POSTMORTEM.md](ARM_284_ATTEMPT_POSTMORTEM.md).
 
 The immediate path is:
 
-1. independently review the pre-shutdown terminalization correction and rebuild
+1. materialize the reviewed ARM-287/ARM-288 correction documents and rebuild
    every affected source/runtime hash;
-2. prepare a new recovery increment with a distinct attempt identifier and
-   output directory; ARM-284 is consumed and is never replayed;
+2. complete the inert ARM-289 recovery request, then implement and independently
+   review its single-use ARM-290/ARM-291 claimant; ARM-284 is consumed and is
+   never replayed;
 3. execute one newly authorized native `SPACE` route-physics attempt with fresh
    EULA and memory gates, preserving its terminal result before shutdown;
 4. diagnose any failed acceptance metric and correct the digital twin or route

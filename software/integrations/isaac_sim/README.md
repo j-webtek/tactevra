@@ -3164,6 +3164,33 @@ joint-command, physics-step, retry, hardware, and physical-authority surfaces.
 These changes authorize no launch; a future attempt needs rebuilt hashes, fresh
 gates, a distinct output, independent review, and a new exact authorization.
 
+ARM-289 begins that rebuilt lineage with a non-executing request. It binds the
+immutable ARM-284 pending claim, the passing EULA and memory receipts, the Kit
+log and postmortem hashes, and newly materialized ARM-287/ARM-288 integration
+and review documents. It rejects the old output path and the consumed ARM-284
+authorization:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+python software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_request.py `
+  --source-request "$root/arm284-nominal-route-physics-eula-recovery-request-002/request.json" `
+  --consumed-status "$root/arm284-nominal-route-physics-attempt-001/status.json" `
+  --eula-receipt "$root/arm287-eula-preflight-001/receipt.json" `
+  --memory-receipt "$root/arm287-memory-preflight-001/receipt.json" `
+  --postmortem software/docs/ARM_284_ATTEMPT_POSTMORTEM.md `
+  --kit-log "C:/IsaacSim/env_6_1_0/Lib/site-packages/isaacsim/kit/logs/Kit/Isaac-Sim Python/6.1/kit_20261110_215320.log" `
+  --integration "$root/arm287-native-runtime-worker-integration-001/integration.json" `
+  --integration-review "$root/arm288-native-runtime-worker-integration-review-001/review.json" `
+  --request-source software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_request.py `
+  --proposed-output-directory "$root/arm289-nominal-route-physics-attempt-001" `
+  --output "$root/arm289-terminalized-route-physics-recovery-request-001/request.json"
+```
+
+Building this request does not collect live gates, start Isaac, claim the new
+directory, or grant simulator, hardware, or physical authority. A separately
+implemented and independently reviewed claimant remains required before the
+exact ARM-289 authorization may be presented.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol

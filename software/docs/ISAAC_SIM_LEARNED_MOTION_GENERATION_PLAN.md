@@ -1416,6 +1416,15 @@ ScheduleGen. Neither is a physical success rate.
     review passes.
 77. Expand only after a distinct, freshly gated and separately authorized
     recovery attempt produces reviewable terminal evidence.
+78. **LM4 terminalized recovery request (ARM-289):** bind the immutable ARM-284
+    pending claim, passing launch-gate receipts, Kit log, postmortem, and newly
+    materialized ARM-287/ARM-288 correction lineage to a distinct output and
+    authorization. Request construction is inert and cannot collect gates,
+    claim an attempt, start Isaac, replay a trajectory, or grant hardware or
+    physical authority.
+79. The next implementation step is a single-use ARM-290 claimant and ARM-291
+    independent review. Only that reviewed lineage may later accept the exact
+    ARM-289 authorization with fresh EULA and memory gates.
 
 ## Completion criterion
 
