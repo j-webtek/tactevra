@@ -1401,9 +1401,21 @@ ScheduleGen. Neither is a physical success rate.
     claimant and worker lineage, statically verifies gate and consumption order,
     and rejects simulator, hardware, retry, or authority surfaces. A passing
     review admits only presentation of the separate ARM-284 authorization.
-74. Expand only after each predecessor produces reviewable evidence. The next
-    evidence-producing step is one exact, separately authorized ARM-284 native
-    SPACE route-physics attempt; its terminal result is retained without retry.
+74. **LM4 first EULA-ready native attempt:** the exact ARM-284 authorization was
+    consumed once. Fresh EULA and memory gates passed; Isaac started, opened the
+    pinned USD, and created native PhysX views. A fast `SimulationApp.close()`
+    path prevented the outer worker from terminalizing the pending claim. The
+    incomplete attempt is retained unchanged and is not retryable.
+75. **LM4 pre-shutdown terminalization correction (ARM-287):** retain atomic failure phase
+    and exception evidence before session shutdown, including when shutdown
+    does not return to Python.
+76. **LM4 terminalization independent review (ARM-288):** statically require the
+    terminal failure replacement to precede shutdown while continuing to reject
+    attempt claims, simulator imports, joint commands, physics steps, retry, and
+    hardware or physical authority. Rebuild the affected hash lineage after the
+    review passes.
+77. Expand only after a distinct, freshly gated and separately authorized
+    recovery attempt produces reviewable terminal evidence.
 
 ## Completion criterion
 

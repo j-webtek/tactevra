@@ -168,18 +168,28 @@ Isaac mechanics components, a governed one-attempt worker, and retained
 authorization/preflight lineage. These are substantial foundations, but they do
 not yet prove a successful native route-physics attempt or real typing.
 
+The independently reviewed EULA- and memory-gated ARM-284 claimant was
+completed and its one authorized native `SPACE` attempt was consumed. Both
+launch gates passed and Isaac reached native PhysX initialization, but a
+fast-shutdown control-flow defect prevented the worker from replacing its
+pending claim with terminal failure evidence. The immutable retained outcome is
+documented in [ARM_284_ATTEMPT_POSTMORTEM.md](ARM_284_ATTEMPT_POSTMORTEM.md).
+
 The immediate path is:
 
-1. finish the independently reviewed EULA- and memory-gated ARM-284 claimant;
-2. execute exactly one separately authorized native `SPACE` route-physics
-   attempt, preserving its no-retry terminal result;
-3. diagnose any failed acceptance metric and correct the digital twin or route
-   through a new reviewed increment rather than replaying the attempt;
-4. on a passing result, freeze the single-key simulation benchmark and expand
+1. independently review the pre-shutdown terminalization correction and rebuild
+   every affected source/runtime hash;
+2. prepare a new recovery increment with a distinct attempt identifier and
+   output directory; ARM-284 is consumed and is never replayed;
+3. execute one newly authorized native `SPACE` route-physics attempt with fresh
+   EULA and memory gates, preserving its terminal result before shutdown;
+4. diagnose any failed acceptance metric and correct the digital twin or route
+   through another reviewed increment rather than replaying the attempt;
+5. on a passing result, freeze the single-key simulation benchmark and expand
    to a representative multi-key set;
-5. add vision-conditioned localization and rolling-horizon sequence planning;
-6. qualify randomized simulation coverage; and
-7. design separately authorized physical correlation campaigns only after the
+6. add vision-conditioned localization and rolling-horizon sequence planning;
+7. qualify randomized simulation coverage; and
+8. design separately authorized physical correlation campaigns only after the
    corresponding simulation gates pass.
 
 ## Governance

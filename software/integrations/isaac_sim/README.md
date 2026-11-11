@@ -3150,6 +3150,20 @@ The review is non-executing: it does not collect live gates, claim an attempt,
 start Isaac, or reuse the consumed ARM-280 authorization. A passing review only
 allows a later caller to present the separate, exact ARM-284 authorization.
 
+That exact ARM-284 authorization was subsequently consumed once. Both fresh
+gates passed; Isaac opened the pinned USD and created native PhysX views, but a
+fast `SimulationApp.close()` path prevented the outer worker from replacing its
+pending claim with terminal failure evidence. The attempt is retained unchanged
+and cannot be retried. See
+[`ARM_284_ATTEMPT_POSTMORTEM.md`](../../docs/ARM_284_ATTEMPT_POSTMORTEM.md).
+
+ARM-287 corrects the lifecycle by atomically retaining the failure stage and
+exception before finally-guarded shutdown. ARM-288 independently requires that
+write to precede shutdown while rejecting attempt-claim, simulator-import,
+joint-command, physics-step, retry, hardware, and physical-authority surfaces.
+These changes authorize no launch; a future attempt needs rebuilt hashes, fresh
+gates, a distinct output, independent review, and a new exact authorization.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol

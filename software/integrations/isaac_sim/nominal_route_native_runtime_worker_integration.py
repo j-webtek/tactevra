@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Callable, Mapping, Protocol
 
 
-INTEGRATION_SCHEMA = "tactevra.isaac_lm4_native_runtime_worker_integration.v1"
+INTEGRATION_SCHEMA = "tactevra.isaac_lm4_native_runtime_worker_integration.v2"
 PLAN_SCHEMA = "tactevra.isaac_lm4_native_runtime_worker_integration_plan.v1"
 PLAN_REVIEW_SCHEMA = (
     "tactevra.isaac_lm4_native_runtime_worker_integration_plan_review.v1"
@@ -171,7 +171,7 @@ def build_integration_definition(
     }
     core = {
         "schema": INTEGRATION_SCHEMA,
-        "integration_id": "arm274-zero-authority-native-runtime-worker-integration-001",
+        "integration_id": "arm287-terminalizing-native-runtime-worker-integration-001",
         "status": "READY_FOR_INDEPENDENT_NATIVE_RUNTIME_WORKER_INTEGRATION_REVIEW",
         "source_plan_sha256": plan_hash,
         "source_plan_review_sha256": review_hash,
@@ -194,6 +194,7 @@ def build_integration_definition(
             "obtain_native_objects_once",
             "construct_runtime_once",
             "execute_backend_once",
+            "terminalize_failure_before_shutdown",
             "shutdown_once",
         ],
         "worker_remains_sole_attempt_claimant": True,
@@ -287,16 +288,22 @@ class OneAttemptNativeBackend:
             )
 
         session = self._session_factory()
+        phase = "start_headless"
         try:
             session.start_headless()
+            phase = "load_scene"
             session.load_scene()
+            phase = "initialize_physics"
             session.initialize_physics()
+            phase = "settle_scene"
             session.settle_scene()
+            phase = "collect_native_objects"
             native = dict(session.native_objects())
             if set(native) != {"articulation", "scene_query", "key_view", "root_view"}:
                 raise NativeRuntimeWorkerIntegrationError(
                     "native session object set changed"
                 )
+            phase = "construct_runtime"
             runtime = self._construct_runtime(
                 self._factory_definition,
                 factory_review=self._factory_review,
@@ -310,6 +317,7 @@ class OneAttemptNativeBackend:
                 solver_kwargs=self._solver_kwargs,
                 native_metadata=self._native_metadata,
             )
+            phase = "execute_backend"
             return self._execute_backend(
                 self._backend_definition,
                 self._route,
@@ -317,6 +325,28 @@ class OneAttemptNativeBackend:
                 output_directory=output_directory,
                 runtime=runtime,
             )
+        except BaseException as exc:
+            # SimulationApp.close() may terminate the host process before this
+            # exception can reach the outer worker.  Retain a terminal failure
+            # while Python and the claimed directory are still available.  If
+            # close() returns normally, the worker may replace this with its
+            # equivalent terminal failure receipt.
+            failure = {
+                "status": "FAILED_RETAINED_NO_RETRY",
+                "attempt_count": 1,
+                "automatic_retry": False,
+                "error_stage": phase,
+                "error_type": type(exc).__name__,
+                "error_message": str(exc),
+                "hardware_access": False,
+                "physical_authority": False,
+            }
+            temporary = status_path.with_suffix(".json.tmp")
+            temporary.write_text(
+                json.dumps(failure, sort_keys=True) + "\n", encoding="utf-8"
+            )
+            temporary.replace(status_path)
+            raise
         finally:
             session.shutdown()
 

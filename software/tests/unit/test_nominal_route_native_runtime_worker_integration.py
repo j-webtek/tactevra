@@ -249,6 +249,66 @@ def test_arm274_shutdown_runs_when_factory_fails(tmp_path):
     with pytest.raises(RuntimeError, match="factory failed"):
         backend(output)
     assert events[-2:] == ["construct", "shutdown"]
+    assert json.loads((output / "status.json").read_text()) == {
+        "status": "FAILED_RETAINED_NO_RETRY",
+        "attempt_count": 1,
+        "automatic_retry": False,
+        "error_stage": "construct_runtime",
+        "error_type": "RuntimeError",
+        "error_message": "factory failed",
+        "hardware_access": False,
+        "physical_authority": False,
+    }
+
+
+def test_arm274_terminalizes_failure_before_fast_shutdown(tmp_path):
+    module = _load("arm274_fast_shutdown_test", SOURCE)
+    events = []
+    native = {
+        name: object()
+        for name in ("articulation", "scene_query", "key_view", "root_view")
+    }
+    output = tmp_path / "claimed"
+    output.mkdir()
+    (output / "status.json").write_text(json.dumps(CLAIM))
+
+    class FastShutdownSession(_Session):
+        def initialize_physics(self):
+            events.append("initialize")
+            raise RuntimeError("native initialization failed")
+
+        def shutdown(self):
+            events.append("shutdown")
+            retained = json.loads((output / "status.json").read_text())
+            assert retained["status"] == "FAILED_RETAINED_NO_RETRY"
+            assert retained["error_stage"] == "initialize_physics"
+            raise SystemExit(0)
+
+    backend = module.OneAttemptNativeBackend(
+        _definition(module),
+        session_factory=lambda: FastShutdownSession(events, native),
+        construct_runtime_fn=lambda *args, **kwargs: pytest.fail(
+            "runtime construction must not run"
+        ),
+        execute_backend_fn=lambda *args, **kwargs: pytest.fail(
+            "backend must not run"
+        ),
+        backend_definition={},
+        route={},
+        factory_definition={},
+        factory_review={},
+        factory_plan={},
+        factory_plan_review={},
+        documents={},
+        solver_kwargs={},
+        native_metadata={},
+    )
+    with pytest.raises(SystemExit):
+        backend(output)
+    retained = json.loads((output / "status.json").read_text())
+    assert retained["error_type"] == "RuntimeError"
+    assert retained["error_message"] == "native initialization failed"
+    assert events == ["start", "load", "initialize", "shutdown"]
 
 
 def test_arm274_static_review_blocks_authority_and_worker_claim():
@@ -257,3 +317,20 @@ def test_arm274_static_review_blocks_authority_and_worker_claim():
     assert result["isaac_and_hardware_imports_absent"] is True
     assert result["worker_attempt_call_absent"] is True
     assert result["joint_and_physics_commands_absent"] is True
+    assert result["failure_terminalization_precedes_shutdown"] is True
+
+
+def test_arm288_review_rejects_missing_pre_shutdown_terminalization(tmp_path):
+    reviewer = _load("arm288_terminalization_reviewer_test", REVIEW_SOURCE)
+    changed = tmp_path / "changed.py"
+    changed.write_text(
+        SOURCE.read_text(encoding="utf-8").replace(
+            "temporary.replace(status_path)", "pass  # terminal write removed"
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(
+        reviewer.NativeRuntimeWorkerIntegrationReviewError,
+        match="failure is not retained",
+    ):
+        reviewer._static_review(changed)

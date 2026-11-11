@@ -1,4 +1,4 @@
-"""Independently review ARM-274 without starting or importing a simulator."""
+"""Independently review ARM-287 without starting or importing a simulator."""
 
 from __future__ import annotations
 
@@ -10,8 +10,8 @@ from pathlib import Path
 from typing import Any, Mapping
 
 
-REVIEW_SCHEMA = "tactevra.isaac_lm4_native_runtime_worker_integration_review.v1"
-INTEGRATION_SCHEMA = "tactevra.isaac_lm4_native_runtime_worker_integration.v1"
+REVIEW_SCHEMA = "tactevra.isaac_lm4_native_runtime_worker_integration_review.v2"
+INTEGRATION_SCHEMA = "tactevra.isaac_lm4_native_runtime_worker_integration.v2"
 
 
 class NativeRuntimeWorkerIntegrationReviewError(ValueError):
@@ -65,10 +65,23 @@ def _static_review(path: Path) -> dict[str, bool]:
         raise NativeRuntimeWorkerIntegrationReviewError(
             "integration claims attempts or submits runtime commands"
         )
+    required_terminalization = (
+        '"status": "FAILED_RETAINED_NO_RETRY"',
+        '"error_stage": phase',
+        'temporary.replace(status_path)',
+        'session.shutdown()',
+    )
+    if any(token not in text for token in required_terminalization) or text.index(
+        'temporary.replace(status_path)'
+    ) > text.index('session.shutdown()'):
+        raise NativeRuntimeWorkerIntegrationReviewError(
+            "failure is not retained before session shutdown"
+        )
     return {
         "isaac_and_hardware_imports_absent": True,
         "worker_attempt_call_absent": True,
         "joint_and_physics_commands_absent": True,
+        "failure_terminalization_precedes_shutdown": True,
     }
 
 
@@ -97,6 +110,7 @@ def review_integration(
         "obtain_native_objects_once",
         "construct_runtime_once",
         "execute_backend_once",
+        "terminalize_failure_before_shutdown",
         "shutdown_once",
     ]
     static = _static_review(integration_source)
@@ -125,7 +139,7 @@ def review_integration(
         )
     core = {
         "schema": REVIEW_SCHEMA,
-        "review_id": "arm274-native-runtime-worker-integration-review-001",
+        "review_id": "arm288-terminalizing-native-runtime-worker-integration-review-001",
         "status": "ACCEPTED_FOR_SEPARATELY_AUTHORIZED_ONE_ATTEMPT_WORKER_USE",
         "source_integration_sha256": integration_hash,
         "source_integration_file_sha256": definition_file_sha256,
@@ -135,6 +149,7 @@ def review_integration(
         "worker_claim_precedes_session_creation": True,
         "factory_runtime_identity_passes_to_backend": True,
         "shutdown_is_finally_guarded": True,
+        "failure_terminalization_precedes_shutdown": True,
         "single_use_no_retry": True,
         "runtime_execution_admitted": False,
         "launch_admitted": False,
