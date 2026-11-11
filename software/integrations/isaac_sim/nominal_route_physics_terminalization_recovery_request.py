@@ -129,6 +129,7 @@ def build_request(
     source_hash = _require_hash(
         source_request, "request_sha256", "ARM-284 request"
     )
+    worker_request_hash = source_request.get("source_worker_request_sha256")
     integration_hash = _require_hash(
         integration, "integration_sha256", "ARM-287 integration"
     )
@@ -163,6 +164,7 @@ def build_request(
         != SOURCE_AUTHORIZATION
         or source_request.get("episode_id") != "episode-ef340d0ad2740c118d87"
         or source_request.get("target_id") != "SPACE"
+        or not _digest(worker_request_hash)
         or attempt.get("maximum_attempt_count") != 1
         or attempt.get("automatic_retry") is not False
         or attempt.get("trajectory_playback") is not False
@@ -216,6 +218,7 @@ def build_request(
         "request_id": "arm289-terminalized-space-route-physics-recovery-001",
         "status": "READY_FOR_INDEPENDENT_TERMINALIZED_RECOVERY_CLAIMANT_REVIEW",
         "source_request_sha256": source_hash,
+        "source_worker_request_sha256": worker_request_hash,
         "source_request_file_sha256": source_request_file_sha256,
         "source_consumed_status_file_sha256": consumed_status_file_sha256,
         "source_eula_receipt_file_sha256": eula_receipt_file_sha256,

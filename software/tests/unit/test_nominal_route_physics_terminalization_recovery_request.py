@@ -37,6 +37,7 @@ def _bundle():
             "required_authorization_statement": module.SOURCE_AUTHORIZATION,
             "episode_id": "episode-ef340d0ad2740c118d87",
             "target_id": "SPACE",
+            "source_worker_request_sha256": "a" * 64,
             "proposed_output_directory": "C:/artifacts/arm284-attempt-001",
             "attempt_contract": {
                 "maximum_attempt_count": 1,
@@ -136,6 +137,7 @@ def _bundle():
 def test_arm289_builds_inert_terminalized_recovery_request():
     module, _, _, _, _, _, _, result = _bundle()
     assert result["required_authorization_statement"] == module.EXACT_AUTHORIZATION
+    assert result["source_worker_request_sha256"] == "a" * 64
     assert result["old_authorization_reusable"] is False
     assert result["attempt_claimed"] is False
     assert result["isaac_started"] is False

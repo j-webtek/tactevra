@@ -3183,7 +3183,7 @@ python software/integrations/isaac_sim/nominal_route_physics_terminalization_rec
   --integration-review "$root/arm288-native-runtime-worker-integration-review-001/review.json" `
   --request-source software/integrations/isaac_sim/nominal_route_physics_terminalization_recovery_request.py `
   --proposed-output-directory "$root/arm289-nominal-route-physics-attempt-001" `
-  --output "$root/arm289-terminalized-route-physics-recovery-request-001/request.json"
+  --output "$root/arm289-terminalized-route-physics-recovery-request-002/request.json"
 ```
 
 Building this request does not collect live gates, start Isaac, claim the new
