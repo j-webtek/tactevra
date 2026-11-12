@@ -161,6 +161,13 @@ remain external hash-bound evidence; no simulator asset, live gate, attempt
 output, trajectory, camera frame, controller transcript, or authority-bearing
 artifact is added. All byte and duplicate-byte limits remain unchanged.
 
+The ARM-298 executable-launcher increment adds three governed Python paths: an
+import-inert launcher, an independent static reviewer, and focused fail-closed
+tests. The reviewed tracked-file ceiling moves from 6,885 to the exact expected
+6,888 files. The externally retained review grants no attempt, simulator,
+trajectory, hardware, or physical authority. All byte, duplicate-byte, and
+reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

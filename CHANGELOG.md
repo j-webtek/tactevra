@@ -23,6 +23,9 @@ as described in the [versioning policy](docs/VERSIONING.md).
   claiming an attempt, or starting Isaac.
 - Added the independently reviewed ARM-298 reproducible launch binding over
   the merged claimant, qualified interpreter, and 13 production sources.
+- Added the import-inert ARM-298 executable launcher and independent static
+  review that enforce exact authorization, source identity, and one claimant
+  delegation before any future simulator construction.
 - Added the shared AI/arm v2 contracts, model/arm conformance profile, and
   operational-readiness gate used by portable offline verification.
 - Added a public release-readiness dashboard, exact-SHA candidate-audit path,
