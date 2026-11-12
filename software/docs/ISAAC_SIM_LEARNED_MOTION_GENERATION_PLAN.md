@@ -1592,6 +1592,13 @@ ScheduleGen. Neither is a physical success rate.
      target submission, trajectory, contact, hardware, or physical authority
      is involved. This qualifies the corrected IK boundary for a fresh inert
      ARM-298 lineage plan; it does not authorize a simulation attempt.
+109. **ARM-298 inert lineage plan and review:** the plan binds the accepted
+     qualification/reproduction, merged commit `8541cef2`, qualified Isaac
+     interpreter, 13 production sources, exact SPACE episode, and fresh absent
+     attempt/EULA/memory outputs. Independent review re-hashes every input,
+     statically rejects simulator, motion, attempt, and transport surfaces, and
+     confirms zero authority. Acceptance permits only building and reviewing a
+     single-use ARM-298 claimant; it does not launch a simulation.
 
 ## Completion criterion
 

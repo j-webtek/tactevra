@@ -136,6 +136,14 @@ output, trajectory corpus, camera frame, controller transcript, or
 authority-bearing artifact is added; all byte, duplicate-byte, and reduction
 limits remain unchanged.
 
+The ARM-298 lineage-planning increment adds four governed paths: an inert
+evidence-bound lineage builder, an independent non-Isaac reviewer, one focused
+test module, and one maintained evidence note. The reviewed tracked-file
+ceiling moves from 6,874 to the exact expected 6,878 files. No simulator asset,
+attempt or preflight output, trajectory corpus, camera frame, controller
+transcript, or authority-bearing artifact is added; all byte, duplicate-byte,
+and reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed
