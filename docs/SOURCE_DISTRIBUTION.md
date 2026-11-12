@@ -1684,3 +1684,12 @@ ten runtime sources, exact future authorization, fresh-gate ordering, and
 terminalization/no-retry rules. No live gate, attempt, simulator, trajectory,
 hardware, or physical authority is created. All byte, duplicate-byte, and
 reduction limits remain unchanged.
+
+ARM-297 then adds the import-inert executable launcher, its independent static
+reviewer, and focused fail-closed tests, advancing the reviewed tracked-file
+ceiling from 6,867 to 6,870. The launcher requires exact fresh authorization,
+the qualified interpreter, bound repository ancestry, unchanged claimant and
+runtime inputs, accepted launcher review, and absent outputs before one
+deferred backend construction and one claimant call. Review creates no attempt,
+gate, simulator, trajectory, hardware, or physical authority. All byte,
+duplicate-byte, and reduction limits remain unchanged.

@@ -1557,6 +1557,18 @@ ScheduleGen. Neither is a physical success rate.
      simulator, motion, and transport execution in the builder. Acceptance
      permits only implementing and reviewing the executable launcher; it does
      not admit an attempt or grant hardware or physical authority.
+105. **ARM-297 executable launcher:** the import-inert launcher consumes the
+     accepted binding and requires exact ARM-297 authorization before any
+     backend construction. It then validates the qualified interpreter,
+     repository ancestry, launcher review, claimant bytes, ten runtime sources,
+     four worker inputs, four runtime bindings, and output absence before one
+     deferred backend construction and one claimant delegation.
+106. **ARM-297 executable-launcher review:** independent AST and exact-byte
+     review proves there is no retry loop or direct worker call, that exact
+     authorization and all fail-closed checks precede backend construction,
+     and that the claimant remains sole owner of fresh gates and delegation.
+     The accepted review still invokes nothing. A new exact ARM-297 one-attempt
+     authorization is now the next boundary; all earlier statements are stale.
 
 ## Completion criterion
 
