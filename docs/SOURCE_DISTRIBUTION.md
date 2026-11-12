@@ -153,6 +153,14 @@ output, trajectory corpus, camera frame, controller transcript, or
 authority-bearing artifact is added. All byte, duplicate-byte, and reduction
 limits remain unchanged.
 
+The ARM-298 launch-binding increment adds four governed paths: an inert
+reproducible binding, an independent static/evidence reviewer, focused tests,
+and one maintained checkpoint document. The reviewed tracked-file ceiling
+moves from 6,881 to the exact expected 6,885 files. Generated binding receipts
+remain external hash-bound evidence; no simulator asset, live gate, attempt
+output, trajectory, camera frame, controller transcript, or authority-bearing
+artifact is added. All byte and duplicate-byte limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed
