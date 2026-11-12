@@ -1615,6 +1615,15 @@ ScheduleGen. Neither is a physical success rate.
      Independent review reopens every byte and rejects simulator, motion, and
      transport execution in the builder. Acceptance permits only implementing
      and reviewing the executable launcher; it grants no attempt authority.
+112. **ARM-298 executable launcher and review:** the import-inert launcher
+     consumes the accepted binding and requires the exact fresh statement
+     before backend construction. It revalidates interpreter identity,
+     repository ancestry, claimant/binding evidence, all 13 production sources,
+     governed-output absence, and its own independent review before one
+     deferred backend construction and one claimant delegation. Independent
+     AST review proves fail-closed ordering, no retry loop, no direct worker
+     call, and no hardware transport surface. Review invokes nothing; a fresh
+     exact single-use ARM-298 authorization remains the next boundary.
 
 ## Completion criterion
 

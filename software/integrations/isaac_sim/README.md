@@ -4503,3 +4503,13 @@ those bytes and statically rejects simulator, motion, and transport execution.
 Neither module observes authorization or invokes the claimant. See
 `software/docs/ARM_298_ROUTE_PHYSICS_LAUNCH_BINDING.md`; acceptance permits
 only implementation and independent review of the executable launcher.
+
+`nominal_route_arm298_launch.py` is that import-inert executable boundary. It
+requires the exact fresh ARM-298 statement, exact qualified interpreter,
+repository ancestry, unchanged claimant/binding evidence, all 13 bound
+production sources, accepted launcher review, and absent governed outputs
+before one deferred backend construction and one claimant delegation.
+`nominal_route_arm298_launch_review.py` independently proves the ordering,
+single delegation, no retry loop, no direct worker call, and absence of a
+hardware transport surface. Its retained acceptance invokes nothing and does
+not itself authorize an attempt.

@@ -286,6 +286,14 @@ nothing. The next safe increment is the import-inert executable launcher and
 independent launch review; only after acceptance may a fresh exact ARM-298
 one-attempt authorization be requested.
 
+The ARM-298 executable launcher and independent static review are now also
+retained. They bind the accepted launch evidence to one fail-closed claimant
+delegation and prove that exact authorization, interpreter/ancestry/source
+checks, and governed-output absence all precede backend construction. This
+work invoked no claimant, simulator, physics, target, contact, hardware, or
+physical authority. A fresh exact ARM-298 authorization is still required for
+the first corrected route-physics attempt.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.

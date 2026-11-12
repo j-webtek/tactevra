@@ -69,3 +69,29 @@ not grant hardware or physical authority. Their acceptance permits only
 implementation and independent review of an import-inert ARM-298 executable
 launcher. A simulation still requires that launcher review plus a fresh exact
 single-use ARM-298 authorization.
+
+## Executable launcher review
+
+`nominal_route_arm298_launch.py` is now the import-inert executable consumer.
+Before constructing its deferred backend, it requires the exact ARM-298
+statement and revalidates the qualified interpreter, repository ancestry,
+claimant and binding evidence, all 13 production sources, its own independent
+review, and absence of the governed attempt and both fresh preflight outputs.
+It contains no retry loop and delegates exactly once to `Arm298Claimant`.
+
+The independent review is retained at
+`C:\IsaacSim\artifacts\issue190\arm298-route-physics-launcher-review-001\review.json`:
+
+- file SHA-256:
+  `16ac1278217a6bcdf3dc680924fc999d8e3b132074a19860088f20258230b515`;
+- canonical review SHA-256:
+  `6c02413ad99169259f2cb345bb68c4969dabe0515e0df4623426f7292ff94e9b`;
+- launcher source SHA-256:
+  `cd3cc1f4523be74c7d403f87d2308c832cdeb1e7da903cc686f72e9ccbeb0a4f`;
+- status: `ACCEPTED_FOR_EXACT_ARM298_ONE_ATTEMPT_AUTHORIZATION`.
+
+This review used static analysis and exact-byte checks only. It observed no
+authorization, invoked no claimant or backend, started no simulator, stepped
+no physics, created none of the governed attempt/EULA/memory outputs, and
+granted no hardware or physical authority. A fresh exact ARM-298 authorization
+is still required before the launcher may execute.
