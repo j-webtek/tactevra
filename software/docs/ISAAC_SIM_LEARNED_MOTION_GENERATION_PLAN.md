@@ -1608,6 +1608,13 @@ ScheduleGen. Neither is a physical success rate.
      single-use consumption, then one worker call. The accepted evidence still
      observes no authorization, claims no attempt, and starts no simulator. A
      reproducible launch binding and executable-launch review remain required.
+111. **ARM-298 reproducible launch binding:** the inert binding pins merged
+     claimant commit `84bb099e`, the qualified Isaac interpreter, exact
+     claimant/review evidence, all 13 production sources, governed output
+     paths, fresh-gate order, terminalization, and no-retry behavior.
+     Independent review reopens every byte and rejects simulator, motion, and
+     transport execution in the builder. Acceptance permits only implementing
+     and reviewing the executable launcher; it grants no attempt authority.
 
 ## Completion criterion
 

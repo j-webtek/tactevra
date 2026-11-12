@@ -4492,3 +4492,14 @@ worker delegation. The retained acceptance grants no attempt or hardware
 authority. Reproduction commands and evidence hashes are maintained in
 `software/docs/ARM_298_ROUTE_PHYSICS_LINEAGE_PLAN.md`; a reproducible launch
 binding and executable-launch review are still required before any attempt.
+
+### ARM-298 reproducible launch binding
+
+`nominal_route_arm298_launch_binding.py` binds merged claimant commit
+`84bb099e`, the qualified Isaac interpreter, exact claimant/review evidence,
+all 13 production sources, governed outputs, and fresh-gate/terminalization
+order. `nominal_route_arm298_launch_binding_review.py` independently reopens
+those bytes and statically rejects simulator, motion, and transport execution.
+Neither module observes authorization or invokes the claimant. See
+`software/docs/ARM_298_ROUTE_PHYSICS_LAUNCH_BINDING.md`; acceptance permits
+only implementation and independent review of the executable launcher.

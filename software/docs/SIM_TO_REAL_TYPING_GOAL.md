@@ -278,6 +278,14 @@ the governed attempt and both live-preflight paths remain absent. The next safe
 increment is a reproducible ARM-298 launch binding and executable-launch review
 before requesting a fresh exact one-attempt authorization.
 
+That reproducible ARM-298 launch binding and independent review are now
+retained. They pin the merged claimant commit, qualified interpreter, exact
+claimant/review evidence, all 13 production sources, governed outputs, and the
+fresh-gate/terminalization order. They observed no authorization and invoked
+nothing. The next safe increment is the import-inert executable launcher and
+independent launch review; only after acceptance may a fresh exact ARM-298
+one-attempt authorization be requested.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.
