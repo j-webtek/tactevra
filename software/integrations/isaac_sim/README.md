@@ -3509,6 +3509,14 @@ Isaac, step physics, invoke a runtime/backend, play a trajectory, or grant
 hardware or physical authority. A passing review permits only construction and
 independent review of a future single-use claimant.
 
+That ARM-297 claimant and its independent review are now retained and described
+in the same evidence note. The definition wraps the existing fail-closed worker
+with a new exact external statement, fresh EULA and memory gates, exclusive
+receipt retention, source revalidation, terminalization, and one-use
+delegation. Merely building or reviewing it invokes none of those runtime
+operations. A reproducible launch binding remains required before requesting
+authorization or invoking the claimant.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
