@@ -269,8 +269,13 @@ pin the exact continuity evidence, merged correction commit, qualified Isaac
 interpreter, 13 production sources, and fresh absent attempt/EULA/memory
 outputs. No claimant was constructed and no authorization, simulator, physics,
 target, trajectory, contact, hardware, or physical authority was exercised.
-The next safe increment is a single-use ARM-298 claimant and independent
-review, followed by a reproducible launch binding and executable-launch review
+The single-use ARM-298 claimant and independent review are now also retained.
+They bind the accepted lineage to one fresh-gated worker delegation and prove
+that exact authorization, source checks, EULA, memory, exclusive receipt
+retention, and single-use consumption occur in order. Building and reviewing
+them observed no authorization, claimed no attempt, and started no simulator;
+the governed attempt and both live-preflight paths remain absent. The next safe
+increment is a reproducible ARM-298 launch binding and executable-launch review
 before requesting a fresh exact one-attempt authorization.
 
 ## Governance
