@@ -46,3 +46,18 @@ The independently reviewed receipt must show:
 After acceptance, the next simulator run must use a new attempt number, newly
 pinned and independently reviewed lineage, and a fresh exact one-use
 authorization. ARM-296 itself does not authorize that run.
+
+## Retained result
+
+The merged implementation at commit `9c77ac81` produced and independently
+accepted the following external evidence on 2026-11-11:
+
+| Artifact | File SHA-256 | Canonical document SHA-256 |
+| --- | --- | --- |
+| `arm296-constructor-completeness-gate-001/receipt.json` | `6c81aa58affb57218fd88ca38ea977a62c5aa305f0f4dad9a007fd6625a7a2c1` | `e240eae3f47edeeca8d4010889440bce89d0a10f495793cc286e5b47d290650b` |
+| `arm296-constructor-completeness-gate-review-001/review.json` | `f6ec2f7b7aa84df312057e532062f2938b6b4bce1a56891a1aae5d832ec27e4d` | `9649483e22931a982c865ce209d24ed12446373375a6f2c4522c349dcaaac003` |
+
+The gate status is `PASS_CORRECTED_RUNTIME_CONSTRUCTOR_COMPLETENESS`; the
+review status is `ACCEPTED_CORRECTED_RUNTIME_CONSTRUCTOR_COMPLETENESS`. Both
+record no consumed attempt, no Isaac start, zero physics steps, no runtime
+method, target, trajectory, contact, hardware access, or physical authority.
