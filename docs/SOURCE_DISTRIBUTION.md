@@ -112,6 +112,14 @@ asset, trajectory corpus, camera frame, controller transcript, or
 authority-bearing artifact is added. All byte, duplicate-byte, and reduction
 limits remain unchanged.
 
+The ARM-296 constructor-completeness increment adds four governed paths: an
+inert production-constructor gate, an independent non-Isaac receipt reviewer,
+one focused test module, and one maintained evidence note. The reviewed
+tracked-file ceiling moves from 6,852 to the exact expected 6,856 files. No
+simulator asset, attempt output, trajectory corpus, camera frame, controller
+transcript, or authority-bearing artifact is added; all byte, duplicate-byte,
+and reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

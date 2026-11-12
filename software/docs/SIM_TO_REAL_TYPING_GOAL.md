@@ -213,8 +213,13 @@ executed once. ARM-295 passed its fresh launch gates but terminalized before
 route evaluation because the concrete binding omitted required canonical IK
 inputs. That defect is corrected by deriving the model, frame transform, tool
 offset, gripper state, ready pose, bounds, and IK policy from the locked
-simulation context. ARM-295 remains immutable; the next route-physics test must
-be a newly numbered and independently authorized increment.
+simulation context. ARM-296 now constructs the real solver, four production
+runtime adapters, and complete shared-solver composition around inert protocol
+sentinels, proving the correction crosses ARM-295's former constructor failure
+with no Isaac launch, physics, runtime call, target, trajectory, hardware, or
+physical authority. ARM-295 remains immutable; the next route-physics test must
+be a newly numbered, newly pinned, independently reviewed, and separately
+authorized increment.
 
 ## Governance
 
