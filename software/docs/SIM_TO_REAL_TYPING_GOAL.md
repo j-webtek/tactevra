@@ -236,10 +236,14 @@ hashes, one worker delegation, and failure terminalization. The remaining
 pre-attempt binding is now materialized and independently accepted. It pins the
 merged revision, qualified interpreter, claimant/review evidence, ten runtime
 sources, exact authorization text, governed outputs, fresh-gate order, and
-terminalization/no-retry behavior. The next engineering step is to implement
-and independently review the executable launcher that consumes this binding.
-No fresh ARM-297 authorization should be requested before that launcher is
-merged and accepted.
+terminalization/no-retry behavior.
+The executable launcher and its independent review are now implemented and
+accepted as an inert boundary. The launcher rejects old authorization, wrong
+interpreter or repository lineage, changed source/evidence, and non-fresh
+outputs before constructing a deferred backend; it delegates exactly once to
+the claimant, which retains ownership of fresh gates. Once this source is
+merged, the next runtime step is a separately supplied exact ARM-297
+one-attempt authorization. No earlier authorization can be reused.
 
 ## Governance
 

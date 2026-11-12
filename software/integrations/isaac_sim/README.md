@@ -4422,3 +4422,12 @@ those bytes and rejects simulator, motion, or transport execution in the
 builder. Neither module launches Isaac or consumes an attempt. See
 `software/docs/ARM_297_ROUTE_PHYSICS_LAUNCH_BINDING.md` for retained hashes and
 the executable-launcher boundary.
+
+`nominal_route_arm297_launch.py` is the executable consumer of that binding.
+It is import-inert and rejects all but the exact fresh ARM-297 statement before
+backend construction. It revalidates the qualified interpreter, repository
+ancestry, claimant and launcher reviews, runtime/worker/binding hashes, and
+governed output absence, then delegates once to the claimant. The independent
+`nominal_route_arm297_launch_review.py` statically verifies this ordering,
+single delegation, no direct worker call, no retry loop, and zero hardware
+surface. Its accepted receipt grants no attempt by itself.
