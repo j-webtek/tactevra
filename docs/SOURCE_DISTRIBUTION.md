@@ -1675,3 +1675,12 @@ receipt proves that binding creates no session, claims no attempt, starts no
 simulator, steps no physics, submits no target, and grants no hardware or
 physical authority. The exact ARM-253 authorization remains a separate
 requirement. All byte, duplicate-byte, and reduction limits remain unchanged.
+
+ARM-297 adds an inert reproducible launch-binding builder, an independent
+static/evidence reviewer, focused tests, and a maintained checkpoint document,
+advancing the reviewed tracked-file ceiling from 6,863 to 6,867. The binding
+pins the merged revision, qualified Isaac interpreter, claimant/review bytes,
+ten runtime sources, exact future authorization, fresh-gate ordering, and
+terminalization/no-retry rules. No live gate, attempt, simulator, trajectory,
+hardware, or physical authority is created. All byte, duplicate-byte, and
+reduction limits remain unchanged.

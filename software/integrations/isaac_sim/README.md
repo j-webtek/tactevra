@@ -4410,3 +4410,15 @@ contact path. Gravity is disabled for the one-dimensional key mechanism to
 represent a preloaded keyboard return pending measured preload data. The next
 LM1 boundary is to replace the virtual tip with the drive-controlled robot TCP
 while retaining this exact mechanism-state evaluator and zero-authority receipt.
+
+### ARM-297 reproducible launch binding
+
+`nominal_route_arm297_launch_binding.py` builds an inert binding over the
+accepted ARM-297 claimant, its independent review, the merged repository
+commit, qualified Isaac interpreter, all ten runtime sources, governed output
+paths, exact authorization statement, fresh-gate order, and terminalization
+rules. `nominal_route_arm297_launch_binding_review.py` independently reopens
+those bytes and rejects simulator, motion, or transport execution in the
+builder. Neither module launches Isaac or consumes an attempt. See
+`software/docs/ARM_297_ROUTE_PHYSICS_LAUNCH_BINDING.md` for retained hashes and
+the executable-launcher boundary.

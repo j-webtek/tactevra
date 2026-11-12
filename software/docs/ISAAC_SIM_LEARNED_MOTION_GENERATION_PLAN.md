@@ -1547,6 +1547,16 @@ ScheduleGen. Neither is a physical success rate.
      delegation in that order. The accepted result still starts no simulator
      and grants no hardware or physical authority. A reproducible launch
      binding is required before requesting authorization.
+103. **ARM-297 reproducible launch binding:** the inert binding pins merged
+     commit `20ec4ce2`, the qualified Isaac 6.1 Python binary, exact claimant
+     and review evidence, all ten corrected runtime sources, governed output
+     paths, the exact external statement, and fresh-gate/terminalization order.
+     It observes no authorization and starts no simulator.
+104. **ARM-297 launch-binding review:** an independent reviewer reopens every
+     bound file, revalidates the interpreter and commit, and statically rejects
+     simulator, motion, and transport execution in the builder. Acceptance
+     permits only implementing and reviewing the executable launcher; it does
+     not admit an attempt or grant hardware or physical authority.
 
 ## Completion criterion
 

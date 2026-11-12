@@ -233,9 +233,13 @@ The ARM-297 single-use claimant and its independent review are now also
 materialized without collecting gates or claiming the attempt. They enforce
 exact external authorization, fresh EULA and memory receipts, unchanged source
 hashes, one worker delegation, and failure terminalization. The remaining
-pre-attempt engineering step is a reproducible launch binding; only after that
-binding is merged and reviewed may the exact one-use simulation authorization
-be requested.
+pre-attempt binding is now materialized and independently accepted. It pins the
+merged revision, qualified interpreter, claimant/review evidence, ten runtime
+sources, exact authorization text, governed outputs, fresh-gate order, and
+terminalization/no-retry behavior. The next engineering step is to implement
+and independently review the executable launcher that consumes this binding.
+No fresh ARM-297 authorization should be requested before that launcher is
+merged and accepted.
 
 ## Governance
 
