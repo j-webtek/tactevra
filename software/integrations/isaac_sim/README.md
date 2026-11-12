@@ -3500,6 +3500,15 @@ physics, trajectory, target, hardware, or physical authority. See
 `software/docs/ARM_296_CONSTRUCTOR_COMPLETENESS_GATE.md`. The resulting receipt
 and review are prerequisites, not authorization, for a newly numbered attempt.
 
+ARM-297 is that new lineage. Its inert plan and independent reviewer are
+documented in `software/docs/ARM_297_ROUTE_PHYSICS_LINEAGE_PLAN.md`. They pin
+the retained ARM-296 receipt/review, ten production sources, the fixed `SPACE`
+episode, and fresh absent attempt/EULA/memory outputs. They do not construct a
+claimant, collect preflights, accept authorization, claim an attempt, import
+Isaac, step physics, invoke a runtime/backend, play a trajectory, or grant
+hardware or physical authority. A passing review permits only construction and
+independent review of a future single-use claimant.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol
