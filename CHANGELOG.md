@@ -18,6 +18,9 @@ as described in the [versioning policy](docs/VERSIONING.md).
 - Added an independently reviewed ARM-298 route-physics lineage plan binding
   the corrected route evidence, merged sources, qualified Isaac interpreter,
   and fresh absent attempt/preflight outputs without simulator authority.
+- Added the independently reviewed single-use ARM-298 claimant that pins the
+  accepted lineage and fresh-gate order without observing authorization,
+  claiming an attempt, or starting Isaac.
 - Added the shared AI/arm v2 contracts, model/arm conformance profile, and
   operational-readiness gate used by portable offline verification.
 - Added a public release-readiness dashboard, exact-SHA candidate-audit path,

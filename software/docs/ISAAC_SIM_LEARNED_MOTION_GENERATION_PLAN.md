@@ -1599,6 +1599,15 @@ ScheduleGen. Neither is a physical success rate.
      statically rejects simulator, motion, attempt, and transport surfaces, and
      confirms zero authority. Acceptance permits only building and reviewing a
      single-use ARM-298 claimant; it does not launch a simulation.
+110. **ARM-298 single-use claimant and review:** the claimant clones the
+     retained fail-closed worker for the new absent output, pins the accepted
+     lineage plus all preflight, worker, runtime, and backend sources, and
+     permits at most one delegation after exact authorization and two freshly
+     retained passing gates. Independent AST/evidence review proves the order
+     is authorization, source revalidation, EULA, memory, exclusive receipts,
+     single-use consumption, then one worker call. The accepted evidence still
+     observes no authorization, claims no attempt, and starts no simulator. A
+     reproducible launch binding and executable-launch review remain required.
 
 ## Completion criterion
 

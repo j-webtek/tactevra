@@ -4475,3 +4475,20 @@ the three future outputs remain absent. The retained review accepts only the
 next inert claimant-construction stage. See
 `software/docs/ARM_298_ROUTE_PHYSICS_LINEAGE_PLAN.md`; no ARM-298 attempt is
 authorized or launched by this layer.
+
+### ARM-298 single-use claimant
+
+`nominal_route_arm298_claimant.py` binds the accepted ARM-298 lineage and
+review to the retained fail-closed worker, fresh absent EULA/memory receipts,
+all 13 runtime sources, and the exact non-reusable ARM-298 statement. Its
+definition build is inert: it does not collect either preflight, observe
+authorization, claim the attempt, import Isaac, or invoke the worker.
+
+`nominal_route_arm298_claimant_review.py` independently reopens the exact plan,
+review, worker, and implementation bytes. Its AST review proves the future
+runtime order is exact authorization, source revalidation, EULA, memory,
+exclusive retention of both receipts, single-use consumption, and exactly one
+worker delegation. The retained acceptance grants no attempt or hardware
+authority. Reproduction commands and evidence hashes are maintained in
+`software/docs/ARM_298_ROUTE_PHYSICS_LINEAGE_PLAN.md`; a reproducible launch
+binding and executable-launch review are still required before any attempt.

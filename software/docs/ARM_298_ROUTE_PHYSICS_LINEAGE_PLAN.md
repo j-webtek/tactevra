@@ -96,11 +96,64 @@ python @reviewArgs
 
 Both commands are single-write and refuse existing outputs.
 
+## Single-use claimant and independent review
+
+The claimant pins the accepted lineage and review, the retained fail-closed
+base worker, both fresh-preflight implementations, and the worker source. Its
+future callable admits at most one delegation after the exact ARM-298
+statement, unchanged sources, passing EULA and memory gates, and exclusive
+retention of both receipts. Building the definition does not call that
+runtime surface.
+
+The independent reviewer reopens every exact byte and statically proves the
+future ordering. The retained artifacts are:
+
+| Artifact | File SHA-256 | Canonical document SHA-256 |
+| --- | --- | --- |
+| `arm298-route-physics-claimant-001/claimant.json` | `0a6649d4eb98081f193f5ede79fde2b01ec05a5ae6c54ced56c6eceb9ed6760c` | `a23ec05b51e3e14d3491be588ea3cb76fdf060f590c11adbd28315dcf1fbeaa4` |
+| `arm298-route-physics-claimant-review-001/review.json` | `b8b4d40efe21ef98629444cc834e9f67cd9f96dcd3bf23739c88ee185e961547` | `dc1501b904a984be6ac2dd097e4709bafddce6556f65d4d520df925c78431896` |
+
+The claimant status is `READY_FOR_INDEPENDENT_ARM298_CLAIMANT_REVIEW`;
+the review status is `ACCEPTED_FOR_EXACT_ARM298_ONE_ATTEMPT_AUTHORIZATION`.
+Authorization remains unobserved, the attempt remains unclaimed, Isaac remains
+unstarted, and the attempt plus both live-preflight paths remain absent.
+
+From the repository root in PowerShell:
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$src = 'software/integrations/isaac_sim'
+
+python "$src/nominal_route_arm298_claimant.py" `
+  --plan "$root/arm298-route-physics-lineage-plan-001/plan.json" `
+  --plan-review "$root/arm298-route-physics-lineage-plan-review-001/review.json" `
+  --base-worker "$root/arm254-nominal-route-physics-worker-001/worker.json" `
+  --claimant-source "$src/nominal_route_arm298_claimant.py" `
+  --claimant-review-source "$src/nominal_route_arm298_claimant_review.py" `
+  --eula-preflight-source "$src/nominal_route_isaac_eula_preflight.py" `
+  --memory-preflight-source "$src/nominal_route_memory_preflight.py" `
+  --worker-source "$src/nominal_route_physics_worker.py" `
+  --output "$root/arm298-route-physics-claimant-001/claimant.json"
+
+python "$src/nominal_route_arm298_claimant_review.py" `
+  --claimant "$root/arm298-route-physics-claimant-001/claimant.json" `
+  --claimant-source "$src/nominal_route_arm298_claimant.py" `
+  --plan "$root/arm298-route-physics-lineage-plan-001/plan.json" `
+  --plan-review "$root/arm298-route-physics-lineage-plan-review-001/review.json" `
+  --base-worker "$root/arm254-nominal-route-physics-worker-001/worker.json" `
+  --claimant-review-source "$src/nominal_route_arm298_claimant_review.py" `
+  --eula-preflight-source "$src/nominal_route_isaac_eula_preflight.py" `
+  --memory-preflight-source "$src/nominal_route_memory_preflight.py" `
+  --worker-source "$src/nominal_route_physics_worker.py" `
+  --output "$root/arm298-route-physics-claimant-review-001/review.json"
+```
+
+Both commands are single-write and refuse existing outputs. They do not
+collect live preflights or invoke `Arm298Claimant.run`.
+
 ## Next boundary
 
-Acceptance permits only construction and independent review of a single-use
-ARM-298 claimant. That claimant must retain fresh EULA and memory receipts
-before any attempt claim, delegate at most once, terminalize before shutdown,
-and refuse automatic retry. A simulation may run only after the claimant,
-launch binding, and executable launcher are each independently accepted and a
-fresh exact ARM-298 authorization is supplied.
+Acceptance permits only construction and independent review of a reproducible
+ARM-298 launch binding. A simulation may run only after that binding and the
+executable launcher are independently accepted and a fresh exact ARM-298
+authorization is supplied. The claimant review itself is not attempt authority.
