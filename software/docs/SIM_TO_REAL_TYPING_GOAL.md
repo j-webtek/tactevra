@@ -221,6 +221,14 @@ physical authority. ARM-295 remains immutable; the next route-physics test must
 be a newly numbered, newly pinned, independently reviewed, and separately
 authorized increment.
 
+That increment is now ARM-297. Its inert plan and independent reviewer bind the
+accepted ARM-296 evidence to the corrected runtime, worker, and backend sources
+and reserve fresh, absent attempt/EULA/memory outputs. This advances the
+simulation connection without claiming an attempt: the next required layer is
+a single-use ARM-297 claimant plus independent review, followed only then by a
+fresh exact one-attempt authorization. No simulated typing success or physical
+typing success is claimed yet.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.

@@ -1525,6 +1525,17 @@ ScheduleGen. Neither is a physical success rate.
     new attempt number, pin the accepted ARM-296 receipt/review and all corrected
     runtime sources, and independently review the single-use claimant before
     requesting a fresh exact simulation authorization.
+99. **ARM-297 inert lineage plan:** the new plan pins the exact retained ARM-296
+    receipt and independent review, ten production runtime sources, the fixed
+    `SPACE` episode, and absent attempt/EULA/memory outputs. It explicitly
+    forbids ARM-295 replay, rejects reusable authorization, and grants no
+    claimant, launch, simulation, motion, hardware, or physical authority.
+100. **ARM-297 independent lineage review:** the non-importing reviewer
+    re-hashes both ARM-296 evidence files and every production source, statically
+    rejects runtime and transport call surfaces, and requires all proposed
+    governed outputs to remain absent. Acceptance permits only building and
+    independently reviewing a single-use claimant; a fresh exact ARM-297
+    authorization may be requested only after that later review passes.
 
 ## Completion criterion
 
