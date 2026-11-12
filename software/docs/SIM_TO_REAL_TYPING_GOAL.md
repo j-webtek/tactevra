@@ -264,6 +264,15 @@ increment is an inert ARM-298 lineage plan binding this accepted evidence and
 fresh absent attempt/preflight outputs; a simulation still requires separate
 exact one-use authorization.
 
+That inert ARM-298 lineage plan and independent review are now retained. They
+pin the exact continuity evidence, merged correction commit, qualified Isaac
+interpreter, 13 production sources, and fresh absent attempt/EULA/memory
+outputs. No claimant was constructed and no authorization, simulator, physics,
+target, trajectory, contact, hardware, or physical authority was exercised.
+The next safe increment is a single-use ARM-298 claimant and independent
+review, followed by a reproducible launch binding and executable-launch review
+before requesting a fresh exact one-attempt authorization.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.

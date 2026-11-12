@@ -4459,3 +4459,19 @@ canonical-row digest. See
 `software/docs/ARM_298_CANONICAL_CONTINUITY_QUALIFICATION.md` for reproduction
 and evidence hashes. This checkpoint grants no ARM-298 attempt authority; the
 next stage is a fresh inert lineage plan and independent review.
+
+### ARM-298 route-physics lineage plan
+
+`nominal_route_arm298_lineage_plan.py` binds the accepted continuity
+qualification and review, merged commit `8541cef2`, all 13 production model,
+context, solver, runtime, worker, and backend inputs, and the qualified Isaac
+interpreter to fresh absent ARM-298 attempt/EULA/memory outputs. It specifies a
+new exact one-use authorization statement but does not observe or consume it.
+
+`nominal_route_arm298_lineage_plan_review.py` independently reopens every
+bound byte, verifies the qualified interpreter, rejects simulator, motion,
+attempt, transport, and hardware surfaces in the plan builder, and confirms
+the three future outputs remain absent. The retained review accepts only the
+next inert claimant-construction stage. See
+`software/docs/ARM_298_ROUTE_PHYSICS_LINEAGE_PLAN.md`; no ARM-298 attempt is
+authorized or launched by this layer.
