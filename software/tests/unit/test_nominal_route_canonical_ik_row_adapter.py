@@ -231,6 +231,26 @@ def test_arm267_runtime_preserves_fk_pose_and_uses_previous_seed(monkeypatch):
     assert result["position_error_mm"] == 0.002
 
 
+def test_arm267_runtime_accepts_the_canonical_start_boundary(monkeypatch):
+    module = _load("arm267_boundary", SOURCE)
+    definition, *_ = _definition(module)
+    monkeypatch.setattr(module, "_runtime_types", _types)
+    runtime = module.CanonicalIkRowRuntimeAdapter(
+        definition,
+        adapter_review=_accepted_review(module, definition),
+        solver=_Solver(),
+    )
+    result = runtime.regenerate_row(
+        source_row={
+            "sequence": 653,
+            "phase": "TRANSIT",
+            "joint_position_target_rad": [1, 1, 1, 1, 1, 0.25],
+        },
+        previous_joint_targets_rad=[0, 0.1, 0.2, 0.3, 0.4, 0.25],
+    )
+    assert result["sequence"] == 653
+
+
 def test_arm267_runtime_fails_closed_on_no_solution(monkeypatch):
     module = _load("arm267_no_solution", SOURCE)
     definition, *_ = _definition(module)

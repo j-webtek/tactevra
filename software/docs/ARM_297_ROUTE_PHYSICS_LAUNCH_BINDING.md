@@ -59,6 +59,13 @@ The independent launcher review is retained at
 
 The review used static analysis and exact-byte checks only. It observed no
 authorization, invoked no claimant or backend, started no simulator, stepped
-no physics, and created none of the attempt/EULA/memory outputs. The next step
-is a separately supplied exact ARM-297 one-attempt authorization. ARM-295 or
-any earlier authorization is rejected and cannot satisfy this boundary.
+no physics, and created none of the attempt/EULA/memory outputs.
+
+The exact ARM-297 authorization was later supplied and consumed once. Both
+fresh preflights passed, Isaac loaded the governed robot USD, and the attempt
+terminalized `FAILED_RETAINED_NO_RETRY` at canonical IK row 654 because the
+raw start boundary required a 0.1624 rad transition into the aligned IK branch,
+exceeding the unchanged 0.05 rad continuity gate. ARM-297 is now immutable and
+cannot be retried. Offline diagnosis proved that canonicalizing row 653 as the
+initial boundary lets all 287 governed rows pass continuity, with a 0.04581 rad
+maximum step; that correction requires a newly pinned and reviewed lineage.
