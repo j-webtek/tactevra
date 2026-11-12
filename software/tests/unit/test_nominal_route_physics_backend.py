@@ -162,6 +162,7 @@ def test_arm255_builds_hash_bound_nonstarting_backend_definition(
         "first_sequence": 654,
         "last_sequence": 940,
         "row_count": 287,
+        "canonical_boundary_sequence": 653,
         "boundary_inclusive_clearance_segment_count": 288,
     }
     assert definition["runtime_protocol"]["continuous_clearance"] == (
@@ -196,6 +197,8 @@ def test_arm255_executes_exact_contract_through_reviewable_runtime(
     )
 
     assert result["status"] == "PASS_NOMINAL_SIMULATION_ONLY"
+    assert result["canonical_boundary_sequence"] == 653
+    assert result["canonical_boundary_position_error_mm"] == 0.001
     assert result["regenerated_row_count"] == 287
     assert result["canonical_ik_row_count"] == 287
     assert result["continuous_clearance_segment_count"] == 288
@@ -218,6 +221,41 @@ def test_arm255_executes_exact_contract_through_reviewable_runtime(
         == 287
     )
     assert len((output / "continuous_clearance.jsonl").read_text().splitlines()) == 288
+
+
+def test_arm255_canonicalizes_start_boundary_before_continuity_gate(
+    tmp_path: Path,
+) -> None:
+    backend, _, definition, route, _, output = _bundle(tmp_path)
+
+    class ShiftedCanonicalBranchRuntime(PassingRuntime):
+        def regenerate_row(self, *, source_row, previous_joint_targets_rad):
+            sequence = source_row["sequence"]
+            return {
+                "sequence": sequence,
+                "accepted": True,
+                "determinate": True,
+                "position_error_mm": 0.001,
+                "joint_position_target_rad": [
+                    1.0 + sequence / 100_000.0
+                ] * 4 + [0.0, 0.0],
+            }
+
+    result = backend.execute_backend(
+        definition,
+        route,
+        backend_review=_accepted_review(backend, definition),
+        output_directory=output,
+        runtime=ShiftedCanonicalBranchRuntime(),
+    )
+
+    assert result["status"] == "PASS_NOMINAL_SIMULATION_ONLY"
+    assert result["canonical_boundary_sequence"] == 653
+    first = json.loads(
+        (output / "regenerated_joint_targets.jsonl").read_text().splitlines()[0]
+    )
+    assert first["sequence"] == 654
+    assert first["joint_position_target_rad"][0] == pytest.approx(1.00654)
 
 
 def test_arm255_rejects_discrete_clearance_claim(tmp_path: Path) -> None:

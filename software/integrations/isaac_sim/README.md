@@ -4431,3 +4431,13 @@ governed output absence, then delegates once to the claimant. The independent
 `nominal_route_arm297_launch_review.py` statically verifies this ordering,
 single delegation, no direct worker call, no retry loop, and zero hardware
 surface. Its accepted receipt grants no attempt by itself.
+
+The exact ARM-297 authorization was subsequently consumed once. Fresh EULA
+and memory preflights passed, Isaac loaded the governed robot USD, and the
+worker retained `FAILED_RETAINED_NO_RETRY` at canonical IK row 654. The target
+and IK solution were valid, but the raw row-653 start boundary forced a 0.1624
+rad branch transition and correctly exceeded the 0.05 rad continuity limit.
+The corrected backend canonicalizes row 653 as initialization before applying
+continuity to rows 654-940. A complete offline sweep passes all 287 rows with a
+0.04581 rad maximum step. This source correction does not revive ARM-297 or
+authorize another run; it requires a new pinned, reviewed lineage.

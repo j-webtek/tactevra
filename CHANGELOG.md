@@ -23,6 +23,9 @@ as described in the [versioning policy](docs/VERSIONING.md).
 
 ### Changed
 
+- Canonicalized the nominal SPACE route's row-653 start boundary before
+  applying row-to-row continuity, resolving the retained ARM-297 row-654
+  branch discontinuity without loosening the 0.05 rad acceptance limit.
 - Bound the selected-profile Isaac replay handoff to the exact route-reviewed
   collision and fresh-entry receipts before producing a non-replanning native
   request.

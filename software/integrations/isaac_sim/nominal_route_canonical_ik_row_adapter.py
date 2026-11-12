@@ -50,6 +50,7 @@ EXPECTED_URDF_SHA256 = (
 
 FIRST_SEQUENCE = 654
 LAST_SEQUENCE = 940
+BOUNDARY_SEQUENCE = FIRST_SEQUENCE - 1
 JOINT_ORDER = (
     "base_link_to_link1",
     "link1_to_link2",
@@ -289,7 +290,7 @@ class CanonicalIkRowRuntimeAdapter:
         if (
             isinstance(sequence, bool)
             or not isinstance(sequence, int)
-            or not FIRST_SEQUENCE <= sequence <= LAST_SEQUENCE
+            or not BOUNDARY_SEQUENCE <= sequence <= LAST_SEQUENCE
             or source_row.get("phase") not in {"TRANSIT", "HOVER"}
         ):
             raise CanonicalIkRowAdapterError("source row is outside the reviewed window")

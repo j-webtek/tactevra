@@ -22,6 +22,7 @@ BACKEND_REVIEW_SCHEMA = "tactevra.isaac_lm4_nominal_route_physics_backend_review
 PREPARATION_SCHEMA = "tactevra.isaac_lm4_nominal_route_physics_worker.v1"
 FIRST_SEQUENCE = 654
 LAST_SEQUENCE = 940
+BOUNDARY_SEQUENCE = FIRST_SEQUENCE - 1
 SOURCE_SAMPLE_COUNT = 1416
 CONTACT_ENDPOINTS = [1061, 1299]
 REQUIRED_FILES = [
@@ -198,18 +199,24 @@ def build_backend_definition(
             "first_sequence": FIRST_SEQUENCE,
             "last_sequence": LAST_SEQUENCE,
             "row_count": 287,
+            "canonical_boundary_sequence": BOUNDARY_SEQUENCE,
             "boundary_inclusive_clearance_segment_count": 288,
         },
         "acceptance": {
             "minimum_noncontact_tool_key_clearance_mm": 0.5,
             "maximum_noncontact_key_displacement_mm": 0.05,
             "maximum_adjacent_joint_step_rad": 0.05,
+            "canonical_ik_required_for_start_boundary": True,
             "canonical_ik_required_for_every_regenerated_row": True,
             "continuous_clearance_required_for_boundary_and_internal_segments": True,
             "indeterminate_result_disposition": "FAIL_CLOSED",
         },
         "required_output_files": REQUIRED_FILES,
         "runtime_protocol": {
+            "canonical_boundary": (
+                "ONE_ACCEPTED_DETERMINATE_INITIALIZATION_RESULT_WITHOUT_"
+                "SOURCE_ADJACENCY_ACCEPTANCE"
+            ),
             "canonical_ik": "ONE_ACCEPTED_DETERMINATE_RESULT_PER_REGENERATED_ROW",
             "continuous_clearance": "CONTINUOUS_QUERY_NOT_DISCRETE_SAMPLING",
             "tool_key_metrics": "ONE_DETERMINATE_RESULT_PER_REGENERATED_ROW",
@@ -304,9 +311,29 @@ def execute_backend(
     generated: list[dict[str, Any]] = []
     ik_rows: list[dict[str, Any]] = []
     metric_rows: list[dict[str, Any]] = []
-    previous = _joints(
-        rows[FIRST_SEQUENCE - 1]["joint_position_target_rad"], "boundary"
+    boundary_evidence = dict(
+        runtime.regenerate_row(
+            source_row=rows[BOUNDARY_SEQUENCE],
+            previous_joint_targets_rad=rows[BOUNDARY_SEQUENCE - 1][
+                "joint_position_target_rad"
+            ],
+        )
     )
+    canonical_boundary_joints = _joints(
+        boundary_evidence.get("joint_position_target_rad"),
+        "canonical boundary",
+    )
+    boundary_residual = _finite(
+        boundary_evidence.get("position_error_mm"),
+        "canonical boundary IK",
+    )
+    if (
+        boundary_evidence.get("sequence") != BOUNDARY_SEQUENCE
+        or boundary_evidence.get("accepted") is not True
+        or boundary_evidence.get("determinate") is not True
+    ):
+        raise NominalRoutePhysicsBackendError("canonical IK boundary failed")
+    previous = canonical_boundary_joints
 
     for sequence in range(FIRST_SEQUENCE, LAST_SEQUENCE + 1):
         source = rows[sequence]
@@ -373,9 +400,7 @@ def execute_backend(
 
     clearance_rows: list[dict[str, Any]] = []
     joint_by_sequence = {
-        FIRST_SEQUENCE - 1: _joints(
-            rows[FIRST_SEQUENCE - 1]["joint_position_target_rad"], "start boundary"
-        ),
+        BOUNDARY_SEQUENCE: canonical_boundary_joints,
         **{row["sequence"]: row["joint_position_target_rad"] for row in generated},
         LAST_SEQUENCE + 1: _joints(
             rows[LAST_SEQUENCE + 1]["joint_position_target_rad"], "end boundary"
@@ -434,6 +459,8 @@ def execute_backend(
         "schema": "tactevra.isaac_lm4_nominal_route_physics_result.v1",
         "status": "PASS_NOMINAL_SIMULATION_ONLY",
         "source_backend_sha256": backend_hash,
+        "canonical_boundary_sequence": BOUNDARY_SEQUENCE,
+        "canonical_boundary_position_error_mm": boundary_residual,
         "regenerated_row_count": len(generated),
         "canonical_ik_row_count": len(ik_rows),
         "continuous_clearance_segment_count": len(clearance_rows),

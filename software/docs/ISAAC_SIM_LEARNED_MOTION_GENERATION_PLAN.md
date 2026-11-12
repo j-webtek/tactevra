@@ -1568,7 +1568,20 @@ ScheduleGen. Neither is a physical success rate.
      authorization and all fail-closed checks precede backend construction,
      and that the claimant remains sole owner of fresh gates and delegation.
      The accepted review still invokes nothing. A new exact ARM-297 one-attempt
-     authorization is now the next boundary; all earlier statements are stale.
+     authorization was the next boundary; all earlier statements were stale.
+107. **ARM-297 terminal attempt and canonical-boundary finding:** the exact
+     single-use authorization admitted one attempt. EULA and memory preflights
+     passed, Isaac loaded the governed robot USD, and the worker terminalized
+     `FAILED_RETAINED_NO_RETRY` at canonical IK row 654. The solver found a
+     valid 0.0027 mm solution, but entering its aligned branch directly from
+     the raw row-653 boundary required a 0.1624 rad joint change and correctly
+     violated the unchanged 0.05 rad continuity limit. Offline diagnosis then
+     canonicalized row 653 as the initialization boundary before evaluating
+     rows 654-940. All 287 governed rows passed; the worst adjacent step was
+     0.04581 rad at row 670. The corrective source now makes that boundary
+     explicit and adds regression coverage. ARM-297 remains consumed and
+     immutable; a newly pinned and independently reviewed lineage is required
+     before any further attempt.
 
 ## Completion criterion
 

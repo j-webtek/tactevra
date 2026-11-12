@@ -237,13 +237,21 @@ pre-attempt binding is now materialized and independently accepted. It pins the
 merged revision, qualified interpreter, claimant/review evidence, ten runtime
 sources, exact authorization text, governed outputs, fresh-gate order, and
 terminalization/no-retry behavior.
-The executable launcher and its independent review are now implemented and
-accepted as an inert boundary. The launcher rejects old authorization, wrong
+The executable launcher and its independent review were implemented and
+accepted as an inert boundary. The launcher rejected old authorization, wrong
 interpreter or repository lineage, changed source/evidence, and non-fresh
-outputs before constructing a deferred backend; it delegates exactly once to
-the claimant, which retains ownership of fresh gates. Once this source is
-merged, the next runtime step is a separately supplied exact ARM-297
-one-attempt authorization. No earlier authorization can be reused.
+outputs before constructing a deferred backend; it delegated exactly once to
+the claimant, which retained ownership of fresh gates.
+
+The separately authorized ARM-297 attempt is now terminal and consumed. Both
+fresh preflights passed and Isaac loaded the governed USD, but canonical IK row
+654 failed the 0.05 rad continuity gate because the raw row-653 boundary was
+not on the solver's aligned branch. The retained failure is not a simulated
+typing success. Offline reproduction proved the corrected contract:
+canonicalize row 653 as initialization, then evaluate rows 654-940 from that
+boundary. All 287 governed rows satisfy the unchanged limit, with a 0.04581
+rad worst step. The correction must be merged, newly pinned, independently
+reviewed, and assigned a fresh lineage before another simulation attempt.
 
 ## Governance
 
