@@ -93,3 +93,60 @@ review status is `ACCEPTED_ARM297_LINEAGE_FOR_CLAIMANT_CONSTRUCTION`. The
 attempt and both live-preflight directories remain absent. No authorization was
 observed and no attempt, Isaac, physics, runtime, target, trajectory, contact,
 hardware, or physical authority was exercised.
+
+## Single-use claimant
+
+The next inert layer constructs a fresh claimant around the retained ARM-254
+fail-closed worker. It clones the worker for ARM-297 while keeping the old
+ARM-253 statement only as an internal compatibility token; that token is not
+external authority. The claimant runtime requires, in order:
+
+1. the exact new ARM-297 authorization statement;
+2. unchanged plan, review, claimant, runtime, worker, and backend sources;
+3. a fresh passing EULA preflight retained before attempt claim;
+4. a fresh passing memory preflight retained before attempt claim;
+5. exclusive creation of both receipts; and
+6. exactly one delegation to the fail-closed worker.
+
+The independent static reviewer proves that ordering and rejects direct
+simulator, motion, or transport calls. Building and reviewing the claimant do
+not collect either live preflight and do not invoke its `run` method.
+
+```powershell
+$root = 'C:/IsaacSim/artifacts/issue190'
+$src = 'software/integrations/isaac_sim'
+
+python "$src/nominal_route_arm297_claimant.py" `
+  --plan "$root/arm297-route-physics-lineage-plan-001/plan.json" `
+  --plan-review "$root/arm297-route-physics-lineage-plan-review-001/review.json" `
+  --base-worker "$root/arm254-nominal-route-physics-worker-001/worker.json" `
+  --claimant-source "$src/nominal_route_arm297_claimant.py" `
+  --claimant-review-source "$src/nominal_route_arm297_claimant_review.py" `
+  --eula-preflight-source "$src/nominal_route_isaac_eula_preflight.py" `
+  --memory-preflight-source "$src/nominal_route_memory_preflight.py" `
+  --worker-source "$src/nominal_route_physics_worker.py" `
+  --output "$root/arm297-route-physics-claimant-001/claimant.json"
+
+python "$src/nominal_route_arm297_claimant_review.py" `
+  --claimant "$root/arm297-route-physics-claimant-001/claimant.json" `
+  --claimant-source "$src/nominal_route_arm297_claimant.py" `
+  --plan "$root/arm297-route-physics-lineage-plan-001/plan.json" `
+  --plan-review "$root/arm297-route-physics-lineage-plan-review-001/review.json" `
+  --base-worker "$root/arm254-nominal-route-physics-worker-001/worker.json" `
+  --claimant-review-source "$src/nominal_route_arm297_claimant_review.py" `
+  --eula-preflight-source "$src/nominal_route_isaac_eula_preflight.py" `
+  --memory-preflight-source "$src/nominal_route_memory_preflight.py" `
+  --worker-source "$src/nominal_route_physics_worker.py" `
+  --output "$root/arm297-route-physics-claimant-review-001/review.json"
+```
+
+| Artifact | File SHA-256 | Canonical document SHA-256 |
+| --- | --- | --- |
+| `arm297-route-physics-claimant-001/claimant.json` | `ecfe03421730c6bca646842e433226aa0fe3c71b59af744c3ae78d313adb7e83` | `f77d3dfe2e756f764821f01ef7937ddcd1364819a065fa3acbc0d4f0caada72b` |
+| `arm297-route-physics-claimant-review-001/review.json` | `f92d9b0163e79eabe2817ef18caf9e43bfbf82acec1ddac61d2c5311d84aa309` | `b09ebc79bd0796f50c757bda2336bc8985ffe2f27679f05e9a66591abd61df0e` |
+
+The accepted claimant still grants no authorization. Before any attempt, a
+reproducible launch binding must pin the qualified Isaac interpreter, merged
+source identities, claimant/review hashes, fresh-gate outputs, terminalization
+behavior, and the exact external statement. Until then, do not invoke the
+claimant runtime.

@@ -229,6 +229,14 @@ a single-use ARM-297 claimant plus independent review, followed only then by a
 fresh exact one-attempt authorization. No simulated typing success or physical
 typing success is claimed yet.
 
+The ARM-297 single-use claimant and its independent review are now also
+materialized without collecting gates or claiming the attempt. They enforce
+exact external authorization, fresh EULA and memory receipts, unchanged source
+hashes, one worker delegation, and failure terminalization. The remaining
+pre-attempt engineering step is a reproducible launch binding; only after that
+binding is merged and reviewed may the exact one-use simulation authorization
+be requested.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.

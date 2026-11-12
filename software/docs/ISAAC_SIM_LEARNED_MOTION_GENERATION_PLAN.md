@@ -1536,6 +1536,17 @@ ScheduleGen. Neither is a physical success rate.
     governed outputs to remain absent. Acceptance permits only building and
     independently reviewing a single-use claimant; a fresh exact ARM-297
     authorization may be requested only after that later review passes.
+101. **ARM-297 single-use claimant:** the claimant clones the retained
+     fail-closed worker for the new absent output, pins all plan, review,
+     preflight, worker, runtime, and backend sources, and admits at most one
+     call after exact authorization and two freshly retained passing gates. Its
+     definition build observes no authorization and invokes no runtime.
+102. **ARM-297 claimant review:** independent AST and evidence review verifies
+     exact authorization, source revalidation, EULA then memory collection,
+     exclusive receipt retention, single-use consumption, and one worker
+     delegation in that order. The accepted result still starts no simulator
+     and grants no hardware or physical authority. A reproducible launch
+     binding is required before requesting authorization.
 
 ## Completion criterion
 
