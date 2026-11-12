@@ -253,6 +253,17 @@ boundary. All 287 governed rows satisfy the unchanged limit, with a 0.04581
 rad worst step. The correction must be merged, newly pinned, independently
 reviewed, and assigned a fresh lineage before another simulation attempt.
 
+That full-window qualification is now retained as the first ARM-298
+checkpoint. The production solver and an independent reproduction both
+canonicalized row 653 and passed all 287 governed rows with an identical
+canonical-row digest. The maximum adjacent step was `0.045805 rad` at row 670,
+below the unchanged `0.05 rad` limit. This is stronger evidence that the
+specific ARM-297 failure is corrected, but it remains offline kinematic
+evidence—not collision, physics, key-contact, or typing success. The next safe
+increment is an inert ARM-298 lineage plan binding this accepted evidence and
+fresh absent attempt/preflight outputs; a simulation still requires separate
+exact one-use authorization.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.
