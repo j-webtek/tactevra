@@ -4441,3 +4441,21 @@ The corrected backend canonicalizes row 653 as initialization before applying
 continuity to rows 654-940. A complete offline sweep passes all 287 rows with a
 0.04581 rad maximum step. This source correction does not revive ARM-297 or
 authorize another run; it requires a new pinned, reviewed lineage.
+
+### ARM-298 canonical continuity qualification
+
+`nominal_route_arm298_continuity_qualification.py` turns the ARM-297 diagnosis
+into retained production evidence. It binds the terminal ARM-297 status, exact
+SPACE route, reviewed adapter inputs, locked model context, current canonical
+IK adapter, and current backend. It performs offline FK/IK only: row 653 is
+canonicalized from row 652, then every row 654-940 is solved and checked
+against the unchanged `0.05 rad` continuity limit.
+
+`nominal_route_arm298_continuity_qualification_review.py` independently
+re-hashes those inputs, rejects simulator/motion/transport call surfaces, and
+reexecutes the production solver. The retained result covers all 287 rows,
+with a `0.045805020525269136 rad` maximum step at row 670 and an identical
+canonical-row digest. See
+`software/docs/ARM_298_CANONICAL_CONTINUITY_QUALIFICATION.md` for reproduction
+and evidence hashes. This checkpoint grants no ARM-298 attempt authority; the
+next stage is a fresh inert lineage plan and independent review.

@@ -1582,6 +1582,16 @@ ScheduleGen. Neither is a physical success rate.
      explicit and adds regression coverage. ARM-297 remains consumed and
      immutable; a newly pinned and independently reviewed lineage is required
      before any further attempt.
+108. **ARM-298 production continuity qualification:** the zero-authority gate
+     binds ARM-297's retained terminal status, the exact 1,416-row SPACE route,
+     reviewed canonical-IK inputs, and merged adapter/backend sources. It
+     canonicalizes row 653 from row 652 and executes the production RoArm-M3
+     solver across all 287 governed rows. Independent reproduction matches the
+     canonical-row digest exactly; the maximum step is `0.045805 rad` at row
+     670 under the unchanged `0.05 rad` limit. No Isaac process, physics step,
+     target submission, trajectory, contact, hardware, or physical authority
+     is involved. This qualifies the corrected IK boundary for a fresh inert
+     ARM-298 lineage plan; it does not authorize a simulation attempt.
 
 ## Completion criterion
 

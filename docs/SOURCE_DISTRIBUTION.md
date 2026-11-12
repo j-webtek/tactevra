@@ -1693,3 +1693,15 @@ runtime inputs, accepted launcher review, and absent outputs before one
 deferred backend construction and one claimant call. Review creates no attempt,
 gate, simulator, trajectory, hardware, or physical authority. All byte,
 duplicate-byte, and reduction limits remain unchanged.
+
+ARM-298 adds a production-solver continuity qualification, its independent
+reproduction reviewer, focused fail-closed tests, and one maintained evidence
+note, advancing the reviewed tracked-file ceiling from 6,870 to 6,874. The
+qualification binds the retained ARM-297 failure, exact SPACE route, locked
+model context, and corrected adapter/backend sources, then checks the
+canonicalized row-653 boundary and all 287 governed rows without starting
+Isaac or stepping physics. Generated receipts remain in the external evidence
+store and are represented only by hashes. No simulator asset, trajectory
+corpus, camera frame, controller transcript, attempt authority, or hardware
+authority is added; all byte, duplicate-byte, and reduction limits remain
+unchanged.

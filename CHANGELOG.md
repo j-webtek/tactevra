@@ -13,6 +13,8 @@ as described in the [versioning policy](docs/VERSIONING.md).
 
 ### Added
 
+- Added a production-solver ARM-298 continuity qualification and independent
+  reproduction over the complete 287-row governed SPACE-route window.
 - Added the shared AI/arm v2 contracts, model/arm conformance profile, and
   operational-readiness gate used by portable offline verification.
 - Added a public release-readiness dashboard, exact-SHA candidate-audit path,
