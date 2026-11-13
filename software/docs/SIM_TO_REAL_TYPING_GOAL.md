@@ -169,43 +169,41 @@ authorization/preflight lineage. These are substantial foundations, but they do
 not yet prove a successful native route-physics attempt or real typing.
 
 ARM-284 first exposed and retained the fast-shutdown terminalization defect.
-ARM-287/ARM-288 corrected and reviewed that lifecycle, and ARM-289 then consumed
-one fresh EULA- and memory-gated native `SPACE` authorization. Isaac loaded the
-pinned scene and initialized PhysX; runtime construction failed closed because
-the articulation adapter did not expose native `link_names`. Unlike ARM-284,
-ARM-289 retained the exact terminal failure before shutdown. The immutable
-outcomes are documented in
-[ARM_284_ATTEMPT_POSTMORTEM.md](ARM_284_ATTEMPT_POSTMORTEM.md) and
-[ARM_289_ATTEMPT_POSTMORTEM.md](ARM_289_ATTEMPT_POSTMORTEM.md). The adapter and
-integration correction is merged; a zero-motion native confirmation remains
-required before another route-physics lineage is justified.
+ARM-287/ARM-288 corrected and reviewed that lifecycle. ARM-289 then proved
+terminal retention while exposing a missing native link inventory;
+ARM-294 confirmed the corrected inventory without motion. ARM-295 exposed
+missing canonical solver construction inputs, ARM-296 proved their correction,
+and ARM-297 exposed and corrected a canonical route start-boundary mismatch.
+ARM-298 consumed the next fresh EULA- and memory-gated native `SPACE`
+authorization on 2026-11-13. Isaac reached backend execution and failed closed
+because the restricted articulation wrapper omitted its wrapped Isaac
+articulation's valid `set_dof_positions` method. The immutable outcomes include
+[ARM_284_ATTEMPT_POSTMORTEM.md](ARM_284_ATTEMPT_POSTMORTEM.md),
+[ARM_289_ATTEMPT_POSTMORTEM.md](ARM_289_ATTEMPT_POSTMORTEM.md),
+[ARM_295_ATTEMPT_POSTMORTEM.md](ARM_295_ATTEMPT_POSTMORTEM.md), and
+[ARM_298_ATTEMPT_POSTMORTEM.md](ARM_298_ATTEMPT_POSTMORTEM.md). The ARM-298
+authorization is consumed; the adapter correction is local code awaiting a new
+reviewed lineage, not permission to rerun.
 
 The immediate path is:
 
-1. retain ARM-289 as the consumed terminal failure that exposed the missing
-   native link inventory; never replay it;
-2. preserve the merged adapter/binding correction and its cross-platform test
-   evidence;
-3. merge and reproduce the inert ARM-292 exact-inventory request and ARM-293
-   independent zero-motion review;
-4. execute one separately authorized ARM-294 native inventory diagnostic with
-   zero physics steps, retaining success or failure before shutdown;
-5. independently review the retained ARM-294 receipt, requiring the exact
-   seven-link order, one seven-transform batch, zero motion authority, and an
-   absent ARM-295 directory;
-6. only after that accepted receipt review, build and independently review an
-   inert ARM-295 lineage plan that pins the corrected runtime sources, ARM-289
-   terminal evidence, and still-absent attempt/EULA/memory outputs;
-7. construct a separately reviewed ARM-295 claimant whose fresh EULA and memory
-   gates must pass before it can claim the attempt directory, and require a new
-   exact one-use authorization before any simulator launch;
-8. diagnose any failed acceptance metric and correct the digital twin or route
-   through another reviewed increment rather than replaying the attempt;
-9. on a passing result, freeze the single-key simulation benchmark and expand
+1. retain ARM-298 and its exact preflight/terminal hashes as immutable consumed
+   evidence; never replay it;
+2. merge and independently review the narrow articulation-setter delegation and
+   its fail-closed regression tests;
+3. build a newly numbered inert lineage that pins the corrected adapter, the
+   accepted ARM-298 ancestry, the fixed `SPACE` episode, and fresh absent
+   attempt/EULA/memory outputs;
+4. independently reproduce that lineage and review its claimant and executable
+   launch boundary without starting Isaac;
+5. require a new exact one-use authorization before any later simulator launch;
+6. diagnose any failed acceptance metric and correct the digital twin or route
+   through another reviewed increment rather than replaying an attempt;
+7. on a passing result, freeze the single-key simulation benchmark and expand
    to a representative multi-key set;
-10. add vision-conditioned localization and rolling-horizon sequence planning;
-11. qualify randomized simulation coverage; and
-12. design separately authorized physical correlation campaigns only after the
+8. add vision-conditioned localization and rolling-horizon sequence planning;
+9. qualify randomized simulation coverage; and
+10. design separately authorized physical correlation campaigns only after the
    corresponding simulation gates pass.
 
 ARM-294 has since passed its zero-motion inventory purpose, and ARM-295 was

@@ -3517,6 +3517,22 @@ delegation. Merely building or reviewing it invokes none of those runtime
 operations. A reproducible launch binding remains required before requesting
 authorization or invoking the claimant.
 
+ARM-298 subsequently rebuilt that lineage after the ARM-297 canonical-route
+correction and was executed exactly once on 2026-11-13. Both fresh gates passed,
+Isaac Sim 6.1 started, and runtime construction reached backend execution. The
+attempt then failed closed because the capability-restricted articulation
+wrapper did not forward the wrapped Isaac articulation's valid
+`set_dof_positions` method. The retained status is
+`FAILED_RETAINED_NO_RETRY`; no trajectory playback, hardware access, or
+physical authority occurred. ARM-298 is consumed and must not be replayed.
+
+The wrapper now delegates only that required teleport-only FK operation while
+continuing to hide unrelated Isaac capabilities. Regression coverage proves
+exact row forwarding and fail-closed behavior when the native setter is absent.
+See [`ARM_298_ATTEMPT_POSTMORTEM.md`](../../docs/ARM_298_ATTEMPT_POSTMORTEM.md).
+Any later simulation requires a newly numbered and independently reviewed
+lineage plus a new exact one-use authorization.
+
 ARM-255 implements the deterministic core of that backend without embedding an
 unreviewed Isaac adapter. It validates the retained worker, route, correction
 window, source/runtime hashes, and backend source identity. Its runtime protocol

@@ -237,10 +237,19 @@ def test_articulation_adapter_exposes_native_link_view():
         link_names = ["base_link", "link1"]
         _physics_articulation_view = Native()
 
-    adapter = MODULE.IsaacArticulationLinkView(Articulation())
+        def __init__(self):
+            self.rows = None
+
+        def set_dof_positions(self, rows):
+            self.rows = rows
+
+    articulation = Articulation()
+    adapter = MODULE.IsaacArticulationLinkView(articulation)
     assert adapter.dof_names == ["joint1"]
     assert adapter.link_names == ["base_link", "link1"]
     assert adapter.get_link_transforms() == "links"
+    adapter.set_dof_positions([[0.25]])
+    assert articulation.rows == [[0.25]]
 
 
 def test_articulation_adapter_rejects_missing_native_method():
@@ -249,3 +258,18 @@ def test_articulation_adapter_rejects_missing_native_method():
 
     with pytest.raises(MODULE.InertSmokeError, match="link view is unavailable"):
         MODULE.IsaacArticulationLinkView(Articulation())
+
+
+def test_articulation_adapter_rejects_missing_dof_setter():
+    class Native:
+        def get_link_transforms(self):
+            return "links"
+
+    class Articulation:
+        dof_names = ["joint1"]
+        link_names = ["base_link", "link1"]
+        _physics_articulation_view = Native()
+
+    adapter = MODULE.IsaacArticulationLinkView(Articulation())
+    with pytest.raises(MODULE.InertSmokeError, match="DOF setter is unavailable"):
+        adapter.set_dof_positions([[0.25]])
