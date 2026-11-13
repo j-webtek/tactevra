@@ -181,7 +181,8 @@ articulation's valid `set_dof_positions` method. The immutable outcomes include
 [ARM_284_ATTEMPT_POSTMORTEM.md](ARM_284_ATTEMPT_POSTMORTEM.md),
 [ARM_289_ATTEMPT_POSTMORTEM.md](ARM_289_ATTEMPT_POSTMORTEM.md),
 [ARM_295_ATTEMPT_POSTMORTEM.md](ARM_295_ATTEMPT_POSTMORTEM.md), and
-[ARM_298_ATTEMPT_POSTMORTEM.md](ARM_298_ATTEMPT_POSTMORTEM.md). The ARM-298
+[the ARM-298 attempt postmortem](../integrations/isaac_sim/README.md#arm-298-attempt-postmortem).
+The ARM-298
 authorization is consumed; the adapter correction is local code awaiting a new
 reviewed lineage, not permission to rerun.
 

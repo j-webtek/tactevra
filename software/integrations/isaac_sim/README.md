@@ -3517,6 +3517,8 @@ delegation. Merely building or reviewing it invokes none of those runtime
 operations. A reproducible launch binding remains required before requesting
 authorization or invoking the claimant.
 
+### ARM-298 attempt postmortem
+
 ARM-298 subsequently rebuilt that lineage after the ARM-297 canonical-route
 correction and was executed exactly once on 2026-11-13. Both fresh gates passed,
 Isaac Sim 6.1 started, and runtime construction reached backend execution. The
@@ -3526,10 +3528,23 @@ wrapper did not forward the wrapped Isaac articulation's valid
 `FAILED_RETAINED_NO_RETRY`; no trajectory playback, hardware access, or
 physical authority occurred. ARM-298 is consumed and must not be replayed.
 
+The immutable retained evidence is:
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `arm298-nominal-route-physics-attempt-001/status.json` | `959e0a7c840f1b742ea479abe7cc65944d0aaa630724b7346e13a3a21d240a2c` |
+| `arm298-nominal-route-physics-eula-preflight-001/receipt.json` | `a1d1b4b1f7755b87436bcaf525a83eaa90966a3225f68eb2eaceb5f91061e79e` |
+| `arm298-nominal-route-physics-memory-preflight-001/receipt.json` | `5d23aadc19a190e6315245c76840cc455f2a1fe0c91788a2336f3db92ce1dd3b` |
+
+The EULA and memory receipts admitted launch without claiming an attempt. The
+terminal status records one attempt, no retry, and no hardware or physical
+authority. No matching Isaac process remained after shutdown. The restricted
+wrapper—not Isaac 6.1—was the root cause: the wrapped experimental
+`Articulation` already provided the required setter.
+
 The wrapper now delegates only that required teleport-only FK operation while
 continuing to hide unrelated Isaac capabilities. Regression coverage proves
 exact row forwarding and fail-closed behavior when the native setter is absent.
-See [`ARM_298_ATTEMPT_POSTMORTEM.md`](../../docs/ARM_298_ATTEMPT_POSTMORTEM.md).
 Any later simulation requires a newly numbered and independently reviewed
 lineage plus a new exact one-use authorization.
 
