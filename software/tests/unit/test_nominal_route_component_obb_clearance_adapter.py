@@ -273,3 +273,54 @@ def test_worker_factory_callback_preserves_native_objects_and_checks_metadata(mo
     with pytest.raises(module.ComponentObbClearanceError, match="incomplete"):
         factory({"id": "factory"}, **arguments)
     assert len(calls) == 2
+
+
+def test_single_use_worker_passes_composed_runtime_to_backend(tmp_path, monkeypatch):
+    import json
+
+    module = _module()
+    path = ROOT / "software/tests/unit/test_nominal_route_native_runtime_worker_integration.py"
+    spec = importlib.util.spec_from_file_location("worker_integration_fixture", path)
+    assert spec is not None and spec.loader is not None
+    fixture = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fixture)
+    worker = fixture._load("component_worker_test", fixture.SOURCE)
+    events = []
+    native = {name: object() for name in ("articulation", "scene_query", "key_view", "root_view")}
+    runtime = object()
+
+    def base_factory(_definition, **kwargs):
+        events.append("base_factory")
+        assert kwargs["articulation"] is native["articulation"]
+        return object()
+
+    def compose(**kwargs):
+        events.append("component_factory")
+        assert kwargs["articulation"] is native["articulation"]
+        assert kwargs["scene_query"] is native["scene_query"]
+        return runtime
+
+    def execute(*_args, **kwargs):
+        events.append("execute")
+        assert kwargs["runtime"] is runtime
+        return {"status": "PASS"}
+
+    monkeypatch.setattr(module, "construct_component_obb_route_runtime", compose)
+    factory = module.ComponentObbRuntimeFactory(
+        base_factory=base_factory, component_definition={}, component_review={}
+    )
+    backend = worker.OneAttemptNativeBackend(
+        fixture._definition(worker), session_factory=lambda: fixture._Session(events, native),
+        construct_runtime_fn=factory, execute_backend_fn=execute,
+        backend_definition={}, route={}, factory_definition={}, factory_review={},
+        factory_plan={}, factory_plan_review={},
+        documents={"binding_definition": {}, "binding_review": {}}, solver_kwargs={},
+        native_metadata={"environment_only_scene": True, "robot_collision_query_shapes_enabled": False},
+    )
+    output = tmp_path / "claimed"
+    output.mkdir()
+    (output / "status.json").write_text(json.dumps(fixture.CLAIM))
+    assert backend(output) == {"status": "PASS"}
+    assert events == ["start", "load", "initialize", "settle", "objects", "base_factory", "component_factory", "execute", "shutdown"]
+    with pytest.raises(worker.NativeRuntimeWorkerIntegrationError, match="retry refused"):
+        backend(output)
