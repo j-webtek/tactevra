@@ -113,6 +113,23 @@ frame alignment is correct. A shared, source-hashed builder now reconstructs
 the same 14 boxes for the audit and concrete-binding validation. The native
 worker remains disabled by the solid-containment qualification guard.
 
+A separate local check loaded the seven vendor STL files after verifying each
+against its retained SHA-256, split their processed meshes into connected face
+components, and verified that every component's vertices fit one of its link's
+candidate boxes. The component face counts sum to each processed mesh's face
+count. Link5 has 114 processed connected components, all inside its single
+whole-link box. Receipt `664c030c00f5cda8efad8b90c18c571f6b2d27b79233defd86e0ca3d586ca9fc`
+binds this check to candidate definition
+`884a8881eb219bf94c1104ac733b1868e094eda72961326122ff836364416530`.
+This verifies the modeled mesh containment, not missing hardware, native
+frames, a human review, or a physical qualification.
+
+Reproduce with the pinned vendor M3 STL directory, trimesh, and a new output:
+
+```text
+python software/integrations/isaac_sim/arm301_mesh_containment_audit.py --mesh-dir <vendor-m3-meshes> --output <new-receipt.json>
+```
+
 An offline comparison of the pinned vendor Xacro at commit `40dbd84` with the
 governed URDF found matching parent, child, type, origin, and movable-axis
 values for the seven joints from world through gripper. All seven vendor link
