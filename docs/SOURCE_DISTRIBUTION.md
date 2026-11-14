@@ -221,6 +221,12 @@ live gate, attempt output, trajectory, camera frame, controller transcript, or
 authority-bearing artifact is tracked; all byte, duplicate-byte, and reduction
 limits remain unchanged.
 
+The ARM-301 follow-up adds five source and test paths for the shared
+whole-component builder, vendor mesh and USD frame audits, and native link
+frame comparison. The tracked-file ceiling advances from 6,921 to the observed
+6,926 paths. No simulator output, mesh, snapshot, or hardware-authority
+artifact is added; the byte and duplicate-byte limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed
@@ -1822,3 +1828,9 @@ module observes authorization, imports or starts Isaac, claims an attempt,
 steps physics, submits positions or targets, plays a trajectory, or grants
 hardware or physical authority. No generated evidence or simulator asset is
 tracked; all byte, duplicate-byte, and reduction limits remain unchanged.
+## ARM-301 offline audit source
+
+The source archive includes the offline SPACE-route component-OBB audit command
+`software/integrations/isaac_sim/arm301_source_route_obb_audit.py`. The retained
+route and generated receipt remain external runtime artifacts. This addition
+accounts for one tracked source file in the archive ceiling.

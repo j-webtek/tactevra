@@ -5,7 +5,8 @@ world coordinates at the start of each joint interval plus a conservative
 bound on the displacement of every point in each box.  Separating-axis gaps
 are reduced by those displacement bounds, so a positive residual proves that
 the containing boxes (and therefore their source meshes) stay separated for
-the complete interval.
+the complete interval. This proves separation of the contained surfaces; it
+does not by itself establish that closed solids are not nested.
 """
 
 from __future__ import annotations

@@ -68,6 +68,13 @@ class IsaacArticulationLinkView:
     def get_link_transforms(self) -> Any:
         return self._native.get_link_transforms()
 
+    def get_dof_positions(self) -> Any:
+        """Read the current simulated joint state without commanding it."""
+        getter = getattr(self._articulation, "get_dof_positions", None)
+        if not callable(getter):
+            raise InertSmokeError("Isaac articulation DOF readback is unavailable")
+        return getter()
+
     def set_dof_positions(self, rows: list[list[float]]) -> None:
         """Forward reviewed teleport-only FK rows to Isaac's articulation.
 

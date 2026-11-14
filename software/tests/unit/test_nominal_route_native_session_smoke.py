@@ -243,11 +243,15 @@ def test_articulation_adapter_exposes_native_link_view():
         def set_dof_positions(self, rows):
             self.rows = rows
 
+        def get_dof_positions(self):
+            return "joint-readback"
+
     articulation = Articulation()
     adapter = MODULE.IsaacArticulationLinkView(articulation)
     assert adapter.dof_names == ["joint1"]
     assert adapter.link_names == ["base_link", "link1"]
     assert adapter.get_link_transforms() == "links"
+    assert adapter.get_dof_positions() == "joint-readback"
     adapter.set_dof_positions([[0.25]])
     assert articulation.rows == [[0.25]]
 
@@ -271,5 +275,7 @@ def test_articulation_adapter_rejects_missing_dof_setter():
         _physics_articulation_view = Native()
 
     adapter = MODULE.IsaacArticulationLinkView(Articulation())
+    with pytest.raises(MODULE.InertSmokeError, match="DOF readback is unavailable"):
+        adapter.get_dof_positions()
     with pytest.raises(MODULE.InertSmokeError, match="DOF setter is unavailable"):
         adapter.set_dof_positions([[0.25]])
