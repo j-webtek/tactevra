@@ -119,6 +119,33 @@ def test_definition_rejects_self_consistent_partition_substitution():
         )
 
 
+def test_definition_rejects_urdf_text_not_matching_claimed_digest():
+    module = _module()
+    text = URDF_PATH.read_text(encoding="utf-8")
+    with pytest.raises(module.NativeComponentObbBindingError, match="source changed"):
+        module.build_definition(
+            json.loads(PARTITION_PATH.read_text(encoding="utf-8")),
+            partition_file_sha256=module._file_sha(PARTITION_PATH),
+            urdf_file_sha256=module._file_sha(URDF_PATH),
+            binding_source_file_sha256=module._file_sha(MODULE_PATH),
+            urdf_text=text + "\n<!-- substituted -->",
+        )
+
+
+@pytest.mark.parametrize("field", ["launch_admitted", "hardware_access", "physical_authority"])
+def test_native_runtime_rejects_review_with_authority(field):
+    module = _module()
+    definition = _definition(module)
+    review = _review(module, definition)
+    review[field] = True
+    review.pop("review_sha256")
+    review["review_sha256"] = module._sha(review)
+    with pytest.raises(module.NativeComponentObbBindingError, match="not admitted"):
+        module.NativeComponentObbRuntime(
+            definition, binding_review=review, articulation=_Articulation(module)
+        )
+
+
 def test_native_runtime_emits_world_obbs_and_conservative_path_bounds():
     module = _module()
     definition = _definition(module)
