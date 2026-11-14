@@ -68,6 +68,20 @@ class IsaacArticulationLinkView:
     def get_link_transforms(self) -> Any:
         return self._native.get_link_transforms()
 
+    def set_dof_positions(self, rows: list[list[float]]) -> None:
+        """Forward reviewed teleport-only FK rows to Isaac's articulation.
+
+        The native sweep adapter evaluates candidate joint rows by setting the
+        wrapped experimental articulation and then reading its native link
+        transforms.  Keep that mutation boundary explicit here instead of
+        exposing the entire Isaac object to downstream runtime composition.
+        """
+
+        setter = getattr(self._articulation, "set_dof_positions", None)
+        if not callable(setter):
+            raise InertSmokeError("Isaac articulation DOF setter is unavailable")
+        setter(rows)
+
 
 class UsdWorldPoseView:
     """Read a nested rigid root without creating a conflicting tensor view."""
