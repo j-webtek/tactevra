@@ -398,7 +398,7 @@ def test_concrete_binding_uses_component_factory_without_starting_session(monkey
     assert seen[0][0] is paths
     assert isinstance(seen[0][1], module.ComponentObbRuntimeFactory)
     assert receipt["component_definition_sha256"] == definition["binding_sha256"]
-    assert receipt["component_review_validated_at_native_construction"] is True
+    assert receipt["component_review_revalidation_required_at_native_construction"] is True
     assert receipt["launch_admitted"] is False
     assert receipt["isaac_started"] is False
     review["hardware_access"] = True

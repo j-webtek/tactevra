@@ -269,7 +269,7 @@ def build_component_obb_concrete_binding(
         "component_definition_sha256": component_definition.get("binding_sha256"),
         "component_review_sha256": component_review.get("review_sha256"),
         "component_review_validated_at_binding": True,
-        "component_review_validated_at_native_construction": True,
+        "component_review_revalidation_required_at_native_construction": True,
         "launch_admitted": False,
         "attempt_consumed": False,
         "isaac_started": False,
