@@ -191,6 +191,11 @@ The session-level helper consumes an already initialized session, requires zero
 reported physics steps before and after the read, and never starts or steps the
 session. Its simulated tests cover a step occurring during capture. It does not
 itself authenticate the session or replace the future capture procedure.
+`run_snapshot_diagnostic` prepares the zero-step session lifecycle around that
+helper: it claims a fresh output directory, retains a result, attempts shutdown
+even after startup failure, and refuses reuse of the claimed directory. It is
+not a standalone authorization gate: the caller must provide an explicitly
+authorized run and a source-pinned session. Tests use a fake session only.
 
 The concrete native binding now rejects the surface-partition definition even
 when its review is otherwise valid: surface separation alone cannot rule out

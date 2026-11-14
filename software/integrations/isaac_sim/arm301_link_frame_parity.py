@@ -164,6 +164,42 @@ def compare_stationary_session(session: object, urdf: Path) -> dict:
     return build_snapshot_receipt(urdf, snapshot)
 
 
+def run_snapshot_diagnostic(session: object, urdf: Path, output_directory: Path) -> dict:
+    """Run one zero-step snapshot using an explicitly supplied simulation session.
+
+    The caller is responsible for authorizing the run and constructing a
+    source-pinned session. An exclusive output directory records that an
+    attempt was claimed, including if the process terminates unexpectedly.
+    """
+    if _file_sha(urdf) != EXPECTED_URDF_SHA256:
+        raise ValueError("governed URDF digest changed")
+    output_directory.mkdir(parents=True, exist_ok=False)
+    claim = output_directory / "claim.json"
+    with claim.open("x", encoding="utf-8") as stream:
+        json.dump({"status": "CLAIMED", "automatic_retry": False}, stream)
+    try:
+        session.start_headless()
+        session.load_scene()
+        session.initialize_physics()
+        receipt = compare_stationary_session(session, urdf)
+        result = {"status": "PASS" if receipt["comparison"]["parity_pass"] else "FAIL_PARITY",
+                  "comparison_receipt": receipt, "automatic_retry": False,
+                  "physics_steps": session.physics_steps}
+    except Exception as exc:
+        result = {"status": "FAIL_DIAGNOSTIC", "failure_type": type(exc).__name__,
+                  "failure_message": str(exc), "automatic_retry": False}
+    finally:
+        try:
+            session.shutdown()
+        except Exception as exc:
+            result = {"status": "FAIL_SHUTDOWN", "failure_type": type(exc).__name__,
+                      "failure_message": str(exc), "automatic_retry": False}
+    with (output_directory / "result.json").open("x", encoding="utf-8", newline="\n") as stream:
+        json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
+        stream.write("\n")
+    return result
+
+
 def main() -> int:
     """Compare a saved snapshot only; no session is created by this command."""
     parser = argparse.ArgumentParser(description=__doc__)

@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "software/integrations/isaac_sim"))
 sys.path.insert(0, str(ROOT / "software/src"))
 from arm301_link_frame_parity import (build_snapshot_receipt, capture_and_compare,
-    capture_link_snapshot, compare_link_frames, compare_stationary_session)
+    capture_link_snapshot, compare_link_frames, compare_stationary_session, run_snapshot_diagnostic)
 from arm301_source_route_obb_audit import _OfflineArticulation
 from nominal_route_native_component_obb_binding import EXPECTED_DOF_NAMES, NATIVE_LINKS
 
@@ -156,3 +156,36 @@ def test_snapshot_cli_retains_failed_comparison_and_refuses_overwrite(tmp_path):
     second = subprocess.run(command, capture_output=True, text=True, check=False)
     assert second.returncode != 0
     assert output.read_bytes() == original
+
+
+def test_single_attempt_diagnostic_retains_result_and_refuses_retry(tmp_path):
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    class ReadOnlyArticulation(_OfflineArticulation):
+        def __init__(self):
+            super().__init__(urdf)
+            self.positions = [0.0] * 6
+        def get_dof_positions(self): return [self.positions]
+    class Session:
+        physics_steps = 0
+        def __init__(self, fail=False): self.calls, self.fail = [], fail
+        def start_headless(self):
+            self.calls.append("start")
+            if self.fail: raise RuntimeError("start failed")
+        def load_scene(self): self.calls.append("load")
+        def initialize_physics(self): self.calls.append("initialize")
+        def native_objects(self): return {"articulation": ReadOnlyArticulation()}
+        def shutdown(self): self.calls.append("shutdown")
+    session = Session()
+    target = tmp_path / "attempt"
+    result = run_snapshot_diagnostic(session, urdf, target)
+    assert result["status"] == "PASS"
+    assert session.calls == ["start", "load", "initialize", "shutdown"]
+    assert json.loads((target / "claim.json").read_text())["status"] == "CLAIMED"
+    assert json.loads((target / "result.json").read_text())["comparison_receipt"]["capture_provenance_verified"] is False
+    with pytest.raises(FileExistsError):
+        run_snapshot_diagnostic(session, urdf, target)
+    assert session.calls.count("start") == 1
+    failed = Session(fail=True)
+    result = run_snapshot_diagnostic(failed, urdf, tmp_path / "failure")
+    assert result["status"] == "FAIL_DIAGNOSTIC"
+    assert failed.calls == ["start", "shutdown"]
