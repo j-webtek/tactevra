@@ -98,6 +98,14 @@ Its locally constructed review record is a software-audit fixture, not an
 independent review or permission to run the Isaac worker. The audit does not
 check environment clearance or regenerated IK.
 
+For an exploratory 14-box whole-component candidate, add `--whole-components`
+to the command. This replaces link2's 16 surface bands with its two retained
+whole-component boxes and pins the original reduction receipt. The offline
+SPACE window again passed all 288 segments with a minimum residual of about
+16.453 mm. The candidate is not installed into the worker. Link1 and link5
+have non-watertight source meshes, so their physical solid envelopes and the
+mesh-to-robot alignment still require qualification.
+
 ## Acceptance sequence
 
 1. Unit-test SAT separation, point-motion reduction, recursive refinement,

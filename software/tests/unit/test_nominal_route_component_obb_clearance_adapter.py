@@ -361,6 +361,21 @@ def test_offline_audit_rejects_unpinned_route(tmp_path):
         module.audit(route)
 
 
+def test_whole_component_audit_rejects_changed_reduction(tmp_path, monkeypatch):
+    import json
+    pytest.importorskip("scipy")
+    route = tmp_path / "route.json"
+    route.write_text(json.dumps({"episode_id": "episode-ef340d0ad2740c118d87", "joint_targets": []}))
+    spec = importlib.util.spec_from_file_location("arm301_whole_audit_test", INTEGRATION / "arm301_source_route_obb_audit.py")
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    monkeypatch.setattr(module, "ROUTE_SHA256", module._file_sha(route))
+    monkeypatch.setattr(module, "REDUCTION_FILE_SHA256", "0" * 64)
+    with pytest.raises(ValueError, match="reduction file changed"):
+        module.audit(route, whole_components=True)
+
+
 def test_concrete_binding_uses_component_factory_without_starting_session(monkeypatch):
     import types
 
