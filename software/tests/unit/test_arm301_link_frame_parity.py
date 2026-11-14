@@ -190,6 +190,11 @@ def test_single_attempt_diagnostic_retains_result_and_refuses_retry(tmp_path):
     result = run_snapshot_diagnostic(failed, urdf, tmp_path / "failure")
     assert result["status"] == "FAIL_DIAGNOSTIC"
     assert failed.calls == ["start", "shutdown"]
+    class ShutdownFailure(Session):
+        def shutdown(self): raise RuntimeError("shutdown failed")
+    result = run_snapshot_diagnostic(ShutdownFailure(fail=True), urdf, tmp_path / "shutdown-failure")
+    assert result["status"] == "FAIL_SHUTDOWN"
+    assert result["prior_result"]["status"] == "FAIL_DIAGNOSTIC"
 
 
 def test_pinned_diagnostic_wires_inputs_and_retains_source_hashes(tmp_path, monkeypatch):
@@ -218,6 +223,13 @@ def test_pinned_diagnostic_wires_inputs_and_retains_source_hashes(tmp_path, monk
     assert result["status"] == "PASS"
     assert result["source_files_sha256"]["robot_usd"] == hashlib.sha256(paths[0].read_bytes()).hexdigest()
     assert result["comparison_receipt"]["capture_provenance_verified"] is False
+    unsigned = dict(result)
+    claimed = unsigned.pop("result_sha256")
+    assert claimed == hashlib.sha256(json.dumps(unsigned, sort_keys=True, separators=(",", ":"),
+        allow_nan=False).encode()).hexdigest()
+    unsigned["source_files_sha256"]["robot_usd"] = "0" * 64
+    assert claimed != hashlib.sha256(json.dumps(unsigned, sort_keys=True, separators=(",", ":"),
+        allow_nan=False).encode()).hexdigest()
 
 
 def test_diagnostic_cli_rejects_missing_inputs_before_launch(tmp_path):

@@ -178,6 +178,7 @@ def run_snapshot_diagnostic(session: object, urdf: Path, output_directory: Path,
     claim = output_directory / "claim.json"
     with claim.open("x", encoding="utf-8") as stream:
         json.dump({"status": "CLAIMED", "automatic_retry": False}, stream)
+    result = None
     try:
         session.start_headless()
         session.load_scene()
@@ -194,8 +195,12 @@ def run_snapshot_diagnostic(session: object, urdf: Path, output_directory: Path,
             session.shutdown()
         except Exception as exc:
             result = {"status": "FAIL_SHUTDOWN", "failure_type": type(exc).__name__,
-                      "failure_message": str(exc), "automatic_retry": False}
+                      "failure_message": str(exc), "automatic_retry": False,
+                      "prior_result": result}
     result["source_files_sha256"] = dict(source_files or {})
+    result["result_sha256"] = hashlib.sha256(json.dumps(
+        result, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()).hexdigest()
     with (output_directory / "result.json").open("x", encoding="utf-8", newline="\n") as stream:
         json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
         stream.write("\n")
