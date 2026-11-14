@@ -211,6 +211,11 @@ self-declared flag or the offline audit fixture is not sufficient.
 
 ## Acceptance sequence
 
+The repository's offline CI selection includes the component clearance,
+native binding, composed adapter, and link-frame parity test files. SciPy is a
+test dependency so the parity and offline geometry checks run in that suite
+rather than silently skipping for a missing package.
+
 1. Unit-test SAT separation, point-motion reduction, recursive refinement,
    fail-closed exhaustion, source pinning, and the public-transform binding.
 2. Independently review the component profile builder and native binding.
