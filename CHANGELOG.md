@@ -13,6 +13,10 @@ as described in the [versioning policy](docs/VERSIONING.md).
 
 ### Added
 
+- Added an inert ARM-299 recovery-lineage plan and independent reviewer that
+  bind the retained ARM-298 adapter failure, merged articulation correction,
+  qualified Isaac interpreter, eight runtime sources, and fresh absent future
+  outputs without claiming or launching another simulation attempt.
 - Added a production-solver ARM-298 continuity qualification and independent
   reproduction over the complete 287-row governed SPACE-route window.
 - Added an independently reviewed ARM-298 route-physics lineage plan binding

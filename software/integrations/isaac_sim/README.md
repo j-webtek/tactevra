@@ -4544,3 +4544,21 @@ before one deferred backend construction and one claimant delegation.
 single delegation, no retry loop, no direct worker call, and absence of a
 hardware transport surface. Its retained acceptance invokes nothing and does
 not itself authorize an attempt.
+
+### ARM-299 recovery lineage after the retained ARM-298 adapter failure
+
+The single ARM-298 attempt is terminal and immutable. Its preflights passed,
+but execution stopped because `IsaacArticulationLinkView` did not expose the
+native articulation's valid `set_dof_positions` method. The corrected wrapper
+is merged and regression-tested; that correction does not revive ARM-298.
+
+`nominal_route_arm299_lineage_plan.py` binds the exact retained failure, merged
+correction commit, corrected wrapper and seven related runtime sources,
+qualified Isaac interpreter, and fresh absent attempt/EULA/memory outputs.
+`nominal_route_arm299_lineage_plan_review.py` independently reopens those
+inputs, revalidates source and interpreter identity, verifies output freshness,
+and statically rejects simulator, motion, transport, and hardware surfaces in
+the builder. Both modules are import-inert and grant zero attempt authority.
+The next permitted stage is construction and independent review of a
+single-use ARM-299 claimant; a simulation remains separately authorized and
+must never reuse the consumed ARM-298 statement.
