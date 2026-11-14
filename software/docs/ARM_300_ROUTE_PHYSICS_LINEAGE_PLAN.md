@@ -90,8 +90,33 @@ direct-motion, transport, and hardware surfaces. Constructing and reviewing
 these documents collected no live gate, observed no authorization, and invoked
 no backend or worker.
 
-The next permitted stage is a reproducible launch binding and independent
-review. The claimant review does not itself admit a launch or satisfy the
+## Reproducible launch binding
+
+The import-inert launch binding and independent review are now retained:
+
+- Binding:
+  `C:\IsaacSim\artifacts\issue190\arm300-route-physics-launch-binding-001\binding.json`
+- Binding document hash:
+  `192c7f01e859ce5cd18ac03d6931a62813f1eafd466bfdeae5a954e9f91fa348`
+- Binding file hash:
+  `f158df214caf281f2a86dd90ebbf1bf46d910853ed31f65ffa96fa331f7ad427`
+- Independent review:
+  `C:\IsaacSim\artifacts\issue190\arm300-route-physics-launch-binding-review-001\review.json`
+- Review document hash:
+  `b09cba9b42a161bdd072429090811db8ec0bd5d16b2b5d22a2780d445ecf8c1a`
+- Review file hash:
+  `4d13c0b923145b5fccc35f5ed50e74b8fe18126c4178c0aa85eb9be6a5871b48`
+
+The binding pins merged claimant commit
+`59f68b4406965c6cd0779d8ff45d80d99f5904c5`, the exact claimant and review
+files, qualified interpreter, all eight runtime sources, gate order, and
+terminalization requirements. Independent review reopens those inputs and
+statically proves the builder has no simulator, motion, or transport execution
+path. It reports `ACCEPTED_FOR_ARM300_LAUNCHER_IMPLEMENTATION` while retaining
+zero authority and `launch_admitted: false`.
+
+The next permitted stage is implementing and independently reviewing the
+executable launcher. The binding review does not admit a launch or satisfy the
 future authorization statement.
 
 ## Future authorization text

@@ -192,6 +192,16 @@ hash-bound JSON evidence; no simulator asset, live gate, attempt output,
 trajectory, camera frame, controller transcript, or authority-bearing artifact
 is tracked. All byte, duplicate-byte, and reduction limits remain unchanged.
 
+The ARM-300 launch-binding increment adds three governed Python paths: an
+import-inert reproducible binding builder, its independent static/evidence
+reviewer, and focused fail-closed tests. The reviewed tracked-file ceiling
+moves from 6,907 to the exact expected 6,910 files. The binding pins the merged
+claimant commit, claimant/review bytes, qualified Isaac interpreter, eight
+runtime sources, fresh-gate order, and terminalization policy. Retained binding
+and review JSON remain external; no simulator import, live gate, attempt claim,
+physics step, trajectory, hardware authority, or physical authority is added.
+All byte, duplicate-byte, and reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

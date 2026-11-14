@@ -1666,6 +1666,14 @@ ScheduleGen. Neither is a physical success rate.
      retention, single-use consumption, then one worker call. The accepted
      evidence invokes nothing and grants no hardware or physical authority; a
      reproducible launch binding and executable-launch review remain required.
+118. **ARM-300 reproducible launch binding and review:** the binding pins the
+     merged claimant commit, exact claimant/review files, qualified Isaac
+     interpreter, eight unchanged runtime sources, EULA-then-memory receipt
+     order, one deferred claimant delegation, and terminalization-before-
+     shutdown policy. Independent review reopens all bytes and statically
+     rejects simulator, motion, and transport execution. The retained evidence
+     grants zero authority and admits no launch; implementing and independently
+     reviewing the executable launcher remains required before any attempt.
 
 ## Completion criterion
 
