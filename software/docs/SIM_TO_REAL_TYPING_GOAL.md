@@ -293,6 +293,25 @@ work invoked no claimant, simulator, physics, target, contact, hardware, or
 physical authority. A fresh exact ARM-298 authorization is still required for
 the first corrected route-physics attempt.
 
+That single ARM-298 authorization was subsequently consumed exactly once. Its
+fresh EULA and memory preflights passed, but the governed native session
+stopped before physics execution because the repository wrapper did not expose
+the underlying articulation's valid `set_dof_positions` method. The retained
+status is `FAILED_RETAINED_NO_RETRY`; it is not typing success and cannot be
+retried or reclassified. The wrapper now delegates that call to the native
+Isaac articulation, with focused regression coverage merged in commit
+`f84c69dc`.
+
+The next increment is ARM-299. Its import-inert lineage builder and independent
+review bind the exact ARM-298 terminal status, merged wrapper correction,
+qualified Isaac interpreter, eight runtime sources, and three distinct absent
+future outputs. This stage intentionally does not construct a claimant,
+observe authorization, import Isaac, step physics, submit a joint position or
+target, or consume an attempt. After the lineage is independently retained,
+the remaining order is claimant construction and review, reproducible launch
+binding and review, executable-launch review, then a new exact one-attempt
+ARM-299 authorization. No ARM-299 simulation is authorized by this plan.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.

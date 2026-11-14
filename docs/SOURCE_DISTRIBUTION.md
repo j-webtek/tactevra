@@ -1737,3 +1737,14 @@ store and are represented only by hashes. No simulator asset, trajectory
 corpus, camera frame, controller transcript, attempt authority, or hardware
 authority is added; all byte, duplicate-byte, and reduction limits remain
 unchanged.
+
+ARM-299 adds an inert recovery-lineage builder, its independent static and
+evidence reviewer, and focused fail-closed tests, advancing the reviewed
+tracked-file ceiling from 6,888 to 6,891. The lineage binds the retained
+single-use ARM-298 failure, merged articulation-adapter correction, qualified
+Isaac interpreter, eight runtime sources, and three fresh absent future output
+locations. It does not construct a claimant, observe authorization, import or
+start Isaac, step physics, submit positions or targets, play a trajectory, or
+grant hardware or physical authority. No simulator asset, generated evidence,
+camera frame, or trajectory corpus is tracked, and all byte, duplicate-byte,
+and reduction limits remain unchanged.
