@@ -172,6 +172,7 @@ def build_definition(
         or claimed != _sha(unsigned)
         or partition_file_sha256 != EXPECTED_PARTITION_FILE_SHA256
         or urdf_file_sha256 != EXPECTED_URDF_SHA256
+        or hashlib.sha256(urdf_text.encode("utf-8")).hexdigest() != urdf_file_sha256
         or partition.get("schema") != "tactevra.isaac_sim_triangle_partition_refinement.v1"
         or partition.get("target_metrics", {}).get("maximum_vertex_overflow_mm") != 0.0
         or partition.get("summary", {}).get("candidate_primitive_count") != 29
@@ -320,6 +321,9 @@ class NativeComponentObbRuntime:
             or binding_review.get("status") != "ACCEPTED_FOR_COMPONENT_OBB_RUNTIME_INTEGRATION"
             or binding_review.get("source_binding_sha256") != binding_hash
             or binding_review.get("runtime_instantiation_admitted") is not True
+            or binding_review.get("launch_admitted") is not False
+            or binding_review.get("hardware_access") is not False
+            or binding_review.get("physical_authority") is not False
             or review_hash != _sha(unsigned_review)
             or tuple(getattr(articulation, "dof_names", ())) != EXPECTED_DOF_NAMES
             or not set(NATIVE_LINKS).issubset(tuple(getattr(articulation, "link_names", ())))
