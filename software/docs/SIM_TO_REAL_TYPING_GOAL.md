@@ -324,6 +324,16 @@ Isaac, step physics, submit positions or targets, contact a key, or grant
 hardware or physical authority. A reproducible launch binding and executable
 launch review remain required before requesting ARM-299 simulation authority.
 
+The reproducible ARM-299 launch binding and its independent reviewer are now
+implemented. They pin the retained claimant/review bytes, qualified Isaac
+interpreter, merged claimant commit, all eight runtime sources, fresh-gate
+order, single delegation, and terminal-status-before-shutdown policy. Static
+review proves the binding is builder-only and contains no simulator, motion,
+or transport execution path. This stage still observes no authorization,
+collects no live gate, claims no attempt, and starts no simulator. The next
+guarded increment is the executable ARM-299 launcher and independent review;
+only after that chain is retained should a fresh exact authorization be used.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.

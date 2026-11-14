@@ -1759,3 +1759,13 @@ worker delegation. Tests include synthetic compatibility with the actual
 fail-closed worker but do not import or start Isaac. No attempt, simulator,
 trajectory, camera frame, hardware authority, or physical authority is added;
 all byte, duplicate-byte, and reduction limits remain unchanged.
+
+ARM-299 then adds the reproducible launch-binding builder, its independent
+static/evidence reviewer, and focused fail-closed tests, advancing the reviewed
+tracked-file ceiling from 6,894 to 6,897. The binding pins the merged claimant
+and review bytes, qualified Isaac interpreter, merged repository commit, all
+eight runtime sources, fresh-gate order, and terminalization policy. Neither
+module observes authorization, imports or starts Isaac, claims an attempt,
+steps physics, submits positions or targets, plays a trajectory, or grants
+hardware or physical authority. No generated evidence or simulator asset is
+tracked; all byte, duplicate-byte, and reduction limits remain unchanged.

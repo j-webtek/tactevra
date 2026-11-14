@@ -4578,3 +4578,16 @@ backend, simulator, physics, trajectory, or hardware. The next permitted stage
 is an independently reviewed reproducible ARM-299 launch binding, followed by
 an executable-launch review; only then may a fresh exact ARM-299 one-attempt
 authorization be requested.
+
+`nominal_route_arm299_launch_binding.py` now builds the reproducible inert
+launch envelope. It pins merged claimant commit `833973e6`, exact claimant and
+review bytes, the qualified Isaac interpreter, all eight runtime sources,
+fresh EULA-then-memory receipt order, one deferred claimant delegation, and
+terminal status before shutdown. The builder does not observe authorization,
+collect gates, invoke the claimant, or import Isaac.
+
+`nominal_route_arm299_launch_binding_review.py` independently reopens those
+bytes and identities and statically rejects simulator, motion, and transport
+imports or calls. Its acceptance remains zero-authority and only admits the
+next implementation stage: an executable ARM-299 launcher plus independent
+review. No ARM-299 attempt is authorized or consumed by either module.
