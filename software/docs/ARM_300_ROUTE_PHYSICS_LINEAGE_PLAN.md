@@ -68,6 +68,32 @@ single-use claimant. A simulation attempt remains forbidden until the claimant,
 launch binding, executable launcher, and their independent reviews are complete
 and the user supplies a separate exact ARM-300 authorization.
 
+## Single-use claimant
+
+The inert claimant and independent review are now retained:
+
+- Claimant:
+  `C:\IsaacSim\artifacts\issue190\arm300-route-physics-claimant-001\claimant.json`
+- Claimant hash:
+  `87019fe885f21283c7f0ac28eea56c8865fdb09b75350dace4638b38fc9db462`
+- Independent review:
+  `C:\IsaacSim\artifacts\issue190\arm300-route-physics-claimant-review-001\review.json`
+- Review hash:
+  `b437a8d7e9a577c78379348fce430579315908a48157e1e571b0c0e6166b48f0`
+
+The claimant binds the accepted lineage, retained fail-closed worker, exact
+runtime sources, and fresh absent EULA/memory receipts. Its future callable is
+single use and orders exact authorization, source revalidation, EULA, memory,
+exclusive receipt retention, attempt consumption, and one worker delegation.
+The independent AST/evidence review verifies this order and rejects simulator,
+direct-motion, transport, and hardware surfaces. Constructing and reviewing
+these documents collected no live gate, observed no authorization, and invoked
+no backend or worker.
+
+The next permitted stage is a reproducible launch binding and independent
+review. The claimant review does not itself admit a launch or satisfy the
+future authorization statement.
+
 ## Future authorization text
 
 The retained plan records, but does not satisfy, this future statement:

@@ -184,6 +184,14 @@ gate, attempt output, trajectory, camera frame, controller transcript, or
 authority-bearing artifact is tracked. All byte, duplicate-byte, and reduction
 limits remain unchanged.
 
+The ARM-300 claimant increment adds three governed Python paths: a single-use
+fresh-gate claimant, its independent static/evidence reviewer, and focused
+fail-closed tests. The reviewed tracked-file ceiling moves from 6,904 to the
+exact expected 6,907 files. The retained claimant and review remain external
+hash-bound JSON evidence; no simulator asset, live gate, attempt output,
+trajectory, camera frame, controller transcript, or authority-bearing artifact
+is tracked. All byte, duplicate-byte, and reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed
