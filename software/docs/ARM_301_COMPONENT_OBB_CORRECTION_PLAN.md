@@ -153,6 +153,17 @@ it does not inspect live link poses, dynamics, or the physical robot.
 python software/integrations/isaac_sim/arm301_usd_joint_frame_audit.py --usd <pinned-imported-usd> --output <new-receipt.json>
 ```
 
+For a previously captured snapshot, the offline comparator can retain a new
+receipt:
+
+```text
+python software/integrations/isaac_sim/arm301_link_frame_parity.py --snapshot <snapshot.json> --output <new-receipt.json>
+```
+
+The command starts no Isaac session, refuses an existing output, and returns
+exit code 2 for a valid snapshot whose link comparison fails. Snapshot provenance
+is not verified.
+
 The retained `roarm_m3_fk_parity_20260929.json` binds the same governed USD
 and reports passing zero, home, and ready poses. Its Isaac probe reads the
 native link5 transform and combines it with the imported hand TCP transform;

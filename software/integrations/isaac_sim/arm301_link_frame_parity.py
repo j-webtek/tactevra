@@ -6,14 +6,20 @@ qualify base-to-workcell placement.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import math
 from pathlib import Path
+import sys
 from typing import Sequence
 
 import numpy as np
 from scipy.spatial.transform import Rotation
+
+ROOT = Path(__file__).resolve().parents[3]
+if str(ROOT / "software/src") not in sys.path:
+    sys.path.insert(0, str(ROOT / "software/src"))
 
 from nominal_route_native_component_obb_binding import EXPECTED_DOF_NAMES, NATIVE_LINKS, _file_sha, EXPECTED_URDF_SHA256
 from rocell.geometry.urdf import JointPosition, UrdfModel
@@ -156,3 +162,27 @@ def compare_stationary_session(session: object, urdf: Path) -> dict:
     if session.physics_steps != before_steps:
         raise ValueError("session advanced during snapshot")
     return build_snapshot_receipt(urdf, snapshot)
+
+
+def main() -> int:
+    """Compare a saved snapshot only; no session is created by this command."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--snapshot", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    snapshot = json.loads(args.snapshot.read_bytes())
+    if not isinstance(snapshot, dict):
+        raise ValueError("snapshot must be an object")
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    receipt = build_snapshot_receipt(urdf, snapshot)
+    with args.output.open("x", encoding="utf-8", newline="\n") as stream:
+        json.dump(receipt, stream, indent=2, sort_keys=True, allow_nan=False)
+        stream.write("\n")
+    print(json.dumps({"parity_pass": receipt["comparison"]["parity_pass"],
+                      "receipt_sha256": receipt["receipt_sha256"],
+                      "capture_provenance_verified": False}))
+    return 0 if receipt["comparison"]["parity_pass"] else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

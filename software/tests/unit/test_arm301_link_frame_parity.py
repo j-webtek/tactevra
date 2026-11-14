@@ -1,4 +1,6 @@
 from pathlib import Path
+import json
+import subprocess
 import sys
 
 import pytest
@@ -129,3 +131,28 @@ def test_stationary_session_comparison_never_starts_or_steps():
     session.native_objects = lambda: {"articulation": AdvancingArticulation()}
     with pytest.raises(ValueError, match="advanced during snapshot"):
         compare_stationary_session(session, urdf)
+
+
+def test_snapshot_cli_retains_failed_comparison_and_refuses_overwrite(tmp_path):
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    class ReadOnlyArticulation(_OfflineArticulation):
+        def __init__(self):
+            super().__init__(urdf)
+            self.positions = [0.0] * 6
+        def get_dof_positions(self):
+            return [self.positions]
+    snapshot = capture_link_snapshot(ReadOnlyArticulation())
+    snapshot["native_transforms"][3][0] += 0.001
+    source, output = tmp_path / "snapshot.json", tmp_path / "receipt.json"
+    source.write_text(json.dumps(snapshot), encoding="utf-8")
+    command = [sys.executable, str(ROOT / "software/integrations/isaac_sim/arm301_link_frame_parity.py"),
+               "--snapshot", str(source), "--output", str(output)]
+    first = subprocess.run(command, capture_output=True, text=True, check=False)
+    assert first.returncode == 2, first.stderr
+    original = output.read_bytes()
+    receipt = json.loads(original)
+    assert receipt["comparison"]["parity_pass"] is False
+    assert receipt["capture_provenance_verified"] is False
+    second = subprocess.run(command, capture_output=True, text=True, check=False)
+    assert second.returncode != 0
+    assert output.read_bytes() == original
