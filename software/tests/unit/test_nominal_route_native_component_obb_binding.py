@@ -188,3 +188,59 @@ def test_native_runtime_rejects_unreviewed_instantiation():
             binding_review=review,
             articulation=_Articulation(module),
         )
+
+
+def test_component_point_bounds_cover_interpolated_urdf_motion():
+    import itertools
+    import math
+    import random
+
+    pytest.importorskip("scipy")
+    sys.path.insert(0, str(ROOT / "software/src"))
+    from rocell.geometry.urdf import JointPosition, UrdfModel
+
+    audit_path = INTEGRATION / "arm301_source_route_obb_audit.py"
+    spec = importlib.util.spec_from_file_location("component_bound_fk_fixture", audit_path)
+    assert spec is not None and spec.loader is not None
+    audit = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(audit)
+    module = _module()
+    definition = _definition(module)
+    runtime = module.NativeComponentObbRuntime(
+        definition, binding_review=_review(module, definition),
+        articulation=audit._OfflineArticulation(URDF_PATH),
+    )
+    model = UrdfModel.from_file(URDF_PATH)
+    rng = random.Random(301)
+
+    def point(transform, component, signs):
+        local_rotation = component["local_rotation_row_major"]
+        extents = component["half_extents_mm"]
+        local = [component["local_center_mm"][i] + sum(
+            local_rotation[i * 3 + j] * extents[j] * signs[j] for j in range(3)
+        ) for i in range(3)]
+        rotation = transform.rotation.matrix
+        translation = transform.translation_mm
+        return [getattr(translation, axis) + sum(
+            rotation[i * 3 + j] * local[j] for j in range(3)
+        ) for i, axis in enumerate(("x", "y", "z"))]
+
+    for _ in range(8):
+        start = [rng.uniform(-0.4, 0.4) for _ in range(5)] + [rng.uniform(0.3, 1.2)]
+        end = [value + rng.uniform(-0.2, 0.2) for value in start]
+        bounds = runtime.bound_link_obbs(start_joint_targets_rad=start, end_joint_targets_rad=end)
+        transforms = []
+        for fraction in (0.0, 0.25, 0.5, 0.75, 1.0):
+            positions = [a + fraction * (b - a) for a, b in zip(start, end)]
+            transforms.append(model.forward_kinematics({
+                name: JointPosition.radians(value)
+                for name, value in zip(module.EXPECTED_DOF_NAMES, positions)
+            }))
+        for component, bound in zip(definition["component_obbs"], bounds):
+            name = component["native_link_name"]
+            for signs in itertools.product((-1, 1), repeat=3):
+                origin = point(transforms[0][name], component, signs)
+                for current in transforms[1:]:
+                    target = point(current[name], component, signs)
+                    distance = math.dist(origin, target)
+                    assert distance <= bound.max_point_path_deviation_mm + 1e-7
