@@ -168,6 +168,13 @@ tests. The reviewed tracked-file ceiling moves from 6,885 to the exact expected
 trajectory, hardware, or physical authority. All byte, duplicate-byte, and
 reduction limits remain unchanged.
 
+The ARM-299 executable-launcher increment likewise adds three governed Python
+paths: an import-inert launcher, independent static reviewer, and focused
+fail-closed tests. The reviewed tracked-file ceiling moves from 6,897 to the
+exact expected 6,900 files. No attempt output, live gate, simulator asset,
+trajectory, camera frame, controller transcript, or authority-bearing artifact
+is tracked; all byte, duplicate-byte, and reduction limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed
