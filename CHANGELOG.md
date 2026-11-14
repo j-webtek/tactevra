@@ -17,6 +17,9 @@ as described in the [versioning policy](docs/VERSIONING.md).
   bind the retained ARM-298 adapter failure, merged articulation correction,
   qualified Isaac interpreter, eight runtime sources, and fresh absent future
   outputs without claiming or launching another simulation attempt.
+- Added the independently reviewed single-use ARM-299 claimant that enforces
+  exact authorization, unchanged sources, fresh EULA and memory receipts, one
+  fail-closed worker delegation, and no automatic retry without invoking it.
 - Added a production-solver ARM-298 continuity qualification and independent
   reproduction over the complete 287-row governed SPACE-route window.
 - Added an independently reviewed ARM-298 route-physics lineage plan binding
