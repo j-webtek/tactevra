@@ -70,6 +70,29 @@ class _OfflineArticulation:
         return [result]
 
 
+def _verify_whole_component_inventory(definition: dict, reduction: dict) -> None:
+    """Ensure every offline box is exactly the pinned whole-component box."""
+    expected = {}
+    for row in reduction["links"]:
+        for component in row["components"]:
+            box = component["candidate_primitive"]
+            if box.get("kind") != "oriented_box" or component["maximum_vertex_overflow_mm"] != 0.0:
+                raise ValueError("whole-component box containment changed")
+            key = (row["link_name"], component["component_index"])
+            if key in expected:
+                raise ValueError("duplicate whole-component box")
+            expected[key] = (box["center_mm"], box["rotation_row_major"], box["half_extents_mm"])
+    actual = {}
+    for component in definition["component_obbs"]:
+        key = (component["native_link_name"], int(component["primitive_name"].rsplit(":", 1)[1]))
+        if key in actual:
+            raise ValueError("duplicate candidate box")
+        actual[key] = (component["local_center_mm"], component["local_rotation_row_major"],
+                       component["half_extents_mm"])
+    if len(expected) != 14 or actual != expected:
+        raise ValueError("whole-component box inventory differs from reduction")
+
+
 def audit(route: Path, *, whole_components: bool = False) -> dict:
     integration = Path(__file__).resolve().parent
     urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
@@ -115,6 +138,7 @@ def audit(route: Path, *, whole_components: bool = False) -> dict:
         definition["component_obbs"] = [
             part for part in definition["component_obbs"] if part["native_link_name"] != "link2"
         ] + replacement
+        _verify_whole_component_inventory(definition, candidate)
         definition["offline_whole_component_candidate"] = True
         definition.pop("binding_sha256")
         definition["binding_sha256"] = _sha(definition)

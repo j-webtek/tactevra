@@ -376,6 +376,31 @@ def test_whole_component_audit_rejects_changed_reduction(tmp_path, monkeypatch):
         module.audit(route, whole_components=True)
 
 
+def test_whole_component_inventory_rejects_missing_or_altered_box():
+    import copy
+    pytest.importorskip("scipy")
+    spec = importlib.util.spec_from_file_location("arm301_inventory_test", INTEGRATION / "arm301_source_route_obb_audit.py")
+    assert spec is not None and spec.loader is not None
+    audit = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(audit)
+    box = {"kind": "oriented_box", "center_mm": [0, 0, 0],
+           "rotation_row_major": [1, 0, 0, 0, 1, 0, 0, 0, 1], "half_extents_mm": [1, 1, 1]}
+    reduction = {"links": [{"link_name": "link", "components": [
+        {"candidate_primitive": box, "component_index": i, "maximum_vertex_overflow_mm": 0.0}
+        for i in range(14)]}]}
+    definition = {"component_obbs": [
+        {"native_link_name": "link", "primitive_name": f"robot:link:{i}",
+         "local_center_mm": [0, 0, 0], "local_rotation_row_major": box["rotation_row_major"],
+         "half_extents_mm": [1, 1, 1]} for i in range(14)]}
+    audit._verify_whole_component_inventory(definition, reduction)
+    changed = copy.deepcopy(definition)
+    changed["component_obbs"][0]["half_extents_mm"][0] = 0.5
+    with pytest.raises(ValueError, match="inventory differs"):
+        audit._verify_whole_component_inventory(changed, reduction)
+    with pytest.raises(ValueError, match="inventory differs"):
+        audit._verify_whole_component_inventory({"component_obbs": definition["component_obbs"][:-1]}, reduction)
+
+
 def test_concrete_binding_uses_component_factory_without_starting_session(monkeypatch):
     import types
 
