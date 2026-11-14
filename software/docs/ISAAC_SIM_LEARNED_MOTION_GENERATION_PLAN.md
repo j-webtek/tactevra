@@ -1674,6 +1674,14 @@ ScheduleGen. Neither is a physical success rate.
      rejects simulator, motion, and transport execution. The retained evidence
      grants zero authority and admits no launch; implementing and independently
      reviewing the executable launcher remains required before any attempt.
+119. **ARM-300 executable launcher and review:** the launcher is import-inert
+     and revalidates exact authorization, binding ancestry, retained claimant
+     and binding evidence, qualified interpreter, eight runtime sources,
+     governed-output freshness, and its own independent review before one
+     deferred backend construction and one claimant call. Independent AST
+     review proves a single claimant delegation and rejects retry-capable
+     loops. The retained review observes no authorization and performs no
+     simulation; a separate fresh exact ARM-300 authorization remains required.
 
 ## Completion criterion
 

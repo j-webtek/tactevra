@@ -4652,3 +4652,15 @@ retained review reports `ACCEPTED_FOR_ARM300_LAUNCHER_IMPLEMENTATION` with no
 authorization observed, no attempt claimed, no Isaac start, zero physics
 steps, and `launch_admitted: false`. The next stage is executable launcher
 implementation and independent review, not an attempt.
+
+`nominal_route_arm300_launch.py` now supplies that import-inert executable
+boundary. It revalidates the exact authorization, reviewed binding and launcher
+review, qualified interpreter, binding-commit ancestry, claimant/review bytes,
+all eight runtime sources, and governed output freshness before constructing
+one deferred backend and calling `Arm300Claimant` once.
+`nominal_route_arm300_launch_review.py` independently checks the source and
+ancestry, proves a single claimant call, and rejects retry-capable loops. The
+retained review reports `ACCEPTED_FOR_EXACT_ARM300_ONE_ATTEMPT_AUTHORIZATION`
+but `launch_admitted: false`; it observes no authorization, imports no launcher,
+collects no live gate, claims no attempt, and starts no simulator. A future run
+requires the exact fresh ARM-300 authorization shown in the lineage plan.
