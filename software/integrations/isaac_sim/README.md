@@ -4640,5 +4640,15 @@ fresh absent EULA and memory receipts, and all eight runtime source hashes.
 authorization and source revalidation precede both gates, both retained
 receipts precede one-use consumption, and exactly one worker delegation may
 follow. Definition construction and review start no simulator and grant no
-hardware or physical authority. The next stage is a reproducible launch
-binding plus independent review, not an attempt.
+hardware or physical authority.
+
+`nominal_route_arm300_launch_binding.py` now pins merged claimant commit
+`59f68b44`, exact claimant/review files, the qualified Isaac interpreter, all
+eight runtime sources, fresh EULA-then-memory receipt order, one claimant
+delegation, and terminalization-before-shutdown policy.
+`nominal_route_arm300_launch_binding_review.py` independently reopens those
+inputs and statically rejects simulator, motion, and transport execution. The
+retained review reports `ACCEPTED_FOR_ARM300_LAUNCHER_IMPLEMENTATION` with no
+authorization observed, no attempt claimed, no Isaac start, zero physics
+steps, and `launch_admitted: false`. The next stage is executable launcher
+implementation and independent review, not an attempt.
