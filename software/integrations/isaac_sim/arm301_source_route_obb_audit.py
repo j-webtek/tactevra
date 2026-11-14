@@ -122,9 +122,10 @@ def audit(route: Path) -> dict:
         "clearance_margin_mm": 0.5, "python_version": sys.version.split()[0],
         "scipy_version": scipy.__version__, "isaac_started": False,
         "hardware_access": False, "physical_authority": False,
-        "scope": "SOURCE_ROUTE_SELF_CLEARANCE_ONLY",
+        "scope": "SOURCE_ROUTE_MESH_SURFACE_SELF_CLEARANCE_ONLY",
         "limitations": ["offline URDF FK", "not regenerated IK", "no environment proof",
-                        "no Isaac validation", "local review is not independent"],
+                        "no Isaac validation", "local review is not independent",
+                        "surface containment does not establish solid non-nesting"],
     }, "receipt_sha256")
 
 

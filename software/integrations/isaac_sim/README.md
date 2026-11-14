@@ -530,8 +530,10 @@ The later ARM-300 route attempt confirmed why pair exclusions must remain
 separate from geometric fidelity: its whole-link sphere model stopped on the
 otherwise-free `base_link/link2` pair. The successor
 [`nominal_route_component_obb_clearance.py`](nominal_route_component_obb_clearance.py)
-implements an Isaac-import-free continuous proof over the retained
-mesh-containing component OBBs. Its native public-transform binding is in
+implements an Isaac-import-free continuous surface-separation proof over the
+retained triangle-containing component OBBs. These boxes do not by themselves
+establish that one closed solid is not nested inside another; solid semantics
+and initial non-nesting still require qualification. Its native public-transform binding is in
 [`nominal_route_native_component_obb_binding.py`](nominal_route_native_component_obb_binding.py).
 The binding promotes vertex containment only; it does not promote the finite
 replay or SRDF `Never` pairs. See the

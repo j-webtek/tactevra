@@ -46,8 +46,15 @@ For each adjacent joint interval:
    fails closed.
 
 Because each box contains its assigned source triangles, separating the boxes
-separates the source meshes. Because the motion bound covers every point for
-the complete interval, this is continuous rather than sampled clearance.
+separates those source mesh surfaces. Because the motion bound covers every
+point for the complete interval, this separation is continuous rather than
+sampled clearance. Surface separation alone does not rule out one closed solid
+being wholly inside another: the partition has non-watertight bands and does
+not establish solid-volume containment. Before this result can be treated as a
+solid collision proof, independently establish the applicable source meshes'
+solid semantics and initial non-nesting for every nonexcluded pair, or use a
+conservative representation proven to contain their full solids. Until then,
+the audit result is surface-clearance evidence, not a complete collision proof.
 
 The implementation is split into:
 
@@ -73,7 +80,7 @@ exclusions, 0.5 mm margin, and the same depth-12 fail-closed rule.
 - worst certified residual before the 0.5 mm acceptance threshold:
   approximately 16.453 mm.
 
-This establishes correction feasibility on the retained source route. It is
+This establishes surface-clearance feasibility on the retained source route. It is
 not an ARM-301 simulation result: the future backend regenerates canonical IK,
 so the same proof must run on those regenerated intervals inside the admitted
 runtime.
@@ -100,9 +107,11 @@ check environment clearance or regenerated IK.
    sweep; neither proof may suppress the other.
 4. Run an offline route audit and retain a canonical receipt bound to the exact
    route, profile, URDF, and implementation hashes.
-5. Independently review the composed runtime and an ARM-301 single-use launch
+5. Qualify closed-solid semantics and non-nesting for every checked pair, or
+   replace the surface envelope with a proven solid-containing envelope.
+6. Independently review the composed runtime and an ARM-301 single-use launch
    chain.
-6. Only then request a new, exact, one-attempt ARM-301 authorization.
+7. Only then request a new, exact, one-attempt ARM-301 authorization.
 
 Any failure remains fail-closed. ARM-300 stays immutable and no authorization
 from ARM-300 transfers to ARM-301.
