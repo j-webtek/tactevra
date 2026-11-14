@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import math
+import os
 from pathlib import Path
 import sys
 from typing import Sequence
@@ -192,18 +193,30 @@ def run_snapshot_diagnostic(session: object, urdf: Path, output_directory: Path,
                   "failure_message": str(exc), "automatic_retry": False}
     finally:
         try:
-            session.shutdown()
-        except Exception as exc:
-            result = {"status": "FAIL_SHUTDOWN", "failure_type": type(exc).__name__,
-                      "failure_message": str(exc), "automatic_retry": False,
-                      "prior_result": result}
-    result["source_files_sha256"] = dict(source_files or {})
-    result["result_sha256"] = hashlib.sha256(json.dumps(
-        result, sort_keys=True, separators=(",", ":"), allow_nan=False
-    ).encode()).hexdigest()
-    with (output_directory / "result.json").open("x", encoding="utf-8", newline="\n") as stream:
-        json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
-        stream.write("\n")
+            if result is not None:
+                result["source_files_sha256"] = dict(source_files or {})
+                result["shutdown_status"] = "NOT_YET_CONFIRMED"
+                result["result_sha256"] = hashlib.sha256(json.dumps(
+                    result, sort_keys=True, separators=(",", ":"), allow_nan=False
+                ).encode()).hexdigest()
+                with (output_directory / "result.json").open("x", encoding="utf-8", newline="\n") as stream:
+                    json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
+                    stream.write("\n")
+                    stream.flush()
+                    os.fsync(stream.fileno())
+        finally:
+            try:
+                session.shutdown()
+            except Exception as exc:
+                shutdown = {"status": "FAIL_SHUTDOWN", "failure_type": type(exc).__name__,
+                            "failure_message": str(exc)}
+            else:
+                shutdown = {"status": "SHUTDOWN_RETURNED"}
+            with (output_directory / "shutdown.json").open("x", encoding="utf-8", newline="\n") as stream:
+                json.dump(shutdown, stream, indent=2, sort_keys=True)
+                stream.write("\n")
+    if shutdown["status"] != "SHUTDOWN_RETURNED":
+        return {"status": "FAIL_SHUTDOWN", "prior_result": result, "shutdown": shutdown}
     return result
 
 

@@ -192,10 +192,21 @@ reported physics steps before and after the read, and never starts or steps the
 session. Its simulated tests cover a step occurring during capture. It does not
 itself authenticate the session or replace the future capture procedure.
 `run_snapshot_diagnostic` prepares the zero-step session lifecycle around that
-helper: it claims a fresh output directory, retains a result, attempts shutdown
-even after startup failure, and refuses reuse of the claimed directory. It is
-not a standalone authorization gate: the caller must provide an explicitly
-authorized run and a source-pinned session. Tests use a fake session only.
+helper: it claims a fresh output directory, writes and flushes the comparison
+before shutdown, records a returned or failed shutdown separately, and refuses
+reuse of the claimed directory. A result without `shutdown.json` leaves
+shutdown unconfirmed. It is not a standalone authorization gate: the caller
+must provide an explicitly authorized run and a source-pinned session. Tests use
+a fake session only.
+
+The authorized `arm301-link-frame-diagnostic-001` started Isaac once and left
+only `claim.json`; it produced no comparison or terminal result. The retained
+Kit log shows `SimulationApp.close` followed by application shutdown while the
+then-current runner wrote results only after shutdown. The log is consistent
+with shutdown terminating the process before that write, but does not expose
+the unrecorded comparison or establish its outcome. The output is consumed and
+must not be retried. The pre-shutdown write and abrupt-process-exit test address
+that loss mechanism offline; they do not establish a successful Isaac run.
 The `--run-diagnostic` mode constructs the existing Isaac driver, which
 validates its pinned robot USD, layout, route and mechanics profile, and passes
 their hashes and the diagnostic and driver source hashes into the result. The
