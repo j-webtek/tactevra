@@ -1657,6 +1657,15 @@ ScheduleGen. Neither is a physical success rate.
      simulator, motion, attempt, and transport surfaces, and retains zero
      authority. Acceptance permits only construction and independent review of
      an ARM-300 single-use claimant; it does not authorize or launch Isaac.
+117. **ARM-300 single-use claimant and review:** the claimant clones the
+     retained fail-closed worker for the new absent output, binds the accepted
+     lineage plus preflight, worker, runtime, and backend sources, and permits
+     at most one delegation only after exact authorization and two freshly
+     retained passing gates. Independent AST/evidence review proves the order
+     is authorization, source revalidation, EULA, memory, exclusive receipt
+     retention, single-use consumption, then one worker call. The accepted
+     evidence invokes nothing and grants no hardware or physical authority; a
+     reproducible launch binding and executable-launch review remain required.
 
 ## Completion criterion
 

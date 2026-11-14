@@ -4632,3 +4632,13 @@ output freshness, and statically rejects simulator, motion, attempt, transport,
 and hardware surfaces in the builder. The retained acceptance grants zero
 authority and permits only building and independently reviewing a single-use
 ARM-300 claimant. See `software/docs/ARM_300_ROUTE_PHYSICS_LINEAGE_PLAN.md`.
+
+`nominal_route_arm300_claimant.py` implements that single-use boundary. Its
+definition binds the accepted lineage/review, retained fail-closed worker,
+fresh absent EULA and memory receipts, and all eight runtime source hashes.
+`nominal_route_arm300_claimant_review.py` independently proves exact
+authorization and source revalidation precede both gates, both retained
+receipts precede one-use consumption, and exactly one worker delegation may
+follow. Definition construction and review start no simulator and grant no
+hardware or physical authority. The next stage is a reproducible launch
+binding plus independent review, not an attempt.
