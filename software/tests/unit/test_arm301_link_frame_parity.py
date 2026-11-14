@@ -11,7 +11,8 @@ ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "software/integrations/isaac_sim"))
 sys.path.insert(0, str(ROOT / "software/src"))
 from arm301_link_frame_parity import (build_snapshot_receipt, capture_and_compare,
-    capture_link_snapshot, compare_link_frames, compare_stationary_session, run_snapshot_diagnostic)
+    capture_link_snapshot, compare_link_frames, compare_stationary_session,
+    run_pinned_snapshot_diagnostic, run_snapshot_diagnostic)
 from arm301_source_route_obb_audit import _OfflineArticulation
 from nominal_route_native_component_obb_binding import EXPECTED_DOF_NAMES, NATIVE_LINKS
 
@@ -189,3 +190,40 @@ def test_single_attempt_diagnostic_retains_result_and_refuses_retry(tmp_path):
     result = run_snapshot_diagnostic(failed, urdf, tmp_path / "failure")
     assert result["status"] == "FAIL_DIAGNOSTIC"
     assert failed.calls == ["start", "shutdown"]
+
+
+def test_pinned_diagnostic_wires_inputs_and_retains_source_hashes(tmp_path, monkeypatch):
+    import hashlib
+    import nominal_route_native_session_smoke as session_module
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    paths = [tmp_path / name for name in ("robot", "layout", "route", "profile")]
+    for path in paths: path.write_text(path.name, encoding="utf-8")
+    class Articulation(_OfflineArticulation):
+        def __init__(self):
+            super().__init__(urdf)
+            self.positions = [0.0] * 6
+        def get_dof_positions(self): return [self.positions]
+    class FakeDriver:
+        physics_steps = 0
+        def __init__(self, robot, layout, route, mechanics_profile):
+            assert [robot, layout, route, mechanics_profile] == paths
+        def start_headless(self): pass
+        def load_scene(self): pass
+        def initialize_physics(self): pass
+        def native_objects(self): return {"articulation": Articulation()}
+        def shutdown(self): pass
+    monkeypatch.setattr(session_module, "IsaacInertSmokeDriver", FakeDriver)
+    result = run_pinned_snapshot_diagnostic(robot_usd=paths[0], layout=paths[1], route=paths[2],
+        mechanics_profile=paths[3], output_directory=tmp_path / "attempt")
+    assert result["status"] == "PASS"
+    assert result["source_files_sha256"]["robot_usd"] == hashlib.sha256(paths[0].read_bytes()).hexdigest()
+    assert result["comparison_receipt"]["capture_provenance_verified"] is False
+
+
+def test_diagnostic_cli_rejects_missing_inputs_before_launch(tmp_path):
+    command = [sys.executable, str(ROOT / "software/integrations/isaac_sim/arm301_link_frame_parity.py"),
+               "--run-diagnostic", "--output", str(tmp_path / "attempt")]
+    result = subprocess.run(command, capture_output=True, text=True, check=False)
+    assert result.returncode != 0
+    assert "requires robot USD" in result.stderr
+    assert not (tmp_path / "attempt").exists()

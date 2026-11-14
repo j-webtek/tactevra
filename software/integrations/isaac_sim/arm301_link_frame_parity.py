@@ -164,7 +164,8 @@ def compare_stationary_session(session: object, urdf: Path) -> dict:
     return build_snapshot_receipt(urdf, snapshot)
 
 
-def run_snapshot_diagnostic(session: object, urdf: Path, output_directory: Path) -> dict:
+def run_snapshot_diagnostic(session: object, urdf: Path, output_directory: Path,
+                            *, source_files: dict | None = None) -> dict:
     """Run one zero-step snapshot using an explicitly supplied simulation session.
 
     The caller is responsible for authorizing the run and constructing a
@@ -194,18 +195,53 @@ def run_snapshot_diagnostic(session: object, urdf: Path, output_directory: Path)
         except Exception as exc:
             result = {"status": "FAIL_SHUTDOWN", "failure_type": type(exc).__name__,
                       "failure_message": str(exc), "automatic_retry": False}
+    result["source_files_sha256"] = dict(source_files or {})
     with (output_directory / "result.json").open("x", encoding="utf-8", newline="\n") as stream:
         json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
         stream.write("\n")
     return result
 
 
+def run_pinned_snapshot_diagnostic(*, robot_usd: Path, layout: Path, route: Path,
+                                   mechanics_profile: Path, output_directory: Path) -> dict:
+    """Construct the existing asset-pinned Isaac driver and run one diagnostic.
+
+    Calling this function starts Isaac. The caller must independently authorize
+    the run and review the sources; no hardware or physical authority is added.
+    """
+    from nominal_route_native_session_smoke import IsaacInertSmokeDriver
+    integration = Path(__file__).resolve().parent
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    sources = {"robot_usd": _file_sha(robot_usd), "layout": _file_sha(layout),
+               "route": _file_sha(route), "mechanics_profile": _file_sha(mechanics_profile),
+               "urdf": _file_sha(urdf), "diagnostic": _file_sha(Path(__file__)),
+               "session_driver": _file_sha(integration / "nominal_route_native_session_smoke.py")}
+    session = IsaacInertSmokeDriver(robot_usd, layout, route, mechanics_profile=mechanics_profile)
+    return run_snapshot_diagnostic(session, urdf, output_directory, source_files=sources)
+
+
 def main() -> int:
-    """Compare a saved snapshot only; no session is created by this command."""
+    """Compare a saved snapshot or run one explicitly selected Isaac diagnostic."""
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--snapshot", type=Path, required=True)
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--snapshot", type=Path)
+    mode.add_argument("--run-diagnostic", action="store_true")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--robot-usd", type=Path)
+    parser.add_argument("--layout", type=Path)
+    parser.add_argument("--route", type=Path)
+    parser.add_argument("--mechanics-profile", type=Path)
     args = parser.parse_args()
+    paths = (args.robot_usd, args.layout, args.route, args.mechanics_profile)
+    if args.run_diagnostic:
+        if any(path is None for path in paths):
+            parser.error("--run-diagnostic requires robot USD, layout, route, and mechanics profile")
+        result = run_pinned_snapshot_diagnostic(robot_usd=args.robot_usd, layout=args.layout,
+            route=args.route, mechanics_profile=args.mechanics_profile, output_directory=args.output)
+        print(json.dumps({"status": result["status"]}))
+        return 0 if result["status"] == "PASS" else 2
+    if any(path is not None for path in paths):
+        parser.error("simulation inputs are only valid with --run-diagnostic")
     snapshot = json.loads(args.snapshot.read_bytes())
     if not isinstance(snapshot, dict):
         raise ValueError("snapshot must be an object")

@@ -196,6 +196,11 @@ helper: it claims a fresh output directory, retains a result, attempts shutdown
 even after startup failure, and refuses reuse of the claimed directory. It is
 not a standalone authorization gate: the caller must provide an explicitly
 authorized run and a source-pinned session. Tests use a fake session only.
+The `--run-diagnostic` mode constructs the existing Isaac driver, which
+validates its pinned robot USD, layout, route and mechanics profile, and passes
+their hashes and the diagnostic and driver source hashes into the result. The
+mode has not been run with Isaac and does not itself authenticate the runtime
+environment, independently review its source, or grant authorization.
 
 The concrete native binding now rejects the surface-partition definition even
 when its review is otherwise valid: surface separation alone cannot rule out
