@@ -1,8 +1,8 @@
-"""Compare a captured native link snapshot with governed URDF FK offline.
+"""Compare native link snapshots with governed URDF forward kinematics.
 
-No Isaac session, articulation mutation, or hardware access is performed here.
-The comparison factors out the observed base pose and therefore does not
-qualify base-to-workcell placement.
+The saved-snapshot mode is offline. The explicit diagnostic mode starts an
+Isaac simulation session but does not command physical hardware. Comparisons
+factor out the observed base pose and do not qualify workcell placement.
 """
 from __future__ import annotations
 
