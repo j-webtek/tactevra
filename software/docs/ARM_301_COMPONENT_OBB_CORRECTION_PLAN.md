@@ -110,8 +110,9 @@ convex-hull surrogate, including the chosen fills of the open meshes. The six
 direct-joint pairs remain excluded. This does not prove that the physical robot,
 attachments, or omitted geometry fit the surrogate, or that the mesh-to-robot
 frame alignment is correct. A shared, source-hashed builder now reconstructs
-the same 14 boxes for the audit and concrete-binding validation. The native
-worker remains disabled by the solid-containment qualification guard.
+the same 14 boxes for the audit and concrete-binding validation. A reviewed,
+explicitly simulation-scoped surrogate may now construct a deferred worker;
+this does not admit its execution or qualify physical geometry.
 
 A separate local check loaded the seven vendor STL files after verifying each
 against its retained SHA-256, split their processed meshes into connected face
@@ -213,12 +214,14 @@ their hashes and the diagnostic and driver source hashes into the result. The
 mode has not been run with Isaac and does not itself authenticate the runtime
 environment, independently review its source, or grant authorization.
 
-The concrete native binding now rejects the surface-partition definition even
-when its review is otherwise valid: surface separation alone cannot rule out
-nested solids. It cannot currently create a native worker, since its pinned
-definition builder has no solid-containment certification. The 14-box candidate
-must be independently validated before enabling this path; a
-self-declared flag or the offline audit fixture is not sufficient.
+The concrete native binding rejects the surface-partition definition even when
+its review is otherwise valid: surface separation alone cannot rule out nested
+solids. It accepts only the exact reconstructed 14-box convex-hull surrogate
+with a hash-bound review explicitly limiting the geometry to simulated vendor
+meshes and denying physical qualification. Construction creates a deferred
+worker only; the review and execution authorization remain separate. The
+surrogate does not cover omitted hardware, prove installed geometry, or remove
+the need for independently reviewed trajectory and scene evidence.
 
 ## Acceptance sequence
 

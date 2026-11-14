@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 from typing import Any, Mapping, Sequence
@@ -191,8 +192,10 @@ class ComponentObbRuntimeFactory:
         if not callable(base_factory):
             raise ComponentObbClearanceError("base runtime factory is absent")
         self._base_factory = base_factory
-        self._component_definition = component_definition
-        self._component_review = component_review
+        # The caller must not be able to alter validated JSON inputs after the
+        # deferred worker has been constructed but before it is invoked.
+        self._component_definition = copy.deepcopy(component_definition)
+        self._component_review = copy.deepcopy(component_review)
 
     def __call__(self, definition: Mapping[str, Any], **kwargs: Any) -> ComponentObbRouteRuntime:
         documents = kwargs.get("documents")
@@ -279,12 +282,15 @@ def build_component_obb_concrete_binding(
     ):
         raise ComponentObbClearanceError("component definition or review is invalid")
 
-    # Triangle-partition boxes bound mesh surfaces, not necessarily the solid
-    # interior. A separated surface test alone can miss nested geometry. Do
-    # not create a native worker until a separately validated solid-containing
-    # definition is wired through this concrete binding.
-    if component_definition.get("solid_containment_certified") is not True:
-        raise ComponentObbClearanceError("component solid containment is not certified")
+    # Only the exact reconstructed whole-component convex-hull surrogate may
+    # be used for this simulation. The partition model bounds triangle bands
+    # and cannot establish non-nesting of solids. This does not certify the
+    # installed robot, omitted attachments, or physical geometry.
+    if (component_definition.get("offline_whole_component_candidate") is not True
+        or component_definition.get("containment_contract", {}).get("whole_component_convex_hull_surrogate") is not True
+        or component_review.get("geometry_scope") != "SIMULATED_VENDOR_MESH_CONVEX_HULL_SURROGATE"
+        or component_review.get("physical_geometry_qualified") is not False):
+        raise ComponentObbClearanceError("simulation surrogate scope is not established")
 
     factory = ComponentObbRuntimeFactory(
         base_factory=construct_runtime,
@@ -300,6 +306,8 @@ def build_component_obb_concrete_binding(
         "component_review_sha256": component_review.get("review_sha256"),
         "component_review_validated_at_binding": True,
         "component_review_revalidation_required_at_native_construction": True,
+        "geometry_scope": "SIMULATED_VENDOR_MESH_CONVEX_HULL_SURROGATE",
+        "physical_geometry_qualified": False,
         "launch_admitted": False,
         "attempt_consumed": False,
         "isaac_started": False,
@@ -348,6 +356,8 @@ def check_composed_continuous_clearance(
         ),
         "colliding_body_pair": None,
         "proof_method": "COMPONENT_OBB_SELF_PLUS_ENVIRONMENT_SPHERE_SWEEPS",
+        "geometry_scope": "MODEL_GEOMETRY_ONLY",
+        "physical_geometry_qualified": False,
         "self_clearance": self_result,
         "environment_clearance": environment_result,
     }
