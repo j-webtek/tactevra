@@ -219,7 +219,12 @@ def test_native_construction_checks_scene_and_does_not_move():
         "physical_authority": False,
     }
     sweep_review["binding_review_sha256"] = sweep_module._sha(sweep_review)
-    articulation = sweep_fixture._Articulation()
+    class SeparatedArticulation(sweep_fixture._Articulation):
+        def get_link_transforms(self):
+            return [[[float(index), 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+                     for index, _name in enumerate(self.link_names)]]
+
+    articulation = SeparatedArticulation()
     query = sweep_fixture._Query()
     class Route:
         def regenerate_row(self, **kwargs): return kwargs
@@ -237,6 +242,23 @@ def test_native_construction_checks_scene_and_does_not_move():
     assert isinstance(runtime, module.ComponentObbRouteRuntime)
     assert articulation.positions == []
     assert query.calls == []
+
+    result = runtime.check_continuous_clearance(
+        start_sequence=1, end_sequence=2,
+        start_joint_targets_rad=[0.0] * 6, end_joint_targets_rad=[0.0] * 6,
+    )
+    assert result["continuous"] is True
+    assert result["proof_method"] == "COMPONENT_OBB_SELF_PLUS_ENVIRONMENT_SPHERE_SWEEPS"
+    assert len(query.calls) == 7
+    assert all(call[0] == "overlap" for call in query.calls)
+
+    # A native query hit must still stop the composed route proof.
+    query.overlaps = [True] * 20
+    with pytest.raises(module.ConservativeSweepError, match="subdivision budget"):
+        runtime.check_continuous_clearance(
+            start_sequence=1, end_sequence=2,
+            start_joint_targets_rad=[0.0] * 6, end_joint_targets_rad=[0.0] * 6,
+        )
 
     arguments["robot_collision_query_shapes_enabled"] = True
     from nominal_route_native_sweep_binding import NativeSweepBindingError
