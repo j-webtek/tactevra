@@ -28,6 +28,7 @@ class _ComponentRuntime:
     def __init__(self, module, *, center_gap=12.0):
         self.module = module
         self.center_gap = center_gap
+        self.excluded_pairs = frozenset()
 
     def bound_link_obbs(self, **_kwargs):
         bound = self.module.OrientedBoxIntervalBound
@@ -108,4 +109,31 @@ def test_composition_still_fails_closed_on_environment_obstruction():
             start_joint_targets_rad=[0.0] * 6,
             end_joint_targets_rad=[0.0] * 6,
             reviewed_excluded_pairs=(),
+        )
+
+
+def test_backend_protocol_runs_both_proofs_without_caller_exclusions():
+    module = _module()
+    environment = _EnvironmentRuntime(module)
+    adapter = module.ComponentObbClearanceRuntimeAdapter(
+        component_runtime=_ComponentRuntime(module), environment_runtime=environment
+    )
+    assert environment.sweeps == 0
+    result = adapter.check_continuous_clearance(
+        start_sequence=1,
+        end_sequence=2,
+        start_joint_targets_rad=[0.0] * 6,
+        end_joint_targets_rad=[0.0] * 6,
+    )
+    assert result["continuous"] is True
+    assert environment.sweeps == 2
+
+
+def test_backend_protocol_requires_bound_exclusions():
+    module = _module()
+    component = _ComponentRuntime(module)
+    component.excluded_pairs = None
+    with pytest.raises(module.ComponentObbClearanceError, match="exclusions"):
+        module.ComponentObbClearanceRuntimeAdapter(
+            component_runtime=component, environment_runtime=_EnvironmentRuntime(module)
         )

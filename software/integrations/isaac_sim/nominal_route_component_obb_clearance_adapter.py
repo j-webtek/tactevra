@@ -42,6 +42,53 @@ class _EnvironmentSweepOnlyRuntime:
         return None
 
 
+class ComponentObbClearanceRuntimeAdapter:
+    """Expose the route backend clearance protocol over both proof runtimes.
+
+    Construction does not call either runtime or authorize a simulator launch.
+    Exclusions come from the reviewed component binding rather than the route
+    caller; the underlying proof still fails closed on an indeterminate pair.
+    """
+
+    def __init__(
+        self,
+        *,
+        component_runtime: ComponentObbRuntime,
+        environment_runtime: ConservativeSweepRuntime,
+    ) -> None:
+        if not callable(getattr(component_runtime, "bound_link_obbs", None)):
+            raise ComponentObbClearanceError("component runtime protocol is absent")
+        if not all(
+            callable(getattr(environment_runtime, name, None))
+            for name in ("bound_link_spheres", "sweep_sphere_any")
+        ):
+            raise ComponentObbClearanceError("environment runtime protocol is absent")
+        exclusions = getattr(component_runtime, "excluded_pairs", None)
+        if not isinstance(exclusions, frozenset):
+            raise ComponentObbClearanceError("reviewed component exclusions are absent")
+        self._component_runtime = component_runtime
+        self._environment_runtime = environment_runtime
+        self._excluded_pairs = tuple(sorted(exclusions))
+
+    def check_continuous_clearance(
+        self,
+        *,
+        start_sequence: int,
+        end_sequence: int,
+        start_joint_targets_rad: Sequence[float],
+        end_joint_targets_rad: Sequence[float],
+    ) -> dict[str, object]:
+        return check_composed_continuous_clearance(
+            component_runtime=self._component_runtime,
+            environment_runtime=self._environment_runtime,
+            start_sequence=start_sequence,
+            end_sequence=end_sequence,
+            start_joint_targets_rad=start_joint_targets_rad,
+            end_joint_targets_rad=end_joint_targets_rad,
+            reviewed_excluded_pairs=self._excluded_pairs,
+        )
+
+
 def check_composed_continuous_clearance(
     *,
     component_runtime: ComponentObbRuntime,
