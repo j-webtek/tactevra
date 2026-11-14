@@ -334,6 +334,17 @@ collects no live gate, claims no attempt, and starts no simulator. The next
 guarded increment is the executable ARM-299 launcher and independent review;
 only after that chain is retained should a fresh exact authorization be used.
 
+The executable ARM-299 launcher and independent static reviewer are now
+implemented as the next zero-authority layer. The launcher is import-inert and
+revalidates the retained binding/review, qualified interpreter, repository
+ancestry, claimant bytes, all eight runtime sources, fresh output exclusivity,
+and exact future authorization before constructing the deferred backend and
+delegating once. The reviewer proves that ordering and rejects retry-capable
+loops. Implementing and testing this layer does not collect live gates, claim
+or consume ARM-299, start Isaac, step physics, play a trajectory, or authorize
+hardware. Its retained review remains required before any exact one-attempt
+ARM-299 authorization can be acted upon.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.

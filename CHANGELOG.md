@@ -23,6 +23,9 @@ as described in the [versioning policy](docs/VERSIONING.md).
 - Added the inert ARM-299 reproducible launch binding and independent reviewer
   that pin the merged claimant evidence, qualified Isaac interpreter, merged
   repository commit, and all eight runtime sources without launching Isaac.
+- Added the import-inert ARM-299 executable launcher and independent static
+  review that bind the retained launch evidence and permit only one future
+  exact-authorized delegation through the fresh-gated claimant.
 - Added a production-solver ARM-298 continuity qualification and independent
   reproduction over the complete 287-row governed SPACE-route window.
 - Added an independently reviewed ARM-298 route-physics lineage plan binding

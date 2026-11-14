@@ -4591,3 +4591,17 @@ bytes and identities and statically rejects simulator, motion, and transport
 imports or calls. Its acceptance remains zero-authority and only admits the
 next implementation stage: an executable ARM-299 launcher plus independent
 review. No ARM-299 attempt is authorized or consumed by either module.
+
+`nominal_route_arm299_launch.py` is the import-inert executable boundary. It
+requires the exact retained binding and review, qualified Isaac Python,
+repository ancestry, claimant and runtime-source identity, absent fresh gate
+and attempt outputs, and an independently accepted launcher review before it
+can construct the deferred native backend and delegate once to
+`Arm299Claimant`. The claimant still owns EULA-then-memory gate collection and
+single-use consumption; the worker still owns terminal status and shutdown.
+
+`nominal_route_arm299_launch_review.py` independently parses the launcher and
+rejects retry loops, multiple claimant calls, changed evidence, changed source
+bytes, or mismatched interpreter/repository identity. Static review and unit
+tests are zero-authority: they do not collect live gates, claim an attempt,
+start Isaac, step physics, play a trajectory, or access hardware.
