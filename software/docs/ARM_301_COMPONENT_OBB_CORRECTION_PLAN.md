@@ -160,6 +160,14 @@ the worst reported TCP translation error is 0.000129 mm. This supports those
 three end-frame comparisons only: it does not compare every intermediate link
 frame, establish dynamics, or qualify the physical assembly.
 
+`arm301_link_frame_parity.py` provides an offline comparator for a future
+native snapshot: it checks all seven link poses against URDF forward kinematics
+at the captured six-joint state, relative to the captured base pose. Synthetic
+tests exercise translation, rotation, ordering, and invalid-quaternion errors.
+No native snapshot has been captured by this comparator, and factoring out the
+base means it cannot verify base placement in the workcell. A separately
+authorized diagnostic and reviewed capture procedure are still needed.
+
 The concrete native binding now rejects the surface-partition definition even
 when its review is otherwise valid: surface separation alone cannot rule out
 nested solids. It cannot currently create a native worker, since its pinned
