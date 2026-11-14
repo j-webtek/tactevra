@@ -212,6 +212,15 @@ remains external; no authorization is observed, no live gate is collected, no
 attempt is claimed, and no simulator, trajectory, hardware, or physical
 authority artifact is tracked. All other limits remain unchanged.
 
+The ARM-301 component-OBB correction adds seven governed paths: three
+import-safe proof/binding/composition modules, three focused unit-test modules,
+and one maintained correction plan. The reviewed tracked-file ceiling moves
+from 6,913 to the exact observed 6,920 files. The measured tree is 676,711,841
+logical bytes with 4,890,152 governed duplicate bytes. No simulator asset,
+live gate, attempt output, trajectory, camera frame, controller transcript, or
+authority-bearing artifact is tracked; all byte, duplicate-byte, and reduction
+limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

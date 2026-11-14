@@ -153,3 +153,29 @@ The retained plan records, but does not satisfy, this future statement:
 > retry, no trajectory playback, and no hardware or physical authority.
 
 No earlier ARM-299 or other authorization may be reused.
+
+## Terminal ARM-300 result
+
+The exact authorization was supplied once and consumed once. Isaac Sim 6.1
+started and shut down normally. The EULA and memory preflights passed, but the
+backend failed closed on its first continuous-clearance segment with:
+
+```text
+moving self collision: ('robot:base_link', 'robot:link2')
+```
+
+The immutable terminal status is retained at
+`C:\IsaacSim\artifacts\issue190\arm300-nominal-route-physics-attempt-001\status.json`
+as `FAILED_RETAINED_NO_RETRY`. No trajectory playback, hardware access, or
+physical authority occurred. ARM-300 must never be retried.
+
+The retained single-sphere profile explains the stop: its base and `link2`
+radii sum to approximately 210.731 mm. By contrast, the governed 49-pose mesh
+and component-box differential classifies this pair free in all 49 cases, with
+minimum raw-mesh clearance 34.949 mm and minimum candidate-box clearance
+32.006 mm (33.680 mm with the triangle-partition profile). This is evidence of
+a conservative single-sphere false positive, not permission to add a pair
+exclusion.
+
+The successor correction is documented in
+[`ARM_301_COMPONENT_OBB_CORRECTION_PLAN.md`](ARM_301_COMPONENT_OBB_CORRECTION_PLAN.md).
