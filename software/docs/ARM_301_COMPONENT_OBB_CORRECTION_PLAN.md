@@ -102,9 +102,14 @@ For an exploratory 14-box whole-component candidate, add `--whole-components`
 to the command. This replaces link2's 16 surface bands with its two retained
 whole-component boxes and pins the original reduction receipt. The offline
 SPACE window again passed all 288 segments with a minimum residual of about
-16.453 mm. The candidate is not installed into the worker. Link1 and link5
-have non-watertight source meshes, so their physical solid envelopes and the
-mesh-to-robot alignment still require qualification.
+16.453 mm. Each axis-aligned box is convex and contains all vertices of its
+assigned complete source component, or all link5 vertices for the whole-link
+fallback; it therefore contains their convex hull. The whole-box result proves
+separation for the checked nonadjacent pairs of this explicitly defined
+convex-hull surrogate, including the chosen fills of the open meshes. The six
+direct-joint pairs remain excluded. This does not prove that the physical robot,
+attachments, or omitted geometry fit the surrogate, or that the mesh-to-robot
+frame alignment is correct. The candidate is not installed into the worker.
 
 ## Acceptance sequence
 

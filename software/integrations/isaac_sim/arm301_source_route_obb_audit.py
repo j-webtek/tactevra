@@ -185,11 +185,18 @@ def audit(route: Path, *, whole_components: bool = False) -> dict:
         "clearance_margin_mm": 0.5, "python_version": sys.version.split()[0],
         "scipy_version": scipy.__version__, "isaac_started": False,
         "hardware_access": False, "physical_authority": False,
-        "scope": "SOURCE_ROUTE_MESH_SURFACE_SELF_CLEARANCE_ONLY",
+        "scope": ("SOURCE_ROUTE_NONADJACENT_CONVEX_HULL_SURROGATE_CLEARANCE"
+                  if whole_components else "SOURCE_ROUTE_NONADJACENT_MESH_SURFACE_CLEARANCE"),
+        "modeled_solid_semantics": (
+            "CONVEX_HULL_OF_EACH_SOURCE_COMPONENT_OR_WHOLE_LINK_FALLBACK"
+            if whole_components else "SURFACE_ONLY"
+        ),
         "limitations": ["offline URDF FK", "not regenerated IK", "no environment proof",
                         "no Isaac validation", "local review is not independent",
-                        "surface containment does not establish solid non-nesting",
-                        "link1 and link5 source meshes are non-watertight"],
+                        "mesh-to-robot frame alignment not established by this audit",
+                        "physical robot, attachments and omitted geometry not bounded",
+                        "link1 and link5 source meshes are non-watertight"]
+        + ([] if whole_components else ["surface containment does not establish solid non-nesting"]),
     }, "receipt_sha256")
 
 
