@@ -174,6 +174,52 @@ def construct_component_obb_route_runtime(
     )
 
 
+class ComponentObbRuntimeFactory:
+    """Adapt the existing native factory to the worker's factory protocol.
+
+    The wrapped factory still validates its own inputs and captures baselines.
+    This adapter then constructs the new clearance bindings with the same
+    articulation, query, and scene metadata supplied to that factory.
+    """
+
+    def __init__(
+        self, *, base_factory: Any, component_definition: Mapping[str, Any],
+        component_review: Mapping[str, Any],
+    ) -> None:
+        if not callable(base_factory):
+            raise ComponentObbClearanceError("base runtime factory is absent")
+        self._base_factory = base_factory
+        self._component_definition = component_definition
+        self._component_review = component_review
+
+    def __call__(self, definition: Mapping[str, Any], **kwargs: Any) -> ComponentObbRouteRuntime:
+        documents = kwargs.get("documents")
+        metadata = kwargs.get("native_metadata")
+        if (
+            not isinstance(documents, Mapping)
+            or not isinstance(metadata, Mapping)
+            or metadata.get("environment_only_scene") is not True
+            or metadata.get("robot_collision_query_shapes_enabled") is not False
+            or "binding_definition" not in documents
+            or "binding_review" not in documents
+            or "articulation" not in kwargs
+            or "scene_query" not in kwargs
+        ):
+            raise ComponentObbClearanceError("native runtime factory inputs are incomplete")
+        route_runtime = self._base_factory(definition, **kwargs)
+        return construct_component_obb_route_runtime(
+            route_runtime=route_runtime,
+            component_definition=self._component_definition,
+            component_review=self._component_review,
+            sweep_definition=documents["binding_definition"],
+            sweep_review=documents["binding_review"],
+            articulation=kwargs["articulation"],
+            scene_query=kwargs["scene_query"],
+            environment_only_scene=metadata["environment_only_scene"],
+            robot_collision_query_shapes_enabled=metadata["robot_collision_query_shapes_enabled"],
+        )
+
+
 def check_composed_continuous_clearance(
     *,
     component_runtime: ComponentObbRuntime,

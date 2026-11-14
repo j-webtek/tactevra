@@ -242,3 +242,34 @@ def test_native_construction_checks_scene_and_does_not_move():
     from nominal_route_native_sweep_binding import NativeSweepBindingError
     with pytest.raises(NativeSweepBindingError, match="not admissible"):
         module.construct_component_obb_route_runtime(**arguments)
+
+
+def test_worker_factory_callback_preserves_native_objects_and_checks_metadata(monkeypatch):
+    module = _module()
+    calls = []
+    route = object()
+    def base_factory(definition, **kwargs):
+        calls.append((definition, kwargs))
+        return route
+    def construct(**kwargs):
+        calls.append(kwargs)
+        return "composed"
+    monkeypatch.setattr(module, "construct_component_obb_route_runtime", construct)
+    factory = module.ComponentObbRuntimeFactory(
+        base_factory=base_factory, component_definition={"id": "component"},
+        component_review={"id": "review"},
+    )
+    articulation, scene = object(), object()
+    arguments = {
+        "documents": {"binding_definition": {"id": "sweep"}, "binding_review": {}},
+        "native_metadata": {"environment_only_scene": True, "robot_collision_query_shapes_enabled": False},
+        "articulation": articulation, "scene_query": scene,
+    }
+    assert factory({"id": "factory"}, **arguments) == "composed"
+    assert calls[1]["route_runtime"] is route
+    assert calls[1]["articulation"] is articulation
+    assert calls[1]["scene_query"] is scene
+    arguments["native_metadata"] = {"environment_only_scene": False}
+    with pytest.raises(module.ComponentObbClearanceError, match="incomplete"):
+        factory({"id": "factory"}, **arguments)
+    assert len(calls) == 2
