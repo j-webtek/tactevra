@@ -371,7 +371,8 @@ def test_whole_component_audit_rejects_changed_reduction(tmp_path, monkeypatch):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     monkeypatch.setattr(module, "ROUTE_SHA256", module._file_sha(route))
-    monkeypatch.setattr(module, "REDUCTION_FILE_SHA256", "0" * 64)
+    import nominal_route_whole_component_candidate as candidate
+    monkeypatch.setattr(candidate, "REDUCTION_FILE_SHA256", "0" * 64)
     with pytest.raises(ValueError, match="reduction file changed"):
         module.audit(route, whole_components=True)
 
@@ -439,6 +440,32 @@ def test_concrete_binding_rejects_surface_only_geometry_without_starting_session
     with pytest.raises(module.ComponentObbClearanceError, match="solid containment is not certified"):
         module.build_component_obb_concrete_binding(
             paths, component_definition=definition, component_review=review,
+        )
+    assert seen == []
+    from nominal_route_whole_component_candidate import build_candidate
+    whole = build_candidate(ROOT)
+    whole_review = dict(review)
+    whole_review["source_binding_sha256"] = whole["binding_sha256"]
+    whole_review.pop("review_sha256")
+    whole_review["review_sha256"] = component_binding._sha(whole_review)
+    with pytest.raises(module.ComponentObbClearanceError, match="solid containment is not certified"):
+        module.build_component_obb_concrete_binding(
+            paths, component_definition=whole, component_review=whole_review,
+        )
+    assert len(whole["component_obbs"]) == 14
+    assert seen == []
+    import copy
+    altered = copy.deepcopy(whole)
+    altered["component_obbs"][0]["half_extents_mm"][0] *= 0.5
+    altered.pop("binding_sha256")
+    altered["binding_sha256"] = component_binding._sha(altered)
+    altered_review = dict(whole_review)
+    altered_review["source_binding_sha256"] = altered["binding_sha256"]
+    altered_review.pop("review_sha256")
+    altered_review["review_sha256"] = component_binding._sha(altered_review)
+    with pytest.raises(module.ComponentObbClearanceError, match="review is invalid"):
+        module.build_component_obb_concrete_binding(
+            paths, component_definition=altered, component_review=altered_review,
         )
     assert seen == []
     changed = dict(definition)

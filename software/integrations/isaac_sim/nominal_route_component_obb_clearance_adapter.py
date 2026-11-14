@@ -249,11 +249,15 @@ def build_component_obb_concrete_binding(
     def digest(path: Any) -> str:
         return hashlib.sha256(path.read_bytes()).hexdigest()
     try:
-        expected_definition = build_definition(
-            json.loads(partition.read_bytes()), partition_file_sha256=digest(partition),
-            urdf_file_sha256=digest(urdf), binding_source_file_sha256=digest(binding_source),
-            urdf_text=urdf.read_text(encoding="utf-8"),
-        )
+        if component_definition.get("offline_whole_component_candidate") is True:
+            from nominal_route_whole_component_candidate import build_candidate
+            expected_definition = build_candidate(repo_root)
+        else:
+            expected_definition = build_definition(
+                json.loads(partition.read_bytes()), partition_file_sha256=digest(partition),
+                urdf_file_sha256=digest(urdf), binding_source_file_sha256=digest(binding_source),
+                urdf_text=urdf.read_text(encoding="utf-8"),
+            )
     except (OSError, ValueError) as exc:
         raise ComponentObbClearanceError("component source inputs are invalid") from exc
 

@@ -19,8 +19,6 @@ from nominal_route_native_component_obb_binding import (
     EXPECTED_DOF_NAMES,
     NATIVE_LINKS,
     NativeComponentObbRuntime,
-    _component_coefficients,
-    _joint_chain,
     _sha,
     build_definition,
 )
@@ -28,8 +26,6 @@ from rocell.geometry.urdf import JointPosition, UrdfModel
 
 ROUTE_SHA256 = "d22fffa61b4d481e8c90956828c3c2a58634e9408108f00a2521501e331c0449"
 EPISODE = "episode-ef340d0ad2740c118d87"
-REDUCTION_FILE_SHA256 = "d9d49bbb97a207a56db2a15cb55b12dc63f6ce89e35998a139ccd112f2061714"
-REDUCTION_RECEIPT_SHA256 = "ef8d011314df145afe5db43310457671082b276023191aea47287b3ef87a7178"
 
 
 def _file_sha(path: Path) -> str:
@@ -112,36 +108,9 @@ def audit(route: Path, *, whole_components: bool = False) -> dict:
     )
     reduction = integration / "evidence/roarm_m3_link_mesh_reduction_20261004.json"
     if whole_components:
-        if _file_sha(reduction) != REDUCTION_FILE_SHA256:
-            raise ValueError("whole-component reduction file changed")
-        candidate = json.loads(reduction.read_bytes())
-        unsigned = dict(candidate)
-        claimed = unsigned.pop("receipt_sha256", None)
-        if claimed != REDUCTION_RECEIPT_SHA256 or claimed != _sha(unsigned):
-            raise ValueError("whole-component reduction receipt changed")
-        parts = next(row for row in candidate["links"] if row["link_name"] == "link2")["components"]
-        if len(parts) != 2 or any(part["maximum_vertex_overflow_mm"] != 0.0 for part in parts):
-            raise ValueError("whole-component link2 containment changed")
-        chain = _joint_chain(urdf.read_text(encoding="utf-8"))
-        replacement = []
-        for part in parts:
-            box = part["candidate_primitive"]
-            center, extents = box["center_mm"], box["half_extents_mm"]
-            replacement.append({
-                "link_name": "robot:link2", "native_link_name": "link2",
-                "primitive_name": f"robot:link2:{part['component_index']}",
-                "local_center_mm": center,
-                "local_rotation_row_major": [1, 0, 0, 0, 1, 0, 0, 0, 1],
-                "half_extents_mm": extents,
-                "path_lipschitz_mm_per_rad": _component_coefficients("link2", center, extents, chain),
-            })
-        definition["component_obbs"] = [
-            part for part in definition["component_obbs"] if part["native_link_name"] != "link2"
-        ] + replacement
-        _verify_whole_component_inventory(definition, candidate)
-        definition["offline_whole_component_candidate"] = True
-        definition.pop("binding_sha256")
-        definition["binding_sha256"] = _sha(definition)
+        from nominal_route_whole_component_candidate import build_candidate
+        definition = build_candidate(ROOT)
+        _verify_whole_component_inventory(definition, json.loads(reduction.read_bytes()))
     # This local record enables the offline mathematical audit only; it is not
     # an independent review or permission to construct a live Isaac runtime.
     review = _signed({
@@ -170,7 +139,9 @@ def audit(route: Path, *, whole_components: bool = False) -> dict:
         "source_files_sha256": {"route": _file_sha(route), "urdf": _file_sha(urdf),
             "partition": _file_sha(partition), "binding": _file_sha(binding),
             "proof": _file_sha(proof), "audit": _file_sha(Path(__file__)),
-            **({"whole_component_reduction": _file_sha(reduction)} if whole_components else {})},
+            **({"whole_component_reduction": _file_sha(reduction),
+                "whole_component_builder": _file_sha(integration / "nominal_route_whole_component_candidate.py")}
+               if whole_components else {})},
         "component_definition_sha256": definition["binding_sha256"],
         "geometry_candidate": "WHOLE_COMPONENT_BOXES" if whole_components else "TRIANGLE_PARTITION_BOXES",
         "component_count": len(definition["component_obbs"]),

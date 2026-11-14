@@ -109,7 +109,9 @@ separation for the checked nonadjacent pairs of this explicitly defined
 convex-hull surrogate, including the chosen fills of the open meshes. The six
 direct-joint pairs remain excluded. This does not prove that the physical robot,
 attachments, or omitted geometry fit the surrogate, or that the mesh-to-robot
-frame alignment is correct. The candidate is not installed into the worker.
+frame alignment is correct. A shared, source-hashed builder now reconstructs
+the same 14 boxes for the audit and concrete-binding validation. The native
+worker remains disabled by the solid-containment qualification guard.
 
 An offline comparison of the pinned vendor Xacro at commit `40dbd84` with the
 governed URDF found matching parent, child, type, origin, and movable-axis
@@ -133,7 +135,7 @@ The concrete native binding now rejects the surface-partition definition even
 when its review is otherwise valid: surface separation alone cannot rule out
 nested solids. It cannot currently create a native worker, since its pinned
 definition builder has no solid-containment certification. The 14-box candidate
-must be integrated and independently validated before enabling this path; a
+must be independently validated before enabling this path; a
 self-declared flag or the offline audit fixture is not sufficient.
 
 ## Acceptance sequence
