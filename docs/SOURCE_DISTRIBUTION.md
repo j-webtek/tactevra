@@ -202,6 +202,16 @@ and review JSON remain external; no simulator import, live gate, attempt claim,
 physics step, trajectory, hardware authority, or physical authority is added.
 All byte, duplicate-byte, and reduction limits remain unchanged.
 
+The ARM-300 executable-launcher increment adds three governed Python paths: an
+import-inert, exact-authorization launcher, its independent AST/evidence
+reviewer, and focused fail-closed tests. The reviewed tracked-file ceiling
+moves from 6,910 to the exact expected 6,913 files. The launcher revalidates
+binding ancestry, retained evidence, qualified interpreter, runtime sources,
+governed output freshness, and one deferred claimant call. The retained review
+remains external; no authorization is observed, no live gate is collected, no
+attempt is claimed, and no simulator, trajectory, hardware, or physical
+authority artifact is tracked. All other limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

@@ -115,9 +115,34 @@ statically proves the builder has no simulator, motion, or transport execution
 path. It reports `ACCEPTED_FOR_ARM300_LAUNCHER_IMPLEMENTATION` while retaining
 zero authority and `launch_admitted: false`.
 
-The next permitted stage is implementing and independently reviewing the
-executable launcher. The binding review does not admit a launch or satisfy the
-future authorization statement.
+## Executable launcher review
+
+The import-inert executable launcher and its independent review are now
+implemented and retained:
+
+- Launcher source hash:
+  `4b4326ae15184c2afa207ee6abccd06db718532994dfe79921b14f3c2d55a2a2`
+- Reviewer source hash:
+  `c512cbfce070d29b6d3bfce29461a7f3de3ff4fb884786647e8ac23e3fcf63b0`
+- Independent review:
+  `C:\IsaacSim\artifacts\issue190\arm300-route-physics-launcher-review-001\review.json`
+- Review document hash:
+  `9412ce1e84e28367a56861a49404afd49ed63df8d3d9b6a4b52b6ae15ab78f00`
+- Review file hash:
+  `7b4f93ca0e2f443a29a02dc235838c13f9977786377dcca3165d89294eebaba3`
+
+The launcher validates the exact authorization, reviewed binding/review,
+qualified interpreter, binding-commit ancestry, claimant/review bytes, eight
+runtime sources, governed output freshness, and its own independent review
+before constructing one deferred backend and invoking the single-use claimant
+once. Static review proves one claimant call and no retry-capable loop. Review
+reports `ACCEPTED_FOR_EXACT_ARM300_ONE_ATTEMPT_AUTHORIZATION` while retaining
+`launch_admitted: false`, observing no authorization, and performing zero
+physics or hardware actions.
+
+The software chain is ready for a separately supplied exact ARM-300 one-attempt
+authorization. The retained review is readiness evidence, not authorization,
+and no attempt may start from an earlier statement.
 
 ## Future authorization text
 
