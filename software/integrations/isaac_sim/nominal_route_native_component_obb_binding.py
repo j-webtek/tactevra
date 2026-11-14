@@ -363,10 +363,13 @@ class NativeComponentObbRuntime:
         start_joint_targets_rad: Sequence[float],
         end_joint_targets_rad: Sequence[float],
     ) -> Sequence[OrientedBoxIntervalBound]:
-        transforms = self._world_transforms(start_joint_targets_rad)
+        if len(start_joint_targets_rad) != 6 or len(end_joint_targets_rad) != 6:
+            raise NativeComponentObbBindingError("joint interval must contain six values at each end")
+        start = tuple(_finite(item, "start joint") for item in start_joint_targets_rad)
+        end = tuple(_finite(item, "end joint") for item in end_joint_targets_rad)
+        transforms = self._world_transforms(start)
         delta = [
-            abs(float(right) - float(left))
-            for left, right in zip(start_joint_targets_rad, end_joint_targets_rad)
+            abs(right - left) for left, right in zip(start, end)
         ]
         result = []
         for component in self._definition["component_obbs"]:

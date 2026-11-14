@@ -190,6 +190,19 @@ def test_native_runtime_rejects_unreviewed_instantiation():
         )
 
 
+@pytest.mark.parametrize("end", [[0.0] * 5, [0.0] * 5 + [float("nan")], [0.0] * 5 + [True]])
+def test_invalid_end_joint_row_does_not_touch_articulation(end):
+    module = _module()
+    definition = _definition(module)
+    articulation = _Articulation(module)
+    runtime = module.NativeComponentObbRuntime(
+        definition, binding_review=_review(module, definition), articulation=articulation,
+    )
+    with pytest.raises(module.NativeComponentObbBindingError):
+        runtime.bound_link_obbs(start_joint_targets_rad=[0.0] * 6, end_joint_targets_rad=end)
+    assert articulation.positions is None
+
+
 def test_component_point_bounds_cover_interpolated_urdf_motion():
     import itertools
     import math
