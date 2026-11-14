@@ -175,6 +175,15 @@ exact expected 6,900 files. No attempt output, live gate, simulator asset,
 trajectory, camera frame, controller transcript, or authority-bearing artifact
 is tracked; all byte, duplicate-byte, and reduction limits remain unchanged.
 
+The ARM-300 recovery-lineage increment adds four governed paths: an inert
+evidence-bound lineage builder, an independent non-Isaac reviewer, one focused
+test module, and one maintained evidence note. The reviewed tracked-file
+ceiling moves from 6,900 to the exact expected 6,904 files. The retained plan
+and review remain external hash-bound JSON evidence; no simulator asset, live
+gate, attempt output, trajectory, camera frame, controller transcript, or
+authority-bearing artifact is tracked. All byte, duplicate-byte, and reduction
+limits remain unchanged.
+
 The ARM-289 retained-attempt postmortem adds one governed documentation path
 while the native-link passthrough, terminalizing integration pin, focused tests,
 and maintained integration guide update existing files in place. The reviewed

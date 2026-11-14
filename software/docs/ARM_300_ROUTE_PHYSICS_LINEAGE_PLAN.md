@@ -1,0 +1,79 @@
+# ARM-300 route-physics lineage plan
+
+## Purpose
+
+ARM-299 is consumed and immutable. Its single authorized simulation passed the
+fresh EULA and memory gates, started Isaac Sim 6.1, and terminalized
+`FAILED_RETAINED_NO_RETRY` before route execution because the conservative
+sweep binding attempted to reach a private articulation transform view. The
+merged correction now uses the narrowed wrapper's reviewed public
+`get_link_transforms()` protocol.
+
+ARM-300 is a new lineage. It does not replay ARM-299 and does not inherit its
+authorization. This stage only binds retained evidence and independently
+reviews the proposed one-use boundary.
+
+## Pinned inputs
+
+- Retained ARM-299 terminal receipt:
+  `C:\IsaacSim\artifacts\issue190\arm299-nominal-route-physics-attempt-001\status.json`
+- Terminal receipt SHA-256:
+  `976c0883581e7dd54ba43ed6364d11e351ec5b8349ecf5ea5fd87d09cf0a6396`
+- Merged correction commit:
+  `50fd017ff89b1d4cb453f1abd93887e98237b10f`
+- Corrected sweep binding SHA-256:
+  `d7062c6c5debebb3a8e74ab07c46fc4ae3ed86fe5ce087ed7be6a974c6ae561d`
+- Qualified interpreter:
+  `C:\IsaacSim\env_6_1_0\Scripts\python.exe`
+- Interpreter SHA-256:
+  `d55736b9f3d6b4ca7985b82db8ce11edfa09994cf93ce31c6b506543b74f32eb`
+- Episode: `episode-ef340d0ad2740c118d87`
+- Target: `SPACE`
+
+The plan also pins the exact bytes of the complete runtime composition,
+concrete native attempt binding, native runtime factory, native worker
+integration, narrowed session wrapper, corrected native sweep binding,
+physics backend, and fail-closed physics worker.
+
+## Retained zero-authority evidence
+
+- Plan:
+  `C:\IsaacSim\artifacts\issue190\arm300-route-physics-lineage-plan-001\plan.json`
+- Plan hash:
+  `62232b7da022a62f4d653d87a4359092baf498eb4ba34836cdcb5194fda3d05b`
+- Independent review:
+  `C:\IsaacSim\artifacts\issue190\arm300-route-physics-lineage-plan-review-001\review.json`
+- Review hash:
+  `bbd49e4c67317ca24c2121ccbbda1ee66834d386cf6f475fb7cb17120d036e7e`
+
+The review reopens the terminal receipt, interpreter, plan source, and all
+eight runtime sources. It also statically rejects simulator, motion, attempt,
+and transport calls in the plan builder and confirms that the future attempt,
+EULA receipt, and memory receipt paths are all absent.
+
+## Authority boundary
+
+This lineage stage:
+
+- observes no authorization;
+- claims and consumes no attempt;
+- imports and starts no Isaac runtime;
+- performs zero physics steps;
+- submits no joint positions or targets;
+- performs no trajectory playback or key contact;
+- accesses no hardware and grants no physical authority.
+
+The accepted next stage is only to build and independently review an ARM-300
+single-use claimant. A simulation attempt remains forbidden until the claimant,
+launch binding, executable launcher, and their independent reviews are complete
+and the user supplies a separate exact ARM-300 authorization.
+
+## Future authorization text
+
+The retained plan records, but does not satisfy, this future statement:
+
+> I authorize exactly one ARM-300 recovered nominal SPACE route-physics
+> simulation attempt for episode-ef340d0ad2740c118d87, with no automatic
+> retry, no trajectory playback, and no hardware or physical authority.
+
+No earlier ARM-299 or other authorization may be reused.
