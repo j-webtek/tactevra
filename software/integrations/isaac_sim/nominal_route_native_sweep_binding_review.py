@@ -242,26 +242,20 @@ class _Array:
         return self.value
 
 
-class _View:
-    def __init__(self, articulation: "_Articulation") -> None:
-        self.articulation = articulation
-
-    def get_link_transforms(self) -> _Array:
-        offset = self.articulation.positions[0] if self.articulation.positions else 0.0
-        rows = [
-            [offset + index / 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-            for index, _name in enumerate(self.articulation.link_names)
-        ]
-        return _Array([rows])
-
-
 class _Articulation:
     dof_names = EXPECTED_DOF_NAMES
     link_names = tuple(PROFILE_TO_NATIVE_LINK.values())
 
     def __init__(self) -> None:
         self.positions: list[float] = []
-        self._physics_articulation_view = _View(self)
+
+    def get_link_transforms(self) -> _Array:
+        offset = self.positions[0] if self.positions else 0.0
+        rows = [
+            [offset + index / 100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+            for index, _name in enumerate(self.link_names)
+        ]
+        return _Array([rows])
 
     def set_dof_positions(self, rows: list[list[float]]) -> None:
         self.positions = list(rows[0])
@@ -445,7 +439,7 @@ def build_review(
     ):
         raise NativeSweepBindingReviewError("path-deviation coefficients failed review")
     expected_runtime_contract = {
-        "articulation_link_transform_source": "physics_articulation_view.get_link_transforms",
+        "articulation_link_transform_source": "articulation.get_link_transforms",
         "environment_queries": [
             "scene_query.overlap_sphere_any",
             "scene_query.sweep_sphere_any",

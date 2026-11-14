@@ -1624,6 +1624,31 @@ ScheduleGen. Neither is a physical success rate.
      AST review proves fail-closed ordering, no retry loop, no direct worker
      call, and no hardware transport surface. Review invokes nothing; a fresh
      exact single-use ARM-298 authorization remains the next boundary.
+113. **ARM-298 terminal attempt and wrapper correction:** the authorized attempt
+     passed both fresh preflights and started Isaac, then failed closed before
+     route execution because the narrowed articulation wrapper did not forward
+     `set_dof_positions`. The retained result is immutable. The wrapper now
+     forwards that reviewed teleport-only FK operation, and an independently
+     pinned ARM-299 lineage was built rather than replaying ARM-298.
+114. **ARM-299 reviewed launch chain and terminal attempt:** the lineage plan,
+     claimant, launch binding, executable launcher, and their independent
+     reviews pinned the corrected wrapper, qualified interpreter, runtime
+     sources, exact SPACE episode, one-use authorization, fresh gates, and
+     terminalization. The authorized attempt passed EULA and memory gates and
+     started Isaac Sim 6.1, then retained `FAILED_RETAINED_NO_RETRY` because the
+     conservative sweep binding reached through the narrowed wrapper for a
+     private `_physics_articulation_view` that the wrapper intentionally does
+     not expose. No retry, trajectory playback, hardware access, or physical
+     authority occurred.
+115. **Public link-transform protocol correction:** the conservative sweep
+     binding now calls the reviewed `articulation.get_link_transforms()`
+     protocol already required by the runtime factory, rather than a private
+     Isaac implementation detail. Constructor admission verifies that public
+     method, the binding contract names it explicitly, and both unit and
+     independent conformance fixtures cover a public-only articulation wrapper
+     with no private transform view. A future simulator attempt must use a new
+     source-pinned lineage and separate exact authorization; ARM-299 remains
+     consumed and immutable.
 
 ## Completion criterion
 

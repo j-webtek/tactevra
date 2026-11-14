@@ -280,9 +280,7 @@ def build_binding_definition(
             profile, urdf_text
         ),
         "runtime_contract": {
-            "articulation_link_transform_source": (
-                "physics_articulation_view.get_link_transforms"
-            ),
+            "articulation_link_transform_source": "articulation.get_link_transforms",
             "environment_queries": [
                 "scene_query.overlap_sphere_any",
                 "scene_query.sweep_sphere_any",
@@ -390,6 +388,7 @@ class NativeIsaacConservativeSweepBinding:
             or robot_collision_query_shapes_enabled is not False
             or not callable(getattr(scene_query, "overlap_sphere_any", None))
             or not callable(getattr(scene_query, "sweep_sphere_any", None))
+            or not callable(getattr(articulation, "get_link_transforms", None))
             or tuple(getattr(articulation, "dof_names", ())) != EXPECTED_DOF_NAMES
         ):
             raise NativeSweepBindingError("native runtime binding is not admissible")
@@ -414,10 +413,11 @@ class NativeIsaacConservativeSweepBinding:
             raise NativeSweepBindingError("joint target must contain six values")
         values = [_finite(item, "joint target") for item in joints]
         self._articulation.set_dof_positions([values])
-        view = getattr(self._articulation, "_physics_articulation_view", None)
-        getter = getattr(view, "get_link_transforms", None)
+        getter = getattr(self._articulation, "get_link_transforms", None)
         if not callable(getter):
-            raise NativeSweepBindingError("native articulation transform view is absent")
+            raise NativeSweepBindingError(
+                "native articulation link-transform protocol is absent"
+            )
         transforms = _tensor_list(getter(), "native link transforms")
         if (
             not isinstance(transforms, list)

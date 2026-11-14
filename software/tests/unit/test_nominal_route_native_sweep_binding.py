@@ -144,8 +144,32 @@ class _Articulation:
         self.positions = []
         self._physics_articulation_view = _View(self)
 
+    def get_link_transforms(self):
+        return self._physics_articulation_view.get_link_transforms()
+
     def set_dof_positions(self, rows):
         self.positions = list(rows[0])
+
+
+class _PublicArticulationView:
+    """Match the narrow wrapper supplied by the native Isaac session."""
+
+    def __init__(self, articulation):
+        self._articulation = articulation
+
+    @property
+    def dof_names(self):
+        return self._articulation.dof_names
+
+    @property
+    def link_names(self):
+        return self._articulation.link_names
+
+    def get_link_transforms(self):
+        return self._articulation.get_link_transforms()
+
+    def set_dof_positions(self, rows):
+        self._articulation.set_dof_positions(rows)
 
 
 class _Query:
@@ -163,7 +187,7 @@ class _Query:
         return self.result
 
 
-def _runtime(module, *, query=None):
+def _runtime(module, *, query=None, articulation=None):
     definition = _definition(module)
     review_core = {
         "schema": module.BINDING_REVIEW_SCHEMA,
@@ -182,7 +206,7 @@ def _runtime(module, *, query=None):
     return module.NativeIsaacConservativeSweepBinding(
         definition,
         binding_review=binding_review,
-        articulation=_Articulation(),
+        articulation=articulation or _Articulation(),
         scene_query=query or _Query(),
         environment_only_scene=True,
         robot_collision_query_shapes_enabled=False,
@@ -363,6 +387,49 @@ def test_arm262_runtime_requires_environment_only_query_scene():
             scene_query=_Query(),
             environment_only_scene=False,
             robot_collision_query_shapes_enabled=True,
+        )
+
+
+def test_arm262_runtime_uses_reviewed_public_link_transform_protocol():
+    module = _module()
+    native = _Articulation()
+    public_view = _PublicArticulationView(native)
+    runtime = _runtime(module, articulation=public_view)
+
+    assert not hasattr(runtime._articulation, "_physics_articulation_view")
+    centers = runtime._world_centers([0.25, 0.0, 0.0, 0.0, 0.0, 0.0])
+
+    assert native.positions == [0.25, 0.0, 0.0, 0.0, 0.0, 0.0]
+    assert set(centers) == set(module.PROFILE_TO_NATIVE_LINK)
+
+
+def test_arm262_runtime_rejects_missing_public_link_transform_protocol():
+    module = _module()
+    definition = _definition(module)
+    review_core = {
+        "schema": module.BINDING_REVIEW_SCHEMA,
+        "status": "ACCEPTED_FOR_NATIVE_BINDING_INTEGRATION",
+        "source_binding_sha256": definition["binding_sha256"],
+        "runtime_instantiation_admitted": True,
+        "launch_admitted": False,
+        "attempt_consumed": False,
+        "hardware_access": False,
+        "physical_authority": False,
+    }
+    articulation = _Articulation()
+    articulation.get_link_transforms = None
+
+    with pytest.raises(module.NativeSweepBindingError, match="not admissible"):
+        module.NativeIsaacConservativeSweepBinding(
+            definition,
+            binding_review={
+                **review_core,
+                "binding_review_sha256": module._sha(review_core),
+            },
+            articulation=articulation,
+            scene_query=_Query(),
+            environment_only_scene=True,
+            robot_collision_query_shapes_enabled=False,
         )
 
 
