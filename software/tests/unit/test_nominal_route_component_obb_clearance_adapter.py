@@ -190,3 +190,55 @@ def test_backend_executes_all_segments_through_composed_clearance(tmp_path):
     assert result["continuous_clearance_segment_count"] == 288
     assert environment.sweeps == 576
     assert result["hardware_access"] is False
+
+
+def test_native_construction_checks_scene_and_does_not_move():
+    module = _module()
+    def load_fixture(name):
+        path = ROOT / f"software/tests/unit/test_nominal_route_native_{name}.py"
+        spec = importlib.util.spec_from_file_location(f"fixture_{name}", path)
+        assert spec is not None and spec.loader is not None
+        fixture = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(fixture)
+        return fixture
+
+    component_fixture = load_fixture("component_obb_binding")
+    sweep_fixture = load_fixture("sweep_binding")
+    component_module = component_fixture._module()
+    component_definition = component_fixture._definition(component_module)
+    sweep_module = sweep_fixture._module()
+    sweep_definition = sweep_fixture._definition(sweep_module)
+    sweep_review = {
+        "schema": sweep_module.BINDING_REVIEW_SCHEMA,
+        "status": "ACCEPTED_FOR_NATIVE_BINDING_INTEGRATION",
+        "source_binding_sha256": sweep_definition["binding_sha256"],
+        "runtime_instantiation_admitted": True,
+        "launch_admitted": False,
+        "attempt_consumed": False,
+        "hardware_access": False,
+        "physical_authority": False,
+    }
+    sweep_review["binding_review_sha256"] = sweep_module._sha(sweep_review)
+    articulation = sweep_fixture._Articulation()
+    query = sweep_fixture._Query()
+    class Route:
+        def regenerate_row(self, **kwargs): return kwargs
+        def measure_tool_key(self, **kwargs): return kwargs
+        def root_drift(self): return {}
+
+    arguments = dict(
+        route_runtime=Route(), component_definition=component_definition,
+        component_review=component_fixture._review(component_module, component_definition),
+        sweep_definition=sweep_definition, sweep_review=sweep_review,
+        articulation=articulation, scene_query=query,
+        environment_only_scene=True, robot_collision_query_shapes_enabled=False,
+    )
+    runtime = module.construct_component_obb_route_runtime(**arguments)
+    assert isinstance(runtime, module.ComponentObbRouteRuntime)
+    assert articulation.positions == []
+    assert query.calls == []
+
+    arguments["robot_collision_query_shapes_enabled"] = True
+    from nominal_route_native_sweep_binding import NativeSweepBindingError
+    with pytest.raises(NativeSweepBindingError, match="not admissible"):
+        module.construct_component_obb_route_runtime(**arguments)

@@ -133,6 +133,47 @@ class ComponentObbRouteRuntime:
         )
 
 
+def construct_component_obb_route_runtime(
+    *,
+    route_runtime: Any,
+    component_definition: Mapping[str, Any],
+    component_review: Mapping[str, Any],
+    sweep_definition: Mapping[str, Any],
+    sweep_review: Mapping[str, Any],
+    articulation: Any,
+    scene_query: Any,
+    environment_only_scene: bool,
+    robot_collision_query_shapes_enabled: bool,
+) -> ComponentObbRouteRuntime:
+    """Construct the two native bindings over the same supplied scene.
+
+    This is an import-safe construction path, not an execution or launch gate.
+    Both bindings validate their own source and review contracts.  In
+    particular, the environment-only scene assertions must come from the
+    caller's independently checked native scene metadata.
+    """
+    from nominal_route_native_component_obb_binding import NativeComponentObbRuntime
+    from nominal_route_native_sweep_binding import NativeIsaacConservativeSweepBinding
+
+    component = NativeComponentObbRuntime(
+        component_definition, binding_review=component_review, articulation=articulation
+    )
+    environment = NativeIsaacConservativeSweepBinding(
+        sweep_definition,
+        binding_review=sweep_review,
+        articulation=articulation,
+        scene_query=scene_query,
+        environment_only_scene=environment_only_scene,
+        robot_collision_query_shapes_enabled=robot_collision_query_shapes_enabled,
+    )
+    return ComponentObbRouteRuntime(
+        route_runtime=route_runtime,
+        clearance=ComponentObbClearanceRuntimeAdapter(
+            component_runtime=component, environment_runtime=environment
+        ),
+    )
+
+
 def check_composed_continuous_clearance(
     *,
     component_runtime: ComponentObbRuntime,
