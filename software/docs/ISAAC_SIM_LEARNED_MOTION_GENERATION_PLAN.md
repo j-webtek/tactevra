@@ -1649,6 +1649,14 @@ ScheduleGen. Neither is a physical success rate.
      with no private transform view. A future simulator attempt must use a new
      source-pinned lineage and separate exact authorization; ARM-299 remains
      consumed and immutable.
+116. **ARM-300 inert lineage plan and review:** the new plan pins ARM-299's
+     retained terminal receipt, merged public-transform correction commit,
+     qualified Isaac interpreter, exact SPACE episode, eight production
+     runtime sources, and three fresh absent future outputs. Independent review
+     reopens every byte, confirms the corrected sweep-binding digest, rejects
+     simulator, motion, attempt, and transport surfaces, and retains zero
+     authority. Acceptance permits only construction and independent review of
+     an ARM-300 single-use claimant; it does not authorize or launch Isaac.
 
 ## Completion criterion
 

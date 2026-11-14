@@ -4618,3 +4618,17 @@ protocol directly, with a regression fixture that has no private transform
 view. This correction cannot revive or replay ARM-299; any simulator validation
 requires newly numbered, source-pinned, independently reviewed evidence and a
 fresh exact authorization.
+
+### ARM-300 recovery lineage after the retained ARM-299 transform failure
+
+`nominal_route_arm300_lineage_plan.py` binds the exact retained ARM-299
+terminal receipt, merged public-transform correction commit, corrected sweep
+binding and seven related runtime sources, qualified Isaac interpreter, fixed
+SPACE episode, and fresh absent attempt/EULA/memory outputs.
+
+`nominal_route_arm300_lineage_plan_review.py` independently reopens those
+inputs, verifies the corrected binding and interpreter identities, confirms
+output freshness, and statically rejects simulator, motion, attempt, transport,
+and hardware surfaces in the builder. The retained acceptance grants zero
+authority and permits only building and independently reviewing a single-use
+ARM-300 claimant. See `software/docs/ARM_300_ROUTE_PHYSICS_LINEAGE_PLAN.md`.
