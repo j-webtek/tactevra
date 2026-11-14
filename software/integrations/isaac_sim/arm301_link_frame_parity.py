@@ -20,7 +20,9 @@ from rocell.geometry.urdf import JointPosition, UrdfModel
 def _array(value: object) -> np.ndarray:
     if hasattr(value, "numpy"):
         value = value.numpy()
-    return np.asarray(value, dtype=float)
+    # Native tensor views may reuse their backing buffer on the next read.
+    # Preserve each observation before issuing another native call.
+    return np.array(value, dtype=float, copy=True)
 
 
 def capture_link_snapshot(articulation: object, *, maximum_joint_change_rad: float = 1e-7) -> dict:
@@ -96,3 +98,16 @@ def compare_link_frames(urdf: Path, *, link_names: Sequence[str],
             "translation_tolerance_mm": translation_tolerance_mm,
             "rotation_tolerance_deg": rotation_tolerance_deg,
             "scope": "single snapshot relative to observed base; not workcell placement or dynamics"}
+
+
+def capture_and_compare(articulation: object, urdf: Path) -> dict:
+    """Capture and compare one state in an already-established stationary session.
+
+    This helper never starts a session and does not itself authorize a capture.
+    A caller must retain and review the result and establish its own provenance.
+    """
+    snapshot = capture_link_snapshot(articulation)
+    comparison = compare_link_frames(urdf, **{key: snapshot[key] for key in
+        ("link_names", "joint_names", "joint_positions_rad", "native_transforms")})
+    return {"snapshot": snapshot, "comparison": comparison,
+            "isaac_started_by_helper": False, "hardware_access_by_helper": False}

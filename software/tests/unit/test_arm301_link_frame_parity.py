@@ -8,7 +8,7 @@ Rotation = pytest.importorskip("scipy.spatial.transform").Rotation
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "software/integrations/isaac_sim"))
 sys.path.insert(0, str(ROOT / "software/src"))
-from arm301_link_frame_parity import capture_link_snapshot, compare_link_frames
+from arm301_link_frame_parity import capture_and_compare, capture_link_snapshot, compare_link_frames
 from arm301_source_route_obb_audit import _OfflineArticulation
 from nominal_route_native_component_obb_binding import EXPECTED_DOF_NAMES, NATIVE_LINKS
 
@@ -66,6 +66,24 @@ def test_capture_is_read_only_and_rejects_changes():
     assert articulation.reads == 2
     assert compare_link_frames(urdf, **{k: snapshot[k] for k in
         ("link_names", "joint_names", "joint_positions_rad", "native_transforms")})["parity_pass"]
+    assert capture_and_compare(articulation, urdf)["comparison"]["parity_pass"]
     articulation.changed = True
     with pytest.raises(ValueError, match="changed during snapshot"):
         capture_link_snapshot(articulation)
+
+
+def test_capture_rejects_changed_joint_state_with_reused_native_buffer():
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    class ReusedBuffer(_OfflineArticulation):
+        def __init__(self):
+            super().__init__(urdf)
+            self.positions = [0.0] * 6
+            self.buffer = np.zeros((1, 6))
+            self.reads = 0
+        def get_dof_positions(self):
+            self.reads += 1
+            if self.reads == 2:
+                self.buffer[0, 0] = 0.01
+            return self.buffer
+    with pytest.raises(ValueError, match="changed during snapshot"):
+        capture_link_snapshot(ReusedBuffer())
