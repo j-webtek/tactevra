@@ -1822,3 +1822,9 @@ module observes authorization, imports or starts Isaac, claims an attempt,
 steps physics, submits positions or targets, plays a trajectory, or grants
 hardware or physical authority. No generated evidence or simulator asset is
 tracked; all byte, duplicate-byte, and reduction limits remain unchanged.
+## ARM-301 offline audit source
+
+The source archive includes the offline SPACE-route component-OBB audit command
+`software/integrations/isaac_sim/arm301_source_route_obb_audit.py`. The retained
+route and generated receipt remain external runtime artifacts. This addition
+accounts for one tracked source file in the archive ceiling.

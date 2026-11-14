@@ -324,3 +324,16 @@ def test_single_use_worker_passes_composed_runtime_to_backend(tmp_path, monkeypa
     assert events == ["start", "load", "initialize", "settle", "objects", "base_factory", "component_factory", "execute", "shutdown"]
     with pytest.raises(worker.NativeRuntimeWorkerIntegrationError, match="retry refused"):
         backend(output)
+
+
+def test_offline_audit_rejects_unpinned_route(tmp_path):
+    pytest.importorskip("scipy")
+    route = tmp_path / "route.json"
+    route.write_text("{}", encoding="utf-8")
+    audit_path = INTEGRATION / "arm301_source_route_obb_audit.py"
+    spec = importlib.util.spec_from_file_location("arm301_offline_audit_test", audit_path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    with pytest.raises(ValueError, match="route file digest changed"):
+        module.audit(route)

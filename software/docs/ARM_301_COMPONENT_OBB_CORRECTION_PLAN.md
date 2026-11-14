@@ -78,6 +78,19 @@ not an ARM-301 simulation result: the future backend regenerates canonical IK,
 so the same proof must run on those regenerated intervals inside the admitted
 runtime.
 
+The audit can be reproduced with Python, SciPy, the pinned route file and a
+fresh output path:
+
+```text
+python software/integrations/isaac_sim/arm301_source_route_obb_audit.py --route <native_mechanics_plan.json> --output <new-receipt.json>
+```
+
+The command refuses a different route digest or an existing output. Its
+receipt binds the route, URDF, partition, binding, proof and audit sources.
+Its locally constructed review record is a software-audit fixture, not an
+independent review or permission to run the Isaac worker. The audit does not
+check environment clearance or regenerated IK.
+
 ## Acceptance sequence
 
 1. Unit-test SAT separation, point-motion reduction, recursive refinement,
