@@ -8,7 +8,7 @@ Rotation = pytest.importorskip("scipy.spatial.transform").Rotation
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "software/integrations/isaac_sim"))
 sys.path.insert(0, str(ROOT / "software/src"))
-from arm301_link_frame_parity import compare_link_frames
+from arm301_link_frame_parity import capture_link_snapshot, compare_link_frames
 from arm301_source_route_obb_audit import _OfflineArticulation
 from nominal_route_native_component_obb_binding import EXPECTED_DOF_NAMES, NATIVE_LINKS
 
@@ -46,3 +46,26 @@ def test_wrong_link_order_is_rejected():
     with pytest.raises(ValueError, match="order"):
         compare_link_frames(urdf, link_names=NATIVE_LINKS[::-1], joint_names=EXPECTED_DOF_NAMES,
                             joint_positions_rad=[0] * 6, native_transforms=[[0] * 7] * 7)
+
+
+def test_capture_is_read_only_and_rejects_changes():
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    class FakeArticulation(_OfflineArticulation):
+        def __init__(self):
+            super().__init__(urdf)
+            self.positions = [0.0] * 6
+            self.reads = 0
+            self.changed = False
+        def get_dof_positions(self):
+            self.reads += 1
+            return [[0.01 if self.changed and self.reads % 2 == 0 else 0.0] + [0.0] * 5]
+        def set_dof_positions(self, rows):
+            raise AssertionError("capture must not set joint state")
+    articulation = FakeArticulation()
+    snapshot = capture_link_snapshot(articulation)
+    assert articulation.reads == 2
+    assert compare_link_frames(urdf, **{k: snapshot[k] for k in
+        ("link_names", "joint_names", "joint_positions_rad", "native_transforms")})["parity_pass"]
+    articulation.changed = True
+    with pytest.raises(ValueError, match="changed during snapshot"):
+        capture_link_snapshot(articulation)

@@ -17,6 +17,41 @@ from nominal_route_native_component_obb_binding import EXPECTED_DOF_NAMES, NATIV
 from rocell.geometry.urdf import JointPosition, UrdfModel
 
 
+def _array(value: object) -> np.ndarray:
+    if hasattr(value, "numpy"):
+        value = value.numpy()
+    return np.asarray(value, dtype=float)
+
+
+def capture_link_snapshot(articulation: object, *, maximum_joint_change_rad: float = 1e-7) -> dict:
+    """Read one stable simulated state; never set positions or step physics.
+
+    The caller must establish the session and ensure it remains stationary;
+    bracketing joint reads detect state changes but do not make reads atomic.
+    """
+    if not math.isfinite(maximum_joint_change_rad) or maximum_joint_change_rad < 0:
+        raise ValueError("joint change tolerance invalid")
+    names = tuple(getattr(articulation, "link_names", ()))
+    dofs = tuple(getattr(articulation, "dof_names", ()))
+    if names != NATIVE_LINKS or dofs != EXPECTED_DOF_NAMES:
+        raise ValueError("link or joint order changed")
+    before = _array(articulation.get_dof_positions())
+    transforms = _array(articulation.get_link_transforms())
+    after = _array(articulation.get_dof_positions())
+    if (before.shape != (1, 6) or after.shape != (1, 6) or transforms.shape != (1, 7, 7)
+        or not np.isfinite(before).all() or not np.isfinite(after).all()
+        or not np.isfinite(transforms).all()):
+        raise ValueError("native snapshot shape or values invalid")
+    if np.max(np.abs(before - after)) > maximum_joint_change_rad:
+        raise ValueError("joint state changed during snapshot")
+    return {"link_names": list(names), "joint_names": list(dofs),
+            "joint_positions_rad": before[0].tolist(),
+            "joint_positions_after_rad": after[0].tolist(),
+            "native_transforms": transforms[0].tolist(),
+            "maximum_joint_change_rad": maximum_joint_change_rad,
+            "scope": "read-only non-atomic simulation snapshot"}
+
+
 def compare_link_frames(urdf: Path, *, link_names: Sequence[str],
                         joint_names: Sequence[str], joint_positions_rad: Sequence[float],
                         native_transforms: Sequence[Sequence[float]],

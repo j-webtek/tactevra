@@ -167,6 +167,11 @@ tests exercise translation, rotation, ordering, and invalid-quaternion errors.
 No native snapshot has been captured by this comparator, and factoring out the
 base means it cannot verify base placement in the workcell. A separately
 authorized diagnostic and reviewed capture procedure are still needed.
+The read-only snapshot helper brackets the link read with two joint-state
+reads and rejects a change, but these separate reads are not atomic. The caller
+must establish a stationary simulation session. The native session wrapper now
+exposes read-only joint state; its source hash has changed, so previously pinned
+session reviews cannot be reused as authority for this updated implementation.
 
 The concrete native binding now rejects the surface-partition definition even
 when its review is otherwise valid: surface separation alone cannot rule out
