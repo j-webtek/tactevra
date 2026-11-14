@@ -141,6 +141,18 @@ This establishes agreement between declared vendor and governed link frames;
 it does not check imported Isaac transforms, physical assembly, or omitted
 geometry.
 
+The pinned imported USD's six authored revolute joint relationships, parent
+and child names, local poses, and axes were also compared with the governed
+URDF using OpenUSD without starting Isaac. All six matched within 0.0001 mm and
+0.000001 rad; child-side frames were identity. Receipt
+`95b0f422a92ddef089b2ac59a65c4bab380dd37559619ee4bbd5c946c852174f`
+binds the exact USD, URDF, and audit source. This checks authored joint frames;
+it does not inspect live link poses, dynamics, or the physical robot.
+
+```text
+python software/integrations/isaac_sim/arm301_usd_joint_frame_audit.py --usd <pinned-imported-usd> --output <new-receipt.json>
+```
+
 The retained `roarm_m3_fk_parity_20260929.json` binds the same governed USD
 and reports passing zero, home, and ready poses. Its Isaac probe reads the
 native link5 transform and combines it with the imported hand TCP transform;
