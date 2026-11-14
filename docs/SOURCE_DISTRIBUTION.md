@@ -1748,3 +1748,14 @@ start Isaac, step physics, submit positions or targets, play a trajectory, or
 grant hardware or physical authority. No simulator asset, generated evidence,
 camera frame, or trajectory corpus is tracked, and all byte, duplicate-byte,
 and reduction limits remain unchanged.
+
+ARM-299 then adds the import-inert single-use claimant, its independent
+ordering/evidence reviewer, and focused fail-closed tests, advancing the
+reviewed tracked-file ceiling from 6,891 to 6,894. The claimant binds the
+accepted lineage, retained base worker, both preflight implementations, and
+worker source; its future callable requires exact authorization, unchanged
+sources, both fresh receipts retained before consumption, and exactly one
+worker delegation. Tests include synthetic compatibility with the actual
+fail-closed worker but do not import or start Isaac. No attempt, simulator,
+trajectory, camera frame, hardware authority, or physical authority is added;
+all byte, duplicate-byte, and reduction limits remain unchanged.

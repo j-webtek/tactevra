@@ -312,6 +312,18 @@ the remaining order is claimant construction and review, reproducible launch
 binding and review, executable-launch review, then a new exact one-attempt
 ARM-299 authorization. No ARM-299 simulation is authorized by this plan.
 
+The ARM-299 single-use claimant and its independent reviewer are now
+implemented as the next guarded layer. The claimant clones the retained
+fail-closed worker onto ARM-299's fresh output, rejects the consumed ARM-298
+statement and any changed source before gate collection, requires passing EULA
+and memory preflights, retains both receipts before marking itself used, and
+delegates exactly once. Focused tests exercise that ordering and the actual
+worker with a synthetic no-Isaac backend. Building or reviewing the claimant
+does not observe authorization, collect live gates, claim an attempt, start
+Isaac, step physics, submit positions or targets, contact a key, or grant
+hardware or physical authority. A reproducible launch binding and executable
+launch review remain required before requesting ARM-299 simulation authority.
+
 ## Governance
 
 - No simulation authorization grants hardware or physical authority.

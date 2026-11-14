@@ -4562,3 +4562,19 @@ the builder. Both modules are import-inert and grant zero attempt authority.
 The next permitted stage is construction and independent review of a
 single-use ARM-299 claimant; a simulation remains separately authorized and
 must never reuse the consumed ARM-298 statement.
+
+`nominal_route_arm299_claimant.py` implements that single-use boundary. Its
+definition binds the accepted plan/review, retained base worker, EULA and
+memory preflight implementations, worker implementation, and all eight runtime
+source hashes. Its future `Arm299Claimant.run` rejects authorization or source
+drift before gate collection, writes both fresh receipts before single-use
+consumption, then delegates exactly once to the fail-closed worker.
+
+`nominal_route_arm299_claimant_review.py` independently reopens every bound
+byte and statically proves authorization/source/gate/receipt/delegation order,
+one worker call, and the absence of simulator, direct-motion, transport, or
+hardware surfaces. Definition construction and review invoke no gates, worker,
+backend, simulator, physics, trajectory, or hardware. The next permitted stage
+is an independently reviewed reproducible ARM-299 launch binding, followed by
+an executable-launch review; only then may a fresh exact ARM-299 one-attempt
+authorization be requested.
