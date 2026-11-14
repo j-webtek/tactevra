@@ -401,7 +401,7 @@ def test_whole_component_inventory_rejects_missing_or_altered_box():
         audit._verify_whole_component_inventory({"component_obbs": definition["component_obbs"][:-1]}, reduction)
 
 
-def test_concrete_binding_uses_component_factory_without_starting_session(monkeypatch):
+def test_concrete_binding_rejects_surface_only_geometry_without_starting_session(monkeypatch):
     import types
 
     module = _module()
@@ -436,16 +436,11 @@ def test_concrete_binding_uses_component_factory_without_starting_session(monkey
     }
     review["review_sha256"] = component_binding._sha(review)
     paths = types.SimpleNamespace(repo_root=ROOT)
-    result, receipt = module.build_component_obb_concrete_binding(
-        paths, component_definition=definition, component_review=review,
-    )
-    assert result is backend
-    assert seen[0][0] is paths
-    assert isinstance(seen[0][1], module.ComponentObbRuntimeFactory)
-    assert receipt["component_definition_sha256"] == definition["binding_sha256"]
-    assert receipt["component_review_revalidation_required_at_native_construction"] is True
-    assert receipt["launch_admitted"] is False
-    assert receipt["isaac_started"] is False
+    with pytest.raises(module.ComponentObbClearanceError, match="solid containment is not certified"):
+        module.build_component_obb_concrete_binding(
+            paths, component_definition=definition, component_review=review,
+        )
+    assert seen == []
     changed = dict(definition)
     changed["component_obbs"] = []
     changed.pop("binding_sha256")

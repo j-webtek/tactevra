@@ -122,6 +122,20 @@ This establishes agreement between declared vendor and governed link frames;
 it does not check imported Isaac transforms, physical assembly, or omitted
 geometry.
 
+The retained `roarm_m3_fk_parity_20260929.json` binds the same governed USD
+and reports passing zero, home, and ready poses. Its Isaac probe reads the
+native link5 transform and combines it with the imported hand TCP transform;
+the worst reported TCP translation error is 0.000129 mm. This supports those
+three end-frame comparisons only: it does not compare every intermediate link
+frame, establish dynamics, or qualify the physical assembly.
+
+The concrete native binding now rejects the surface-partition definition even
+when its review is otherwise valid: surface separation alone cannot rule out
+nested solids. It cannot currently create a native worker, since its pinned
+definition builder has no solid-containment certification. The 14-box candidate
+must be integrated and independently validated before enabling this path; a
+self-declared flag or the offline audit fixture is not sufficient.
+
 ## Acceptance sequence
 
 1. Unit-test SAT separation, point-motion reduction, recursive refinement,

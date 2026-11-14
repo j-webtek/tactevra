@@ -275,6 +275,13 @@ def build_component_obb_concrete_binding(
     ):
         raise ComponentObbClearanceError("component definition or review is invalid")
 
+    # Triangle-partition boxes bound mesh surfaces, not necessarily the solid
+    # interior. A separated surface test alone can miss nested geometry. Do
+    # not create a native worker until a separately validated solid-containing
+    # definition is wired through this concrete binding.
+    if component_definition.get("solid_containment_certified") is not True:
+        raise ComponentObbClearanceError("component solid containment is not certified")
+
     factory = ComponentObbRuntimeFactory(
         base_factory=construct_runtime,
         component_definition=component_definition,
