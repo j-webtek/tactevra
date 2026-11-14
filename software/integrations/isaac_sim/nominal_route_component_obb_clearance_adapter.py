@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from nominal_route_component_obb_clearance import (
     ComponentObbClearanceError,
@@ -86,6 +86,50 @@ class ComponentObbClearanceRuntimeAdapter:
             start_joint_targets_rad=start_joint_targets_rad,
             end_joint_targets_rad=end_joint_targets_rad,
             reviewed_excluded_pairs=self._excluded_pairs,
+        )
+
+
+class ComponentObbRouteRuntime:
+    """Adapt an existing route runtime while replacing its clearance method.
+
+    The caller remains responsible for constructing and reviewing the native
+    runtimes and for authorizing any backend execution.
+    """
+
+    def __init__(self, *, route_runtime: Any, clearance: ComponentObbClearanceRuntimeAdapter) -> None:
+        if not all(
+            callable(getattr(route_runtime, name, None))
+            for name in ("regenerate_row", "measure_tool_key", "root_drift")
+        ) or not isinstance(clearance, ComponentObbClearanceRuntimeAdapter):
+            raise ComponentObbClearanceError("route runtime composition is invalid")
+        self._route_runtime = route_runtime
+        self._clearance = clearance
+
+    def regenerate_row(
+        self, *, source_row: Mapping[str, Any], previous_joint_targets_rad: Sequence[float]
+    ) -> Mapping[str, Any]:
+        return self._route_runtime.regenerate_row(
+            source_row=source_row, previous_joint_targets_rad=previous_joint_targets_rad
+        )
+
+    def measure_tool_key(
+        self, *, sequence: int, joint_targets_rad: Sequence[float], phase: str
+    ) -> Mapping[str, Any]:
+        return self._route_runtime.measure_tool_key(
+            sequence=sequence, joint_targets_rad=joint_targets_rad, phase=phase
+        )
+
+    def root_drift(self) -> Mapping[str, Any]:
+        return self._route_runtime.root_drift()
+
+    def check_continuous_clearance(
+        self, *, start_sequence: int, end_sequence: int,
+        start_joint_targets_rad: Sequence[float], end_joint_targets_rad: Sequence[float],
+    ) -> dict[str, object]:
+        return self._clearance.check_continuous_clearance(
+            start_sequence=start_sequence, end_sequence=end_sequence,
+            start_joint_targets_rad=start_joint_targets_rad,
+            end_joint_targets_rad=end_joint_targets_rad,
         )
 
 

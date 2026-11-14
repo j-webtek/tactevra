@@ -137,3 +137,56 @@ def test_backend_protocol_requires_bound_exclusions():
         module.ComponentObbClearanceRuntimeAdapter(
             component_runtime=component, environment_runtime=_EnvironmentRuntime(module)
         )
+
+
+def test_route_wrapper_delegates_and_uses_new_clearance():
+    module = _module()
+    class Route:
+        def regenerate_row(self, **kwargs):
+            return kwargs
+        def measure_tool_key(self, **kwargs):
+            return kwargs
+        def root_drift(self):
+            return {"determinate": True}
+        def check_continuous_clearance(self, **kwargs):
+            raise AssertionError("old sphere self-test must not run")
+
+    environment = _EnvironmentRuntime(module)
+    clearance = module.ComponentObbClearanceRuntimeAdapter(
+        component_runtime=_ComponentRuntime(module), environment_runtime=environment
+    )
+    runtime = module.ComponentObbRouteRuntime(route_runtime=Route(), clearance=clearance)
+    assert runtime.regenerate_row(source_row={"sequence": 1}, previous_joint_targets_rad=[0] * 6)["source_row"] == {"sequence": 1}
+    assert runtime.measure_tool_key(sequence=1, joint_targets_rad=[0] * 6, phase="hover")["phase"] == "hover"
+    assert runtime.root_drift()["determinate"] is True
+    assert runtime.check_continuous_clearance(
+        start_sequence=1, end_sequence=2,
+        start_joint_targets_rad=[0] * 6, end_joint_targets_rad=[0] * 6,
+    )["continuous"] is True
+    assert environment.sweeps == 2
+
+
+def test_backend_executes_all_segments_through_composed_clearance(tmp_path):
+    module = _module()
+    fixture_path = ROOT / "software/tests/unit/test_nominal_route_physics_backend.py"
+    spec = importlib.util.spec_from_file_location("arm255_backend_fixture", fixture_path)
+    assert spec is not None and spec.loader is not None
+    fixtures = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fixtures)
+    backend, _, definition, route, _, output = fixtures._bundle(tmp_path)
+    environment = _EnvironmentRuntime(module)
+    clearance = module.ComponentObbClearanceRuntimeAdapter(
+        component_runtime=_ComponentRuntime(module), environment_runtime=environment
+    )
+    runtime = module.ComponentObbRouteRuntime(
+        route_runtime=fixtures.PassingRuntime(), clearance=clearance
+    )
+
+    result = backend.execute_backend(
+        definition, route, backend_review=fixtures._accepted_review(backend, definition),
+        output_directory=output, runtime=runtime,
+    )
+
+    assert result["continuous_clearance_segment_count"] == 288
+    assert environment.sweeps == 576
+    assert result["hardware_access"] is False
