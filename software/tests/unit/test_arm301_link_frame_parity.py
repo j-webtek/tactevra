@@ -183,6 +183,8 @@ def test_single_attempt_diagnostic_retains_result_and_refuses_retry(tmp_path):
     assert session.calls == ["start", "load", "initialize", "shutdown"]
     assert json.loads((target / "claim.json").read_text())["status"] == "CLAIMED"
     assert json.loads((target / "result.json").read_text())["comparison_receipt"]["capture_provenance_verified"] is False
+    assert json.loads((target / "result.json").read_text())["shutdown_status"] == "NOT_YET_CONFIRMED"
+    assert json.loads((target / "shutdown.json").read_text())["status"] == "SHUTDOWN_RETURNED"
     with pytest.raises(FileExistsError):
         run_snapshot_diagnostic(session, urdf, target)
     assert session.calls.count("start") == 1
@@ -195,6 +197,29 @@ def test_single_attempt_diagnostic_retains_result_and_refuses_retry(tmp_path):
     result = run_snapshot_diagnostic(ShutdownFailure(fail=True), urdf, tmp_path / "shutdown-failure")
     assert result["status"] == "FAIL_SHUTDOWN"
     assert result["prior_result"]["status"] == "FAIL_DIAGNOSTIC"
+    assert json.loads((tmp_path / "shutdown-failure" / "result.json").read_text())["status"] == "FAIL_DIAGNOSTIC"
+    assert json.loads((tmp_path / "shutdown-failure" / "shutdown.json").read_text())["status"] == "FAIL_SHUTDOWN"
+
+
+def test_abrupt_shutdown_retains_provisional_result(tmp_path):
+    script = '''
+import os, sys
+from pathlib import Path
+sys.path.insert(0, str(Path.cwd() / "software/integrations/isaac_sim"))
+sys.path.insert(0, str(Path.cwd() / "software/src"))
+from arm301_link_frame_parity import run_snapshot_diagnostic
+class Session:
+    def start_headless(self): raise ValueError("startup failed")
+    def shutdown(self): os._exit(0)
+run_snapshot_diagnostic(Session(), Path("software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"), Path(sys.argv[1]))
+'''
+    target = tmp_path / "abrupt"
+    outcome = subprocess.run([sys.executable, "-c", script, str(target)], cwd=ROOT, check=False)
+    assert outcome.returncode == 0
+    result = json.loads((target / "result.json").read_text())
+    assert result["status"] == "FAIL_DIAGNOSTIC"
+    assert result["shutdown_status"] == "NOT_YET_CONFIRMED"
+    assert not (target / "shutdown.json").exists()
 
 
 def test_pinned_diagnostic_wires_inputs_and_retains_source_hashes(tmp_path, monkeypatch):
