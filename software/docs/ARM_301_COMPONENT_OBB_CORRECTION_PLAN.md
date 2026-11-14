@@ -172,6 +172,10 @@ reads and rejects a change, but these separate reads are not atomic. The caller
 must establish a stationary simulation session. The native session wrapper now
 exposes read-only joint state; its source hash has changed, so previously pinned
 session reviews cannot be reused as authority for this updated implementation.
+An offline receipt builder also binds the snapshot, comparison, URDF, and
+comparator source by hash and rechecks the two captured joint states. It does
+not establish where a supplied snapshot came from; provenance and authorization
+must be supplied by the eventual reviewed diagnostic.
 
 The concrete native binding now rejects the surface-partition definition even
 when its review is otherwise valid: surface separation alone cannot rule out

@@ -6,6 +6,8 @@ qualify base-to-workcell placement.
 """
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from pathlib import Path
 from typing import Sequence
@@ -111,3 +113,28 @@ def capture_and_compare(articulation: object, urdf: Path) -> dict:
         ("link_names", "joint_names", "joint_positions_rad", "native_transforms")})
     return {"snapshot": snapshot, "comparison": comparison,
             "isaac_started_by_helper": False, "hardware_access_by_helper": False}
+
+
+def build_snapshot_receipt(urdf: Path, snapshot: dict) -> dict:
+    """Produce a hash-bound offline comparison without asserting capture provenance."""
+    keys = {"link_names", "joint_names", "joint_positions_rad", "joint_positions_after_rad",
+            "native_transforms", "maximum_joint_change_rad", "scope"}
+    if set(snapshot) != keys or snapshot["scope"] != "read-only non-atomic simulation snapshot":
+        raise ValueError("snapshot schema changed")
+    before = np.asarray(snapshot["joint_positions_rad"], dtype=float)
+    after = np.asarray(snapshot["joint_positions_after_rad"], dtype=float)
+    limit = snapshot["maximum_joint_change_rad"]
+    if (before.shape != (6,) or after.shape != (6,) or not np.isfinite(before).all()
+        or not np.isfinite(after).all() or not isinstance(limit, (int, float))
+        or isinstance(limit, bool) or not math.isfinite(limit) or limit < 0 or limit > 1e-7
+        or np.max(np.abs(before - after)) > limit):
+        raise ValueError("snapshot joint consistency invalid")
+    comparison = compare_link_frames(urdf, **{key: snapshot[key] for key in
+        ("link_names", "joint_names", "joint_positions_rad", "native_transforms")})
+    receipt = {"schema": "tactevra.arm301.offline_link_frame_comparison.v1",
+        "snapshot": snapshot, "comparison": comparison, "urdf_sha256": _file_sha(urdf),
+        "comparator_sha256": _file_sha(Path(__file__)),
+        "capture_provenance_verified": False, "isaac_started_by_helper": False,
+        "hardware_access_by_helper": False}
+    encoded = json.dumps(receipt, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
+    return {**receipt, "receipt_sha256": hashlib.sha256(encoded).hexdigest()}

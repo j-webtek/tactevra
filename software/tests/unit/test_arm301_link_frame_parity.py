@@ -8,7 +8,7 @@ Rotation = pytest.importorskip("scipy.spatial.transform").Rotation
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "software/integrations/isaac_sim"))
 sys.path.insert(0, str(ROOT / "software/src"))
-from arm301_link_frame_parity import capture_and_compare, capture_link_snapshot, compare_link_frames
+from arm301_link_frame_parity import build_snapshot_receipt, capture_and_compare, capture_link_snapshot, compare_link_frames
 from arm301_source_route_obb_audit import _OfflineArticulation
 from nominal_route_native_component_obb_binding import EXPECTED_DOF_NAMES, NATIVE_LINKS
 
@@ -67,6 +67,14 @@ def test_capture_is_read_only_and_rejects_changes():
     assert compare_link_frames(urdf, **{k: snapshot[k] for k in
         ("link_names", "joint_names", "joint_positions_rad", "native_transforms")})["parity_pass"]
     assert capture_and_compare(articulation, urdf)["comparison"]["parity_pass"]
+    receipt = build_snapshot_receipt(urdf, snapshot)
+    assert receipt["comparison"]["parity_pass"]
+    assert receipt["capture_provenance_verified"] is False
+    assert len(receipt["receipt_sha256"]) == 64
+    changed_snapshot = dict(snapshot)
+    changed_snapshot["joint_positions_after_rad"] = [0.01] + [0.0] * 5
+    with pytest.raises(ValueError, match="consistency"):
+        build_snapshot_receipt(urdf, changed_snapshot)
     articulation.changed = True
     with pytest.raises(ValueError, match="changed during snapshot"):
         capture_link_snapshot(articulation)
