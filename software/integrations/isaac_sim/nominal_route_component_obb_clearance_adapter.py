@@ -220,6 +220,65 @@ class ComponentObbRuntimeFactory:
         )
 
 
+def build_component_obb_concrete_binding(
+    paths: Any, *, component_definition: Mapping[str, Any],
+    component_review: Mapping[str, Any],
+) -> tuple[Any, dict[str, object]]:
+    """Build a deferred worker with component clearance, without launching it.
+
+    The legacy builder retains responsibility for validating pinned scene,
+    route, worker, and factory artifacts. Component review and definition are
+    checked again when the native runtime is constructed after a separate
+    authorized claim; this function does not manufacture either record.
+    """
+    from nominal_route_concrete_native_attempt_binding import (
+        build_concrete_native_attempt_binding,
+    )
+    from nominal_route_native_runtime_factory import construct_runtime
+    from nominal_route_native_component_obb_binding import (
+        DEFINITION_SCHEMA, REVIEW_SCHEMA, _sha,
+    )
+
+    binding_hash = component_definition.get("binding_sha256")
+    review_hash = component_review.get("review_sha256")
+    if (
+        component_definition.get("schema") != DEFINITION_SCHEMA
+        or component_definition.get("status") != "READY_FOR_INDEPENDENT_COMPONENT_OBB_BINDING_REVIEW"
+        or binding_hash != _sha({k: v for k, v in component_definition.items() if k != "binding_sha256"})
+        or component_review.get("schema") != REVIEW_SCHEMA
+        or component_review.get("status") != "ACCEPTED_FOR_COMPONENT_OBB_RUNTIME_INTEGRATION"
+        or component_review.get("source_binding_sha256") != binding_hash
+        or component_review.get("runtime_instantiation_admitted") is not True
+        or component_review.get("launch_admitted") is not False
+        or component_review.get("hardware_access") is not False
+        or component_review.get("physical_authority") is not False
+        or review_hash != _sha({k: v for k, v in component_review.items() if k != "review_sha256"})
+    ):
+        raise ComponentObbClearanceError("component definition or review is invalid")
+
+    factory = ComponentObbRuntimeFactory(
+        base_factory=construct_runtime,
+        component_definition=component_definition,
+        component_review=component_review,
+    )
+    concrete = build_concrete_native_attempt_binding(paths, runtime_factory=factory)
+    receipt = {
+        "schema": "tactevra.arm301.component_obb_concrete_binding.v1",
+        "status": "PREPARED_FOR_INDEPENDENT_REVIEW",
+        "legacy_binding_id": concrete.receipt.get("binding_id"),
+        "component_definition_sha256": component_definition.get("binding_sha256"),
+        "component_review_sha256": component_review.get("review_sha256"),
+        "component_review_validated_at_binding": True,
+        "component_review_validated_at_native_construction": True,
+        "launch_admitted": False,
+        "attempt_consumed": False,
+        "isaac_started": False,
+        "hardware_access": False,
+        "physical_authority": False,
+    }
+    return concrete.backend, receipt
+
+
 def check_composed_continuous_clearance(
     *,
     component_runtime: ComponentObbRuntime,

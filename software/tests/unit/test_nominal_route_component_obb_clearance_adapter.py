@@ -359,3 +359,50 @@ def test_offline_audit_rejects_unpinned_route(tmp_path):
     spec.loader.exec_module(module)
     with pytest.raises(ValueError, match="route file digest changed"):
         module.audit(route)
+
+
+def test_concrete_binding_uses_component_factory_without_starting_session(monkeypatch):
+    import types
+
+    module = _module()
+    seen = []
+    backend = object()
+    def base_factory(*_args, **_kwargs):
+        raise AssertionError("deferred factory must not run during construction")
+    def concrete_builder(paths, *, runtime_factory):
+        seen.append((paths, runtime_factory))
+        return types.SimpleNamespace(backend=backend, receipt={"binding_id": "legacy"})
+    monkeypatch.setitem(sys.modules, "nominal_route_concrete_native_attempt_binding",
+                        types.SimpleNamespace(build_concrete_native_attempt_binding=concrete_builder))
+    monkeypatch.setitem(sys.modules, "nominal_route_native_runtime_factory",
+                        types.SimpleNamespace(construct_runtime=base_factory))
+    import nominal_route_native_component_obb_binding as component_binding
+    definition = {
+        "schema": component_binding.DEFINITION_SCHEMA,
+        "status": "READY_FOR_INDEPENDENT_COMPONENT_OBB_BINDING_REVIEW",
+    }
+    definition["binding_sha256"] = component_binding._sha(definition)
+    review = {
+        "schema": component_binding.REVIEW_SCHEMA,
+        "status": "ACCEPTED_FOR_COMPONENT_OBB_RUNTIME_INTEGRATION",
+        "source_binding_sha256": definition["binding_sha256"],
+        "runtime_instantiation_admitted": True, "launch_admitted": False,
+        "hardware_access": False, "physical_authority": False,
+    }
+    review["review_sha256"] = component_binding._sha(review)
+    paths = object()
+    result, receipt = module.build_component_obb_concrete_binding(
+        paths, component_definition=definition, component_review=review,
+    )
+    assert result is backend
+    assert seen[0][0] is paths
+    assert isinstance(seen[0][1], module.ComponentObbRuntimeFactory)
+    assert receipt["component_definition_sha256"] == definition["binding_sha256"]
+    assert receipt["component_review_validated_at_native_construction"] is True
+    assert receipt["launch_admitted"] is False
+    assert receipt["isaac_started"] is False
+    review["hardware_access"] = True
+    with pytest.raises(module.ComponentObbClearanceError, match="review is invalid"):
+        module.build_component_obb_concrete_binding(
+            paths, component_definition=definition, component_review=review,
+        )
