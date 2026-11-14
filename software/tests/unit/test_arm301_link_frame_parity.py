@@ -8,7 +8,8 @@ Rotation = pytest.importorskip("scipy.spatial.transform").Rotation
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / "software/integrations/isaac_sim"))
 sys.path.insert(0, str(ROOT / "software/src"))
-from arm301_link_frame_parity import build_snapshot_receipt, capture_and_compare, capture_link_snapshot, compare_link_frames
+from arm301_link_frame_parity import (build_snapshot_receipt, capture_and_compare,
+    capture_link_snapshot, compare_link_frames, compare_stationary_session)
 from arm301_source_route_obb_audit import _OfflineArticulation
 from nominal_route_native_component_obb_binding import EXPECTED_DOF_NAMES, NATIVE_LINKS
 
@@ -95,3 +96,36 @@ def test_capture_rejects_changed_joint_state_with_reused_native_buffer():
             return self.buffer
     with pytest.raises(ValueError, match="changed during snapshot"):
         capture_link_snapshot(ReusedBuffer())
+
+
+def test_stationary_session_comparison_never_starts_or_steps():
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    class ReadOnlyArticulation(_OfflineArticulation):
+        def __init__(self):
+            super().__init__(urdf)
+            self.positions = [0.0] * 6
+        def get_dof_positions(self):
+            return [self.positions]
+    class Session:
+        physics_steps = 0
+        def native_objects(self):
+            return {"articulation": ReadOnlyArticulation()}
+        def start_headless(self):
+            raise AssertionError("comparison must not start Isaac")
+        def settle_scene(self):
+            raise AssertionError("comparison must not step physics")
+    session = Session()
+    receipt = compare_stationary_session(session, urdf)
+    assert receipt["comparison"]["parity_pass"]
+    assert receipt["capture_provenance_verified"] is False
+    session.physics_steps = 1
+    with pytest.raises(ValueError, match="zero physics steps"):
+        compare_stationary_session(session, urdf)
+    session.physics_steps = 0
+    class AdvancingArticulation(ReadOnlyArticulation):
+        def get_link_transforms(self):
+            session.physics_steps = 1
+            return super().get_link_transforms()
+    session.native_objects = lambda: {"articulation": AdvancingArticulation()}
+    with pytest.raises(ValueError, match="advanced during snapshot"):
+        compare_stationary_session(session, urdf)

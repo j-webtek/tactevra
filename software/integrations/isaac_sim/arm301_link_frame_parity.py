@@ -138,3 +138,21 @@ def build_snapshot_receipt(urdf: Path, snapshot: dict) -> dict:
         "hardware_access_by_helper": False}
     encoded = json.dumps(receipt, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     return {**receipt, "receipt_sha256": hashlib.sha256(encoded).hexdigest()}
+
+
+def compare_stationary_session(session: object, urdf: Path) -> dict:
+    """Compare one already-initialized session without starting or stepping it.
+
+    The caller owns session lifecycle and authorization. The returned receipt
+    still does not independently verify the session's identity or provenance.
+    """
+    before_steps = session.physics_steps
+    if type(before_steps) is not int or before_steps != 0:
+        raise ValueError("session must report zero physics steps")
+    native = session.native_objects()
+    if not isinstance(native, dict) or "articulation" not in native:
+        raise ValueError("session articulation unavailable")
+    snapshot = capture_link_snapshot(native["articulation"])
+    if session.physics_steps != before_steps:
+        raise ValueError("session advanced during snapshot")
+    return build_snapshot_receipt(urdf, snapshot)

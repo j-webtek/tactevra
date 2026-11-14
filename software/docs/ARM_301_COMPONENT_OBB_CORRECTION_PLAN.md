@@ -176,6 +176,10 @@ An offline receipt builder also binds the snapshot, comparison, URDF, and
 comparator source by hash and rechecks the two captured joint states. It does
 not establish where a supplied snapshot came from; provenance and authorization
 must be supplied by the eventual reviewed diagnostic.
+The session-level helper consumes an already initialized session, requires zero
+reported physics steps before and after the read, and never starts or steps the
+session. Its simulated tests cover a step occurring during capture. It does not
+itself authenticate the session or replace the future capture procedure.
 
 The concrete native binding now rejects the surface-partition definition even
 when its review is otherwise valid: surface separation alone cannot rule out
