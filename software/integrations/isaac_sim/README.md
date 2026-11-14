@@ -526,6 +526,18 @@ governed direct-joint pairs. The separate
 free-space agreement for all six `Never` pairs across the same finite corpus.
 Neither review installs or authorizes an exclusion.
 
+The later ARM-300 route attempt confirmed why pair exclusions must remain
+separate from geometric fidelity: its whole-link sphere model stopped on the
+otherwise-free `base_link/link2` pair. The successor
+[`nominal_route_component_obb_clearance.py`](nominal_route_component_obb_clearance.py)
+implements an Isaac-import-free continuous proof over the retained
+mesh-containing component OBBs. Its native public-transform binding is in
+[`nominal_route_native_component_obb_binding.py`](nominal_route_native_component_obb_binding.py).
+The binding promotes vertex containment only; it does not promote the finite
+replay or SRDF `Never` pairs. See the
+[`ARM-301 correction plan`](../../docs/ARM_301_COMPONENT_OBB_CORRECTION_PLAN.md)
+for the proof and acceptance sequence.
+
 A held-out replay covers 256 Halton poses at indices 1001 through 1256. Its
 [assessment](evidence/roarm_m3_collision_policy_stress_assessment_20261005.json)
 finds zero observed false negatives and no contradiction of the six `Never`
