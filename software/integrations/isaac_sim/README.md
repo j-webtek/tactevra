@@ -4605,3 +4605,16 @@ rejects retry loops, multiple claimant calls, changed evidence, changed source
 bytes, or mismatched interpreter/repository identity. Static review and unit
 tests are zero-authority: they do not collect live gates, claim an attempt,
 start Isaac, step physics, play a trajectory, or access hardware.
+
+The separately authorized ARM-299 attempt is now terminal and immutable. Its
+fresh EULA and memory preflights passed, Isaac Sim 6.1 started on the qualified
+interpreter, and the worker retained `FAILED_RETAINED_NO_RETRY` before route
+completion because the conservative sweep binding tried to recover a private
+`_physics_articulation_view` from the already narrowed
+`IsaacArticulationLinkView`. That wrapper intentionally exposes the reviewed
+public `get_link_transforms()` protocol instead of the private Isaac object.
+The binding and its independent conformance review now use that public
+protocol directly, with a regression fixture that has no private transform
+view. This correction cannot revive or replay ARM-299; any simulator validation
+requires newly numbered, source-pinned, independently reviewed evidence and a
+fresh exact authorization.
