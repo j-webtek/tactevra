@@ -377,11 +377,16 @@ def test_concrete_binding_uses_component_factory_without_starting_session(monkey
     monkeypatch.setitem(sys.modules, "nominal_route_native_runtime_factory",
                         types.SimpleNamespace(construct_runtime=base_factory))
     import nominal_route_native_component_obb_binding as component_binding
-    definition = {
-        "schema": component_binding.DEFINITION_SCHEMA,
-        "status": "READY_FOR_INDEPENDENT_COMPONENT_OBB_BINDING_REVIEW",
-    }
-    definition["binding_sha256"] = component_binding._sha(definition)
+    import json
+    partition = INTEGRATION / "evidence/roarm_m3_triangle_partition_link2_20261005.json"
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    source = INTEGRATION / "nominal_route_native_component_obb_binding.py"
+    definition = component_binding.build_definition(
+        json.loads(partition.read_bytes()), partition_file_sha256=component_binding._file_sha(partition),
+        urdf_file_sha256=component_binding._file_sha(urdf),
+        binding_source_file_sha256=component_binding._file_sha(source),
+        urdf_text=urdf.read_text(encoding="utf-8"),
+    )
     review = {
         "schema": component_binding.REVIEW_SCHEMA,
         "status": "ACCEPTED_FOR_COMPONENT_OBB_RUNTIME_INTEGRATION",
@@ -390,7 +395,7 @@ def test_concrete_binding_uses_component_factory_without_starting_session(monkey
         "hardware_access": False, "physical_authority": False,
     }
     review["review_sha256"] = component_binding._sha(review)
-    paths = object()
+    paths = types.SimpleNamespace(repo_root=ROOT)
     result, receipt = module.build_component_obb_concrete_binding(
         paths, component_definition=definition, component_review=review,
     )
@@ -401,6 +406,18 @@ def test_concrete_binding_uses_component_factory_without_starting_session(monkey
     assert receipt["component_review_revalidation_required_at_native_construction"] is True
     assert receipt["launch_admitted"] is False
     assert receipt["isaac_started"] is False
+    changed = dict(definition)
+    changed["component_obbs"] = []
+    changed.pop("binding_sha256")
+    changed["binding_sha256"] = component_binding._sha(changed)
+    changed_review = dict(review)
+    changed_review["source_binding_sha256"] = changed["binding_sha256"]
+    changed_review.pop("review_sha256")
+    changed_review["review_sha256"] = component_binding._sha(changed_review)
+    with pytest.raises(module.ComponentObbClearanceError, match="review is invalid"):
+        module.build_component_obb_concrete_binding(
+            paths, component_definition=changed, component_review=changed_review,
+        )
     review["hardware_access"] = True
     with pytest.raises(module.ComponentObbClearanceError, match="review is invalid"):
         module.build_component_obb_concrete_binding(

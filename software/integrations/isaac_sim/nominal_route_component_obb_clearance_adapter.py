@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from typing import Any, Mapping, Sequence
 
 from nominal_route_component_obb_clearance import (
@@ -236,13 +238,30 @@ def build_component_obb_concrete_binding(
     )
     from nominal_route_native_runtime_factory import construct_runtime
     from nominal_route_native_component_obb_binding import (
-        DEFINITION_SCHEMA, REVIEW_SCHEMA, _sha,
+        DEFINITION_SCHEMA, REVIEW_SCHEMA, _sha, build_definition,
     )
+
+    repo_root = paths.repo_root
+    integration = repo_root / "software/integrations/isaac_sim"
+    partition = integration / "evidence/roarm_m3_triangle_partition_link2_20261005.json"
+    binding_source = integration / "nominal_route_native_component_obb_binding.py"
+    urdf = repo_root / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    def digest(path: Any) -> str:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    try:
+        expected_definition = build_definition(
+            json.loads(partition.read_bytes()), partition_file_sha256=digest(partition),
+            urdf_file_sha256=digest(urdf), binding_source_file_sha256=digest(binding_source),
+            urdf_text=urdf.read_text(encoding="utf-8"),
+        )
+    except (OSError, ValueError) as exc:
+        raise ComponentObbClearanceError("component source inputs are invalid") from exc
 
     binding_hash = component_definition.get("binding_sha256")
     review_hash = component_review.get("review_sha256")
     if (
-        component_definition.get("schema") != DEFINITION_SCHEMA
+        component_definition != expected_definition
+        or component_definition.get("schema") != DEFINITION_SCHEMA
         or component_definition.get("status") != "READY_FOR_INDEPENDENT_COMPONENT_OBB_BINDING_REVIEW"
         or binding_hash != _sha({k: v for k, v in component_definition.items() if k != "binding_sha256"})
         or component_review.get("schema") != REVIEW_SCHEMA
