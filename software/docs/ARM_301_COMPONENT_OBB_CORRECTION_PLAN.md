@@ -111,6 +111,17 @@ direct-joint pairs remain excluded. This does not prove that the physical robot,
 attachments, or omitted geometry fit the surrogate, or that the mesh-to-robot
 frame alignment is correct. The candidate is not installed into the worker.
 
+An offline comparison of the pinned vendor Xacro at commit `40dbd84` with the
+governed URDF found matching parent, child, type, origin, and movable-axis
+values for the seven joints from world through gripper. All seven vendor link
+visual and collision meshes have zero local translation and rotation and use
+the 0.001 mesh scale; their pinned mesh hashes match the retained inventory.
+The local comparison receipt has canonical SHA-256
+`1ac0e4c4616c49d54f0d706468efefd1ffd094aba2fe0c7df5d9e036f1e7e11a`.
+This establishes agreement between declared vendor and governed link frames;
+it does not check imported Isaac transforms, physical assembly, or omitted
+geometry.
+
 ## Acceptance sequence
 
 1. Unit-test SAT separation, point-motion reduction, recursive refinement,
