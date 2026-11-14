@@ -175,9 +175,7 @@ frame, establish dynamics, or qualify the physical assembly.
 native snapshot: it checks all seven link poses against URDF forward kinematics
 at the captured six-joint state, relative to the captured base pose. Synthetic
 tests exercise translation, rotation, ordering, and invalid-quaternion errors.
-No native snapshot has been captured by this comparator, and factoring out the
-base means it cannot verify base placement in the workcell. A separately
-authorized diagnostic and reviewed capture procedure are still needed.
+Factoring out the base means it cannot verify base placement in the workcell.
 The read-only snapshot helper brackets the link read with two joint-state
 reads and rejects a change, but these separate reads are not atomic. The caller
 must establish a stationary simulation session. The native session wrapper now
@@ -207,6 +205,22 @@ with shutdown terminating the process before that write, but does not expose
 the unrecorded comparison or establish its outcome. The output is consumed and
 must not be retried. The pre-shutdown write and abrupt-process-exit test address
 that loss mechanism offline; they do not establish a successful Isaac run.
+
+The separately authorized `arm301-link-frame-diagnostic-002` retained a
+comparison before fast shutdown. All seven links passed at its one observed
+near-zero joint pose; the maximum translation error was 0.000111 mm, below the
+0.1 mm threshold. The driver reported zero physics steps. The result's
+canonical SHA-256 is
+`efe7af46b713c1cd702f22115c5a222a8af55e672f396d62beb1ffc32ff3164d`;
+its comparison receipt is
+`18b6ad78551a057dc8cf66655e78e8c5bf67cd32db9bf3a7e0611fc9d7297f07`.
+An offline recomputation from the retained snapshot produced the same receipt
+hash. A separate local observation record is
+`09f9b8289a1fa500bda93136415556cc271f7bef2d61d8868d40cc8f90772004`.
+The result records capture provenance as unverified, and fast shutdown did not
+return to write `shutdown.json`, although the process exited. This is
+single-pose, base-relative simulation evidence; it does not establish route
+clearance, dynamic behavior, workcell alignment, or physical safety.
 The `--run-diagnostic` mode constructs the existing Isaac driver, which
 validates its pinned robot USD, layout, route and mechanics profile, and passes
 their hashes and the diagnostic and driver source hashes into the result. The
