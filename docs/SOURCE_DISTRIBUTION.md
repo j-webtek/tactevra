@@ -1834,3 +1834,7 @@ The source archive includes the offline SPACE-route component-OBB audit command
 `software/integrations/isaac_sim/arm301_source_route_obb_audit.py`. The retained
 route and generated receipt remain external runtime artifacts. This addition
 accounts for one tracked source file in the archive ceiling.
+
+The reviewed-component backend preparation CLI adds one Python source file,
+raising the tracked-file ceiling to 6,927. Review inputs and run outputs stay
+in the external artifact store.

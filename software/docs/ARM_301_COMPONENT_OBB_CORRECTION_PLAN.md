@@ -259,3 +259,21 @@ rather than silently skipping for a missing package.
 
 Any failure remains fail-closed. ARM-300 stays immutable and no authorization
 from ARM-300 transfers to ARM-301.
+
+### Preparing the reviewed SPACE backend offline
+
+With the integration dependencies available and `software/src` on PYTHONPATH,
+run the following from the repository root. Supply the SHA-256 of the exact
+review file selected during independent review. The review must identify the
+reconstructed whole-component simulation geometry and its scope.
+
+```text
+python software/integrations/isaac_sim/arm301_prepare_component_backend.py --repo-root . --artifact-root <issue190-artifacts> --governed-attempt-directory <unused-attempt-path> --component-review <review.json> --component-review-sha256 <review-file-sha256>
+```
+
+The command prints the preparation receipt. It uses the retained robot USD,
+SPACE route, and canonical IK inputs, and leaves the attempt path unused.
+A future governed simulation launcher can pass the same
+`ReviewedComponentBindingBuilder` the preflight paths and use the returned
+backend after a fresh claim. This preparation leaves native route clearance,
+simulated typing, and physical transfer outstanding.
