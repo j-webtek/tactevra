@@ -89,7 +89,34 @@ def _verify_whole_component_inventory(definition: dict, reduction: dict) -> None
         raise ValueError("whole-component box inventory differs from reduction")
 
 
-def audit(route: Path, *, whole_components: bool = False) -> dict:
+def _regenerated_rows(route: dict, artifacts: Path) -> tuple[list, dict]:
+    from nominal_route_arm298_continuity_qualification import (
+        EXPECTED_ADAPTER_FILE_SHA256, EXPECTED_ADAPTER_REVIEW_FILE_SHA256,
+        _production_runtime, evaluate_route_continuity,
+    )
+
+    definition = artifacts / "arm267-canonical-ik-row-adapter-001/adapter.json"
+    review = artifacts / "arm267-canonical-ik-row-adapter-review-001/review.json"
+    if (_file_sha(definition) != EXPECTED_ADAPTER_FILE_SHA256
+            or _file_sha(review) != EXPECTED_ADAPTER_REVIEW_FILE_SHA256):
+        raise ValueError("canonical IK adapter evidence changed")
+    solver = _production_runtime(ROOT, json.loads(definition.read_bytes()), json.loads(review.read_bytes()))
+    rows = list(route["joint_targets"])
+
+    class RecordingSolver:
+        def regenerate_row(self, **kwargs):
+            result = solver.regenerate_row(**kwargs)
+            rows[result["sequence"]] = dict(result)
+            return result
+
+    continuity = evaluate_route_continuity(route, RecordingSolver())
+    expected = "7d5b329e0a29a308f5e4fa9e42a3d4f9173560a61b32fd8d09795102d946919c"
+    if continuity["canonical_rows_sha256"] != expected:
+        raise ValueError("canonical IK rows differ from retained ARM-298 qualification")
+    return rows, continuity
+
+
+def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | None = None) -> dict:
     integration = Path(__file__).resolve().parent
     urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
     partition = integration / "evidence/roarm_m3_triangle_partition_link2_20261005.json"
@@ -123,6 +150,16 @@ def audit(route: Path, *, whole_components: bool = False) -> dict:
     runtime = NativeComponentObbRuntime(
         definition, binding_review=review, articulation=_OfflineArticulation(urdf)
     )
+    regenerated = {}
+    if ik_artifacts is not None:
+        if not whole_components:
+            raise ValueError("regenerated route audit requires whole-component geometry")
+        rows, continuity = _regenerated_rows(data, ik_artifacts)
+        regenerated = {
+            "route_input": "CANONICAL_IK_653_THROUGH_940_SOURCE_EXIT_941",
+            "continuity": continuity,
+            "screened_joint_rows_sha256": _sha([row["joint_position_target_rad"] for row in rows[653:942]]),
+        }
     outcomes = []
     for sequence in range(653, 941):
         left, right = rows[sequence], rows[sequence + 1]
@@ -144,7 +181,7 @@ def audit(route: Path, *, whole_components: bool = False) -> dict:
                if whole_components else {})},
         "component_definition_sha256": definition["binding_sha256"],
         "geometry_candidate": "WHOLE_COMPONENT_BOXES" if whole_components else "TRIANGLE_PARTITION_BOXES",
-        "component_count": len(definition["component_obbs"]),
+        "component_count": len(definition["component_obbs"]), **regenerated,
         "episode_id": EPISODE, "first_sequence": 653, "last_sequence": 941,
         "segment_count": len(outcomes),
         "intervals_inspected": sum(row["intervals_inspected"] for row in outcomes),
@@ -156,13 +193,13 @@ def audit(route: Path, *, whole_components: bool = False) -> dict:
         "clearance_margin_mm": 0.5, "python_version": sys.version.split()[0],
         "scipy_version": scipy.__version__, "isaac_started": False,
         "hardware_access": False, "physical_authority": False,
-        "scope": ("SOURCE_ROUTE_NONADJACENT_CONVEX_HULL_SURROGATE_CLEARANCE"
+        "scope": ("REGENERATED_ROUTE_NONADJACENT_CONVEX_HULL_SURROGATE_CLEARANCE" if regenerated else "SOURCE_ROUTE_NONADJACENT_CONVEX_HULL_SURROGATE_CLEARANCE"
                   if whole_components else "SOURCE_ROUTE_NONADJACENT_MESH_SURFACE_CLEARANCE"),
         "modeled_solid_semantics": (
             "CONVEX_HULL_OF_EACH_SOURCE_COMPONENT_OR_WHOLE_LINK_FALLBACK"
             if whole_components else "SURFACE_ONLY"
         ),
-        "limitations": ["offline URDF FK", "not regenerated IK", "no environment proof",
+        "limitations": ["offline URDF FK", *([] if regenerated else ["not regenerated IK"]), "no environment proof",
                         "no Isaac validation", "local review is not independent",
                         "mesh-to-robot frame alignment not established by this audit",
                         "physical robot, attachments and omitted geometry not bounded",
@@ -176,8 +213,9 @@ def main() -> int:
     parser.add_argument("--route", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--whole-components", action="store_true", help="audit exploratory whole-component boxes")
+    parser.add_argument("--ik-artifacts", type=Path, help="regenerate the governed IK window using retained adapter artifacts")
     args = parser.parse_args()
-    result = audit(args.route, whole_components=args.whole_components)
+    result = audit(args.route, whole_components=args.whole_components, ik_artifacts=args.ik_artifacts)
     with args.output.open("x", encoding="utf-8", newline="\n") as stream:
         json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
         stream.write("\n")

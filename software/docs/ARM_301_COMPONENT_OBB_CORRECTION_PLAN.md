@@ -259,3 +259,21 @@ rather than silently skipping for a missing package.
 
 Any failure remains fail-closed. ARM-300 stays immutable and no authorization
 from ARM-300 transfers to ARM-301.
+
+### Regenerated SPACE route self-clearance
+
+Pass `--whole-components --ik-artifacts <issue190-artifact-root>` to
+`arm301_source_route_obb_audit.py` with the pinned route and a fresh output
+file. The audit uses the production IK adapter for rows 653 through 940 and
+the retained exit row 941, matching the backend's clearance window. On
+Windows with Python 3.12.0 and SciPy 1.18.1 the 287 governed IK rows
+reproduced the ARM-298 qualification digest. All 288 adjacent segments
+passed the 0.5 mm self-clearance threshold. Four segments required
+subdivision. The minimum certified separation bound was 10.963295 mm.
+The screened joint rows hash to
+`11abc2137bdfbf71e1d6cc485e07f959c4e5116008d2461903242efc3e3b1888`.
+The retained receipt has canonical digest
+`d3108543f16eb154bf0112c8316a0dc3235828388ae21091dcd5309da24d3ac3`.
+
+This result covers the simulated vendor-mesh surrogate's nonadjacent parts.
+Environment clearance, native physics behavior and physical typing remain open.
