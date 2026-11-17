@@ -473,6 +473,141 @@ def _connected_stroke(route, paths):
     )
 
 
+def _timed_key_response(route, paths, connected, *, substeps=4):
+    """Prescribed joint motion with a one-dimensional unilateral spring-damper key."""
+    import math
+    from nominal_route_concrete_native_attempt_binding import EXPECTED_MECHANICS_SHA256
+    from representative_key_mechanics import build_profile, evaluate_trace
+    from rocell.geometry import Vec3
+
+    receipt_hash = connected["receipt_sha256"]
+    if (
+        _sha(connected["waypoints_rad"])
+        != "74964ffb203378200ac0280a9f51a97f17a357926bc7aedc8518623f97e4f1c5"
+        or connected["joint_order"] != list(EXPECTED_DOF_NAMES)
+        or connected["episode_id"] != route["episode_id"]
+        or receipt_hash
+        != _sha({k: v for k, v in connected.items() if k != "receipt_sha256"})
+        or connected["route_file_sha256"] != _file_sha(paths.route)
+        or _file_sha(paths.mechanics) != EXPECTED_MECHANICS_SHA256
+    ):
+        raise ValueError("timed simulation inputs differ from screened path")
+    profile = build_profile(paths.layout)
+    if (
+        profile["profile_sha256"]
+        != route["source_bindings"]["key_mechanics_profile_sha256"]
+    ):
+        raise ValueError("key mechanics profile changed")
+    virtual = ROOT / "software/config/virtual_commissioning_profile.json"
+    if _file_sha(virtual) != connected["profile_file_sha256"]:
+        raise ValueError("virtual placement changed")
+    study = json.loads(virtual.read_bytes())["study_input"]
+    board = study["derived_solver_transform"]["matrix_row_major"]
+    length = study["route_tool_lengths_mm"]["keyboard"]
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    if _file_sha(urdf) != "a565718e7d74b07702802cf41eb9549a6e38e50b5e80aa9b887ab1ae3d0d8190":
+        raise ValueError("timed path FK model changed")
+    model = UrdfModel.from_file(urdf)
+    params = route["randomized_parameters"]
+    mass, damping, stiffness = (
+        params[name]
+        for name in ("key_mass_kg", "key_damping_n_s_per_m", "key_stiffness_n_per_m")
+    )
+    angle = math.radians(params["keyboard_yaw_deg"])
+    prior = profile["mechanics_prior"]
+    radius = prior["tip_radius_mm"]
+    drive = json.loads(paths.mechanics.read_bytes())
+    tick = drive["physics_dt_s"]
+    speed_limit = drive["dof"]["maximum_velocity_rad_s"]
+    dt = tick / substeps
+    joints = connected["waypoints_rad"]
+    trace, events, waypoint_ticks = [], [], [0]
+    released = True
+    travel = velocity = peak_speed = 0.0
+    for i, (left, right) in enumerate(zip(joints, joints[1:])):
+        delta = max(abs(a - b) for a, b in zip(left, right))
+        ticks = max(1, math.ceil(delta / (speed_limit * tick)))
+        waypoint_ticks.append(waypoint_ticks[-1] + ticks)
+        peak_speed = max(peak_speed, delta / (tick * ticks))
+        count = ticks * substeps
+        for j in range(0 if i == 0 else 1, count + 1):
+            q = [a + (b - a) * j / count for a, b in zip(left, right)]
+            state = {
+                n: JointPosition.radians(v)
+                for n, v in zip(EXPECTED_DOF_NAMES, q, strict=True)
+            }
+            hand = model.forward_kinematics(state)["hand_tcp"]
+            tip = hand.transform_position_mm(
+                Vec3(0, 0, -length + radius)
+            )
+            world = (tip.x, tip.y, tip.z, 1)
+            x, y, z = (
+                sum(board[4 * r + c] * v for c, v in enumerate(world)) for r in range(3)
+            )
+            x -= params["keyboard_offset_x_mm"]
+            y -= params["keyboard_offset_y_mm"]
+            # Evaluate guard regions in their original keyboard placement.
+            px = math.cos(angle) * x + math.sin(angle) * y
+            py = -math.sin(angle) * x + math.cos(angle) * y
+            depth = max(0.0, profile["target_plane_z_board_mm"] - z + radius)
+            if depth > prior["travel_mm"]["range"][0]:
+                raise ValueError(
+                    "prescribed tool exceeds shallowest modeled travel stop"
+                )
+            # Backward Euler free response followed by the unilateral tip/rest constraint.
+            # The centered stroke has a rigid tip and no arm tracking lag.
+            free_v = (mass * velocity - dt * stiffness * travel) / (
+                mass + dt * damping + dt * dt * stiffness
+            )
+            next_travel = max(depth, travel + dt * free_v)
+            velocity = (next_travel - travel) / dt
+            travel = next_travel
+            time = len(trace) * dt
+            trace.append(
+                dict(
+                    time_s=time,
+                    tip_x_board_mm=px,
+                    tip_y_board_mm=py,
+                    compression_mm=travel,
+                )
+            )
+            if released and travel >= prior["activation_mm"]["nominal"]:
+                events.append(dict(event="down", time_s=time, displacement_mm=travel))
+                released = False
+            elif not released and travel <= prior["release_mm"]["nominal"]:
+                events.append(dict(event="up", time_s=time, displacement_mm=travel))
+                released = True
+    evaluation = evaluate_trace(profile, trace)
+    if (
+        not evaluation["accepted"]
+        or evaluation["resolved_key"] != "SPACE"
+        or [e["event"] for e in events] != ["down", "up"]
+        or evaluation["max_compression_mm"] < prior["activation_mm"]["range"][1]
+        or travel > prior["release_mm"]["range"][0]
+    ):
+        raise ValueError(f"timed SPACE response failed: {evaluation}, {events}")
+    return dict(
+        schema="tactevra.offline_timed_space_key_response.v1",
+        source_path_sha256=receipt_hash,
+        episode_id=route["episode_id"],
+        substeps_per_tick=substeps,
+        waypoint_ticks=waypoint_ticks,
+        tick_s=tick,
+        duration_s=trace[-1]["time_s"],
+        events=events,
+        maximum_prescribed_joint_speed_rad_s=peak_speed,
+        modeled_key_mass_kg=mass,
+        modeled_key_stiffness_n_m=stiffness,
+        modeled_key_damping_n_s_m=damping,
+        trace_evaluation=evaluation,
+        trace_sha256=_sha(trace),
+        key_response_model="PRESCRIBED_TIP_UNILATERAL_1D_IMPLICIT_EULER",
+        isaac_started=False,
+        hardware_access=False,
+        physical_authority=False,
+    )
+
+
 def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | None = None, screen_workcell: bool = False, screen_tip: bool = False) -> dict:
     integration = Path(__file__).resolve().parent
     urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
@@ -592,8 +727,9 @@ def main() -> int:
     parser.add_argument("--screen-tip", action="store_true", help="evaluate sampled virtual keyboard tip through contact and retraction")
     parser.add_argument("--plan-local-stroke", action="store_true", help="generate offline episode-profile SPACE stroke")
     parser.add_argument("--plan-connected-stroke", action="store_true", help="screen park, SPACE stroke and return offline")
+    parser.add_argument("--time-connected-stroke", type=Path, help="evaluate retained connected path with the episode key dynamics")
     args = parser.parse_args()
-    if args.plan_local_stroke or args.plan_connected_stroke:
+    if args.plan_local_stroke or args.plan_connected_stroke or args.time_connected_stroke:
         from nominal_route_concrete_native_attempt_binding import BindingPaths
         if _file_sha(args.route) != ROUTE_SHA256 or args.ik_artifacts is None:
             parser.error("local stroke requires pinned route and --ik-artifacts")
@@ -601,7 +737,13 @@ def main() -> int:
         if paths.route.resolve() != args.route.resolve():
             parser.error("artifact root and supplied route differ")
         planner = _connected_stroke if args.plan_connected_stroke else _corrected_space_cycle
-        result = _signed(planner(json.loads(args.route.read_bytes()), paths), "receipt_sha256")
+        route = json.loads(args.route.read_bytes())
+        if args.time_connected_stroke:
+            connected = json.loads(args.time_connected_stroke.read_bytes())
+            result = _timed_key_response(route, paths, connected)
+        else:
+            result = planner(route, paths)
+        result = _signed(result, "receipt_sha256")
         with args.output.open("x", encoding="utf-8") as stream:
             json.dump(result, stream, indent=2, allow_nan=False)
         print(json.dumps({k:v for k,v in result.items() if k != "waypoints_rad"}))

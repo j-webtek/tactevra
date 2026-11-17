@@ -351,3 +351,27 @@ The receipt digest is
 The local stroke still has sampled tip evidence only. The connected path
 contains positions without timing, simulated switch events, measured key
 displacement, or physical execution authority.
+
+### Timed SPACE response in a reduced key model
+
+Pass `--time-connected-stroke <connected-receipt.json>` with the same
+episode route, artifact root and fresh output path. Each linear joint
+segment gets at least one 120 Hz drive tick and enough ticks for the
+configured velocity bound. On this candidate, 422 ticks take 3.517 s.
+Maximum prescribed joint speed is 0.598 rad/s.
+
+The model assumes exact arm tracking and rigid unilateral tip contact. It
+integrates the episode's one-axis key mass, spring, and damper with implicit
+Euler and projects displacement onto the tip and upper-rest constraints.
+The inverse episode keyboard transform maps contact coordinates into the
+existing profile's key/neighbor classifier. The trace evaluator's estimated
+force uses nominal priors and is not a contact-force measurement.
+
+At four integration substeps per drive tick the classifier resolved SPACE,
+with one down at 1.748 s and one up at 1.785 s, 2.700 mm maximum travel
+and zero final compression. Two and eight substeps produced the same
+event sequence. The four-substep receipt has canonical digest
+`ba9fa1a744ad060d8fe4e7b210f8206d6b1dd350de64939b773fbd04805a40ae`.
+This experiment excludes native articulated tracking, native contact forces,
+physical switch signals and USB input. Waypoint timing and a successful
+one-axis key response do not qualify the real arm for motion.
