@@ -225,8 +225,8 @@ clearance, dynamic behavior, workcell alignment, or physical safety.
 The `--run-diagnostic` mode constructs the existing Isaac driver, which
 validates its pinned robot USD, layout, route and mechanics profile, and passes
 their hashes and the diagnostic and driver source hashes into the result. The
-mode has not been run with Isaac and does not itself authenticate the runtime
-environment, independently review its source, or grant authorization.
+mode was used for the diagnostic above, but does not itself authenticate the
+runtime environment, independently review its source, or grant authorization.
 
 The concrete native binding rejects the surface-partition definition even when
 its review is otherwise valid: surface separation alone cannot rule out nested
