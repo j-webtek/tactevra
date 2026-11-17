@@ -5806,3 +5806,31 @@ def test_corrected_space_entry_rejects_substituted_plan_before_claim(tmp_path):
             output_path=missing / "receipt.json", status_path=missing / "status.json",
         )
     assert not missing.exists()
+
+
+def test_compensated_space_keeps_drive_and_reference_distinct(tmp_path, monkeypatch):
+    import json
+
+    mechanics = _load_key_mechanics()
+    reference = [[i] * 6 for i in range(5)]
+    commands = [[i + 0.02] * 6 for i in range(5)]
+    plan = {"plan_sha256": "source", "joint_order": list("abcdef")}
+    candidate = {
+        "report": {"source_plan": "source", "physics_dt_s": 0.01, "landmark_ticks": list(range(5))},
+        "joint_order": plan["joint_order"], "reference_positions_rad": reference,
+        "drive_targets_rad": commands,
+    }
+    digest = mechanics._canonical_sha256(candidate)
+    candidate["candidate_sha256"] = digest
+    source = tmp_path / "candidate.json"
+    source.write_text(json.dumps(candidate), encoding="utf-8")
+    with pytest.raises(mechanics.MechanicsContractError, match="screened schedule"):
+        mechanics._compensated_space_targets(source, plan, 0.01)
+    monkeypatch.setattr(mechanics, "COMPENSATED_SPACE_CANDIDATE_SHA256", digest)
+    rows = mechanics._compensated_space_targets(source, plan, 0.01)
+    assert [row["joint_position_reference_rad"] for row in rows] == reference
+    assert [row["joint_position_target_rad"] for row in rows] == commands
+    assert [row["sequence"] for row in rows if row["phase_endpoint"]] == [2]
+    assert rows[-1]["time_from_start_ns"] == 40000000
+    with pytest.raises(mechanics.MechanicsContractError, match="timing"):
+        mechanics._compensated_space_targets(source, plan, 0.02)
