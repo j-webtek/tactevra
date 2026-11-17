@@ -10291,8 +10291,9 @@ def run_drive_controlled_robot_h_replay(
     plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
     plan_hash = _require_canonical_hash(plan, "plan_sha256", "robot H replay plan")
     corrected_space = plan.get("schema") == "tactevra.arm301.corrected_space_native_plan.v1"
-    if corrected_space and (
-        plan_hash != "7cb7129414390ad8dd0f2dbce14946625f403a2cba2df8486aca1b64d49fe7ea"
+    if (corrected_space or corrected_space_authorization is not None) and (
+        not corrected_space
+        or plan_hash != "7cb7129414390ad8dd0f2dbce14946625f403a2cba2df8486aca1b64d49fe7ea"
         or corrected_space_authorization != CORRECTED_SPACE_NATIVE_AUTHORIZATION
         or randomized_episode is not None
         or state_policy_manifest_sha256 is not None

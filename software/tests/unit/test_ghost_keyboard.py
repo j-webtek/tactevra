@@ -5787,3 +5787,22 @@ def test_arm226_complete_progress_requires_full_target_denominator():
             attempted_joint_target_count=1,
             native_trace_row_count=3,
         )
+
+
+def test_corrected_space_entry_rejects_substituted_plan_before_claim(tmp_path):
+    import json
+
+    mechanics = _load_key_mechanics()
+    plan = {"schema": mechanics.DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA}
+    plan["plan_sha256"] = mechanics._canonical_sha256(plan)
+    source = tmp_path / "plan.json"
+    source.write_text(json.dumps(plan), encoding="utf-8")
+    missing = tmp_path / "unopened"
+    with pytest.raises(mechanics.MechanicsContractError, match="corrected SPACE"):
+        mechanics.run_drive_controlled_robot_h_replay(
+            replay_plan_path=source,
+            corrected_space_authorization=mechanics.CORRECTED_SPACE_NATIVE_AUTHORIZATION,
+            layout_path=missing, drive_profile_path=missing, robot_usd_path=missing,
+            output_path=missing / "receipt.json", status_path=missing / "status.json",
+        )
+    assert not missing.exists()
