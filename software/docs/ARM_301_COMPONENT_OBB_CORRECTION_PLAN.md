@@ -277,3 +277,18 @@ The retained receipt has canonical digest
 
 This result covers the simulated vendor-mesh surrogate's nonadjacent parts.
 Environment clearance, native physics behavior and physical typing remain open.
+
+The optional `--screen-workcell` flag also checks all 14 moving component
+boxes against the RC03 board and the nominal keyboard's full rectangular
+envelope. The audit maps those static obstacles into URDF world coordinates
+using the route's base-link placement and the URDF fixed base offset.
+For the same 288 segments the lowest interval bounds were 29.667 mm to
+the board and 44.926 mm to the keyboard envelope. The keyboard minimum
+occurred for gripper component 0 over rows 940 to 941. Every interval
+cleared the 0.5 mm screen. The canonical receipt digest is
+`69a41cee1c27b435f3d6793fe5a6898ad4b2834dafeeaac1ded40e95a6b6a472`.
+
+The native scene loader currently creates the board and SPACE cube.
+The keyboard envelope in this offline check comes from the nominal workcell
+layout. The check omits attached tools, fixtures outside those two boxes,
+and the rest of the route. It does not establish a keypress.

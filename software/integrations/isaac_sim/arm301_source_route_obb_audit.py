@@ -116,7 +116,60 @@ def _regenerated_rows(route: dict, artifacts: Path) -> tuple[list, dict]:
     return rows, continuity
 
 
-def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | None = None) -> dict:
+def _workcell_boxes(route: dict, layout: dict, urdf: Path):
+    """Express board-coordinate obstacles in the URDF world used by offline FK."""
+    import numpy as np
+    from nominal_route_component_obb_clearance import OrientedBoxIntervalBound
+
+    board_from_base = np.array(route["robot_placement_matrix_row_major"]).reshape(4, 4)
+    model = UrdfModel.from_file(urdf)
+    base = model.forward_kinematics({name: JointPosition.radians(0.0) for name in EXPECTED_DOF_NAMES})["base_link"]
+    world_from_base = np.eye(4)
+    world_from_base[:3, :3] = np.array(base.rotation.matrix).reshape(3, 3)
+    t = base.translation_mm
+    world_from_base[:3, 3] = [t.x, t.y, t.z]
+    world_from_board = world_from_base @ np.linalg.inv(board_from_base)
+
+    def box(name, lower, size):
+        half = np.array(size) / 2
+        center = world_from_board @ np.append(np.array(lower) + half, 1.0)
+        return OrientedBoxIntervalBound(name, name, tuple(center[:3]),
+                                        tuple(world_from_board[:3, :3].flat), tuple(half), 0.0)
+
+    board = layout["board"]
+    keyboard = layout["devices"]["keyboard"]
+    return (
+        box("board", (0, 0, board["bottom_surface_z"]),
+            (board["width"], board["depth"], board["thickness"])),
+        box("keyboard_envelope", (*keyboard["nominal_origin_xy"], keyboard["support_plane_z"]),
+            keyboard["nominal_size"]),
+    )
+
+
+def _screen_workcell(runtime, rows, obstacles):
+    from nominal_route_component_obb_clearance import _separating_axis_gap_mm
+
+    results = {box.link_name: {"segments_screened": 0, "segments_unresolved": 0} for box in obstacles}
+    for sequence in range(653, 941):
+        moving = runtime.bound_link_obbs(
+            start_joint_targets_rad=rows[sequence]["joint_position_target_rad"],
+            end_joint_targets_rad=rows[sequence + 1]["joint_position_target_rad"],
+        )
+        for obstacle in obstacles:
+            residual, primitive = min(
+                (_separating_axis_gap_mm(part, obstacle) - part.max_point_path_deviation_mm,
+                 part.primitive_name) for part in moving
+            )
+            result = results[obstacle.link_name]
+            result["segments_screened"] += 1
+            result["segments_unresolved"] += int(residual <= 0.5)
+            if residual < result.get("minimum_interval_bound_mm", float("inf")):
+                result.update(minimum_interval_bound_mm=residual, limiting_primitive=primitive,
+                              limiting_segment=[sequence, sequence + 1])
+    return results
+
+
+def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | None = None, screen_workcell: bool = False) -> dict:
     integration = Path(__file__).resolve().parent
     urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
     partition = integration / "evidence/roarm_m3_triangle_partition_link2_20261005.json"
@@ -159,6 +212,16 @@ def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | N
             "route_input": "CANONICAL_IK_653_THROUGH_940_SOURCE_EXIT_941",
             "continuity": continuity,
             "screened_joint_rows_sha256": _sha([row["joint_position_target_rad"] for row in rows[653:942]]),
+        }
+    if screen_workcell:
+        if not regenerated:
+            raise ValueError("workcell screen requires regenerated whole-component geometry")
+        layout = ROOT / "active-project/RoCell_v0_3/config/workcell_layout.json"
+        obstacles = _workcell_boxes(data, json.loads(layout.read_bytes()), urdf)
+        regenerated["nominal_workcell_screen"] = {
+            "layout_file_sha256": _file_sha(layout),
+            "geometry": "BOARD_AND_SOLID_NOMINAL_KEYBOARD_ENVELOPE",
+            "obstacles": _screen_workcell(runtime, rows, obstacles),
         }
     outcomes = []
     for sequence in range(653, 941):
@@ -214,8 +277,10 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--whole-components", action="store_true", help="audit exploratory whole-component boxes")
     parser.add_argument("--ik-artifacts", type=Path, help="regenerate the governed IK window using retained adapter artifacts")
+    parser.add_argument("--screen-workcell", action="store_true", help="screen the nominal board and keyboard envelope")
     args = parser.parse_args()
-    result = audit(args.route, whole_components=args.whole_components, ik_artifacts=args.ik_artifacts)
+    result = audit(args.route, whole_components=args.whole_components, ik_artifacts=args.ik_artifacts,
+                   screen_workcell=args.screen_workcell)
     with args.output.open("x", encoding="utf-8", newline="\n") as stream:
         json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
         stream.write("\n")

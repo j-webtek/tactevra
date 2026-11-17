@@ -516,3 +516,24 @@ def test_concrete_binding_admits_only_reviewed_simulation_surrogate_without_star
         module.build_component_obb_concrete_binding(
             paths, component_definition=definition, component_review=review,
         )
+
+
+
+def test_nominal_workcell_screen_places_obstacles_relative_to_the_native_base(monkeypatch):
+    import json
+    pytest.importorskip("scipy")
+    monkeypatch.syspath_prepend(str(INTEGRATION))
+    import arm301_source_route_obb_audit as audit
+
+    layout = json.loads((ROOT / "active-project/RoCell_v0_3/config/workcell_layout.json").read_bytes())
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    # A 90-degree base yaw and a nonzero base height expose frame inversions
+    # and double application of the fixed URDF base offset (70.1 mm).
+    route = {"robot_placement_matrix_row_major": [
+        0, -1, 0, 100, 1, 0, 0, 200, 0, 0, 1, 90, 0, 0, 0, 1,
+    ]}
+    board, keyboard = audit._workcell_boxes(route, layout, urdf)
+    assert board.start_center_mm == pytest.approx((28.5, -205, -28.9))
+    assert keyboard.start_center_mm == pytest.approx((-41.5, -142.5, -9.4))
+    assert keyboard.half_extents_mm == pytest.approx((157.5, 73.5, 10.5))
+    assert keyboard.start_axes_row_major == pytest.approx((0, 1, 0, -1, 0, 0, 0, 0, 1))
