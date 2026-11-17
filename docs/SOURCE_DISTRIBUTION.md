@@ -1838,3 +1838,7 @@ accounts for one tracked source file in the archive ceiling.
 The reviewed-component backend preparation CLI adds one Python source file,
 raising the tracked-file ceiling to 6,927. Review inputs and run outputs stay
 in the external artifact store.
+
+
+The corrected SPACE native launcher adds one tracked Python entry point.
+The generated plan and all simulation outputs stay in the external artifact directory.

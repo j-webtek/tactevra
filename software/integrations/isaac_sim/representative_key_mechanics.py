@@ -14,6 +14,7 @@ import hashlib
 from itertools import product
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -9544,6 +9545,7 @@ def assess_native_key_trace(
     *,
     rest_key_z_m: float | None = None,
     target_id: str = "H",
+    scene_key_center_xy_mm: list[float] | None = None,
 ) -> dict[str, Any]:
     """Convert native key displacement into the shared mechanism-state contract."""
     rows = list(native_samples)
@@ -9557,20 +9559,38 @@ def assess_native_key_trace(
         "native rest key z",
     )
     target_center = regions[target_id]["center_board_xy_mm"]
+    observed_xy = scene_key_center_xy_mm is not None or any("tip_center_xy_m" in row for row in rows)
+    if scene_key_center_xy_mm is None:
+        scene_key_center_xy_mm = target_center
+    if len(scene_key_center_xy_mm) != 2:
+        raise MechanicsContractError("native key center requires two coordinates")
+    scene_center = [_finite_number(v, "native key center") for v in scene_key_center_xy_mm]
     contract_trace = []
     native_contact_steps = 0
     for index, row in enumerate(rows):
         key_z = _finite_number(row.get("key_center_z_m"), f"native sample {index} key z")
         separation = _finite_number(row.get("tip_key_separation_m"), f"native sample {index} separation")
-        if separation <= 0.00005:
+        x, y = target_center
+        if observed_xy:
+            xy = row.get("tip_center_xy_m")
+            if not isinstance(xy, (list, tuple)) or len(xy) != 2:
+                raise MechanicsContractError("native trace lacks observed tip XY")
+            # The native cube is axis-aligned at the episode's shifted center.
+            x, y = [nominal + 1000.0 * _finite_number(obs, "native tip XY") - placed
+                    for nominal, obs, placed in zip(target_center, xy, scene_center)]
+        if separation <= 0.00005 and _intersects_region(
+            x, y, profile["mechanics_prior"]["tip_radius_mm"], regions[target_id]
+        ):
             native_contact_steps += 1
         contract_trace.append({
             "time_s": _finite_number(row.get("time_s"), f"native sample {index} time"),
-            "tip_x_board_mm": target_center[0],
-            "tip_y_board_mm": target_center[1],
+            "tip_x_board_mm": x,
+            "tip_y_board_mm": y,
             "compression_mm": max(0.0, (rest_z - key_z) * 1000.0),
         })
     result = evaluate_trace(profile, contract_trace)
+    if observed_xy:
+        result["tip_xy_source"] = "OBSERVED_SCENE_TIP_RELATIVE_TO_PLACED_KEY"
     result["commanded_key"] = target_id
     result["native_contact_step_count"] = native_contact_steps
     result["native_contact_observed"] = native_contact_steps > 0
@@ -9692,16 +9712,18 @@ def run_native_h_probe(
             SimulationManager.step(steps=1)
             observed_key_z = float(key_view.get_world_poses()[0].numpy().tolist()[0][2])
             key_top = observed_key_z + key_half_z_m
-            tip_bottom = command["tip_z_m"] - tip_radius_m
+            observed_tip = tip_view.get_world_poses()[0].numpy().tolist()[0]
+            tip_bottom = observed_tip[2] - tip_radius_m
             native_samples.append({
                 "step": command["step"],
                 "time_s": command["time_s"],
-                "tip_center_z_m": command["tip_z_m"],
+                "tip_center_z_m": observed_tip[2],
+                "tip_center_xy_m": observed_tip[:2],
                 "key_center_z_m": observed_key_z,
                 "tip_key_separation_m": tip_bottom - key_top,
             })
         assessment = assess_native_key_trace(
-            profile, native_samples, rest_key_z_m=settled_z
+            profile, native_samples, rest_key_z_m=settled_z, scene_key_center_xy_mm=h_region["center_board_xy_mm"]
         )
         passed = assessment["accepted"] and assessment["resolved_key"] == "H" and assessment["native_contact_observed"]
         receipt: dict[str, Any] = {
@@ -10242,9 +10264,16 @@ def build_state_policy_native_execution_progress(
     }
 
 
+CORRECTED_SPACE_NATIVE_AUTHORIZATION = (
+    "I authorize one ARM-301 corrected SPACE native contact simulation using the "
+    "422-tick schedule, with no retry and no hardware or physical authority."
+)
+
+
 def run_drive_controlled_robot_h_replay(
     *,
     replay_plan_path: Path,
+    corrected_space_authorization: str | None = None,
     layout_path: Path,
     drive_profile_path: Path,
     robot_usd_path: Path,
@@ -10261,6 +10290,16 @@ def run_drive_controlled_robot_h_replay(
 
     plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
     plan_hash = _require_canonical_hash(plan, "plan_sha256", "robot H replay plan")
+    corrected_space = plan.get("schema") == "tactevra.arm301.corrected_space_native_plan.v1"
+    if (corrected_space or corrected_space_authorization is not None) and (
+        not corrected_space
+        or plan_hash != "7cb7129414390ad8dd0f2dbce14946625f403a2cba2df8486aca1b64d49fe7ea"
+        or corrected_space_authorization != CORRECTED_SPACE_NATIVE_AUTHORIZATION
+        or randomized_episode is not None
+        or state_policy_manifest_sha256 is not None
+        or state_policy_request_sha256 is not None
+    ):
+        raise MechanicsContractError("corrected SPACE requires its pinned plan and fresh one-attempt authorization")
     profile = build_profile(layout_path.resolve(strict=True))
     drive_raw = drive_profile_path.resolve(strict=True).read_bytes()
     drive_profile = json.loads(drive_raw)
@@ -10333,12 +10372,13 @@ def run_drive_controlled_robot_h_replay(
             or representative_adapted_plan
             or representative_refined_plan
             or state_policy_plan
+            or corrected_space
         )
         else "H"
     )
     randomized_parameters = (
         _validate_randomized_replay_parameters(plan.get("randomized_parameters"))
-        if state_policy_plan
+        if state_policy_plan or corrected_space
         else None
     )
     if randomized_episode is not None:
@@ -10366,6 +10406,7 @@ def run_drive_controlled_robot_h_replay(
             or representative_adapted_plan
             or representative_refined_plan
             or state_policy_plan
+            or corrected_space
         )
         else plan.get("h_contact_endpoint_sequences")
     )
@@ -10380,10 +10421,11 @@ def run_drive_controlled_robot_h_replay(
             or representative_adapted_plan
             or representative_refined_plan
             or state_policy_plan
+            or corrected_space
         )
         or plan.get("sample_count") != len(plan.get("joint_targets", []))
         or not isinstance(contact_endpoint_sequences, list)
-        or len(contact_endpoint_sequences) != 2
+        or len(contact_endpoint_sequences) != (1 if corrected_space else 2)
         or not isinstance(target_region, dict)
         or bindings.get("key_mechanics_profile_sha256") != profile["profile_sha256"]
         or bindings.get("drive_profile_file_sha256")
@@ -10560,8 +10602,23 @@ def run_drive_controlled_robot_h_replay(
     ):
         raise MechanicsContractError("drive profile boundary changed")
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if corrected_space:
+        from nominal_route_isaac_eula_preflight import evaluate_eula_preflight
+        from nominal_route_memory_preflight import collect_windows_memory_snapshot, evaluate_memory_preflight
+
+        directory = Path("C:/IsaacSim/artifacts/issue190/arm301-corrected-space-native-attempt-001")
+        if (output_path.resolve() != directory / "receipt.json"
+                or status_path.resolve() != directory / "status.json"):
+            raise MechanicsContractError("corrected SPACE requires a fresh dedicated attempt directory")
+        if evaluate_eula_preflight(os.environ)["status"] != "PASS_EULA_PREFLIGHT":
+            raise MechanicsContractError("Isaac EULA preflight failed")
+        if evaluate_memory_preflight(collect_windows_memory_snapshot())["status"] != "PASS_MEMORY_PREFLIGHT":
+            raise MechanicsContractError("Isaac memory preflight failed")
+        output_path.parent.mkdir(parents=True, exist_ok=False)
+    else:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.parent.mkdir(parents=True, exist_ok=True)
+    corrected_exit_code = 2
     app = None
     try:
         from isaacsim import SimulationApp
@@ -10736,7 +10793,8 @@ def run_drive_controlled_robot_h_replay(
         stopped_target = None
         previous_ns = int(targets[0]["time_from_start_ns"])
         elapsed_steps = 0
-        for target in targets:
+        # For the corrected path row zero is already installed and settled.
+        for target in (targets[1:] if corrected_space else targets):
             desired = target["joint_position_target_rad"]
             articulation.set_dof_position_targets([desired])
             target_ns = int(target["time_from_start_ns"])
@@ -10755,7 +10813,8 @@ def run_drive_controlled_robot_h_replay(
                 elapsed_steps += 1
                 observed_key_z = float(key_view.get_world_poses()[0].numpy().tolist()[0][2])
                 tip_world = UsdGeom.Xformable(tip.GetPrim()).ComputeLocalToWorldTransform(0.0)
-                tip_center_z = float(tip_world.ExtractTranslation()[2])
+                tip_translation = tip_world.ExtractTranslation()
+                tip_center_z = float(tip_translation[2])
                 separation = tip_center_z - prior["tip_radius_mm"] / 1000.0 - (observed_key_z + key_half_z)
                 observed_positions = [
                     float(value)
@@ -10776,6 +10835,7 @@ def run_drive_controlled_robot_h_replay(
                         tip_key_separation_m=separation,
                     )
                 )
+                native_trace[-1]["tip_center_xy_m"] = [float(tip_translation[0]), float(tip_translation[1])]
             observed = articulation.get_dof_positions().numpy().tolist()[0]
             tracking.append({
                 "sequence": target["sequence"],
@@ -10796,7 +10856,7 @@ def run_drive_controlled_robot_h_replay(
             root["sequence"] = target["sequence"]
             root_records.append(root)
             if not root["passed"]:
-                if state_policy_plan:
+                if state_policy_plan or corrected_space:
                     runtime_failure_reason = "ROOT_INVARIANT"
                     stopped_target = target
                     break
@@ -10805,13 +10865,14 @@ def run_drive_controlled_robot_h_replay(
 
         action_assessments = []
         if runtime_failure_reason is None:
-            for action_index in (0, 1):
+            for action_index in ((0,) if corrected_space else (0, 1)):
                 rows = [row for row in native_trace if row["action_index"] == action_index]
                 assessment = assess_native_key_trace(
                     profile,
                     rows,
                     rest_key_z_m=settled_z,
                     target_id=target_id,
+                    scene_key_center_xy_mm=key_center_xy_mm,
                 )
                 action_assessments.append({"action_index": action_index, "assessment": assessment})
         maximum_tracking_error = max(
@@ -10830,11 +10891,13 @@ def run_drive_controlled_robot_h_replay(
                 or representative_adapted_plan
                 or representative_refined_plan
                 or state_policy_plan
+                or corrected_space
             )
             else None
         )
         passed = (
             runtime_failure_reason is None
+            and (not corrected_space or elapsed_steps == plan["scheduled_physics_steps"])
             and all(item["assessment"]["accepted"] for item in action_assessments)
             and all(
                 item["assessment"]["resolved_key"] == target_id
@@ -10925,12 +10988,21 @@ def run_drive_controlled_robot_h_replay(
                         or representative_adapted_plan
                         or representative_refined_plan
                         or state_policy_plan
+                        or corrected_space
                     )
                     else "single_representative_H_key_only"
                 ),
                 "tool_tip_collision_surface_is_governed_hand_tcp_minus_120_mm_endpoint",
             ],
         }
+        if corrected_space:
+            receipt.update(schema="tactevra.arm301.corrected_space_native_result.v1",
+                           status="PASS" if passed else "BLOCKED_CORRECTED_SPACE",
+                           source_connected_sha256=plan["source_connected_sha256"],
+                           source_timing_sha256=plan["source_timing_sha256"],
+                           episode_id=plan["episode_id"], scheduled_physics_steps=plan["scheduled_physics_steps"],
+                           completed_schedule_steps=elapsed_steps, failure_reason=runtime_failure_reason,
+                           maximum_joint_tracking_error_allowed_rad=maximum_tracking_error_allowed)
         if (
             representative_plan
             or representative_adapted_plan
@@ -11033,6 +11105,8 @@ def run_drive_controlled_robot_h_replay(
             "status": receipt.get("status", receipt.get("disposition")),
             "receipt_sha256": receipt["receipt_sha256"],
         }, sort_keys=True) + "\n", encoding="utf-8")
+        if corrected_space and receipt["status"] == "PASS":
+            corrected_exit_code = 0
         return receipt
     except BaseException as exc:
         if (
@@ -11110,7 +11184,10 @@ def run_drive_controlled_robot_h_replay(
         raise
     finally:
         if app is not None:
-            app.close()
+            if corrected_space:
+                app.close(exit_code=corrected_exit_code)
+            else:
+                app.close()
 
 
 def run_state_policy_root_drift_diagnostic(

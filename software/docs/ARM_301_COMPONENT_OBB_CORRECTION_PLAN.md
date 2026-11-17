@@ -277,3 +277,170 @@ A future governed simulation launcher can pass the same
 `ReviewedComponentBindingBuilder` the preflight paths and use the returned
 backend after a fresh claim. This preparation leaves native route clearance,
 simulated typing, and physical transfer outstanding.
+
+
+### Regenerated SPACE route self-clearance
+
+Pass `--whole-components --ik-artifacts <issue190-artifact-root>` to
+`arm301_source_route_obb_audit.py` with the pinned route and a fresh output
+file. The audit uses the production IK adapter for rows 653 through 940 and
+the retained exit row 941, matching the backend's clearance window. On
+Windows with Python 3.12.0 and SciPy 1.18.1 the 287 governed IK rows
+reproduced the ARM-298 qualification digest. All 288 adjacent segments
+passed the 0.5 mm self-clearance threshold. Four segments required
+subdivision. The minimum certified separation bound was 10.963295 mm.
+The screened joint rows hash to
+`11abc2137bdfbf71e1d6cc485e07f959c4e5116008d2461903242efc3e3b1888`.
+The retained receipt has canonical digest
+`d3108543f16eb154bf0112c8316a0dc3235828388ae21091dcd5309da24d3ac3`.
+
+This result covers the simulated vendor-mesh surrogate's nonadjacent parts.
+Environment clearance, native physics behavior and physical typing remain open.
+
+The optional `--screen-workcell` flag also checks all 14 moving component
+boxes against the RC03 board and the nominal keyboard's full rectangular
+envelope. The audit maps those static obstacles into URDF world coordinates
+using the route's base-link placement and the URDF fixed base offset.
+For the same 288 segments the lowest interval bounds were 29.667 mm to
+the board and 44.926 mm to the keyboard envelope. The keyboard minimum
+occurred for gripper component 0 over rows 940 to 941. Every interval
+cleared the 0.5 mm screen. The canonical receipt digest is
+`69a41cee1c27b435f3d6793fe5a6898ad4b2834dafeeaac1ded40e95a6b6a472`.
+
+The native scene loader currently creates the board and SPACE cube.
+The keyboard envelope in this offline check comes from the nominal workcell
+layout. The check omits attached tools, fixtures outside those two boxes,
+and the rest of the route. It does not establish a keypress.
+
+### SPACE tip-path discrepancy
+
+Add `--screen-tip` to the regenerated audit to include all 1,416 commanded
+tip samples. The retained episode pins the virtual commissioning profile.
+Its keyboard tool extends 120 mm along hand TCP negative Z. Using its
+board transform, rows 1061 and 1299 both put the tip at approximately
+(231.99, 122.40, 1.55) mm. The randomized SPACE center is
+(224.03, 111.02) mm with a 7 mm Y half-extent and a 21 mm rest height.
+Both endpoints miss the rear edge by 4.39 mm and lie about 19.45 mm below
+the rest surface. The contact rows are retained source commands, outside
+the regenerated IK window. The whole-arm approach clearance result
+excludes this virtual tip. The canonical tip-screen receipt digest is
+`6057fff1ab0038e544e5ffb6e8031bddcd00ce70319077d1ff758047c0e5a778`.
+
+The current deferred backend constructs its solver from the canonical
+scenario (100 mm tool and a different board transform). Its IK adapter
+derives each regeneration target from the source joint row. This can
+reproduce a row with a small residual while missing the intended key.
+Future SPACE planning must bind the episode tool and placement and solve
+against the intended board-space key target. The sampled FK comparison
+does not measure key displacement or identify the physical tool.
+
+### Corrected SPACE local stroke
+
+Run the audit with the pinned route, artifact root, a fresh output file and
+`--plan-local-stroke` to generate the local stroke independently of the old
+contact joint commands. The historical endpoint only seeds the first IK solve.
+The planning target is the episode key center. The tool uses the pinned
+virtual keyboard length (120 mm) and the native mechanics model's 1 mm tip
+sphere. The 9 mm hover is a planning choice. The 2.7 mm stroke depth is
+midway between the deepest assumed activation (2.4 mm) and shallowest
+assumed bottom stop (3.0 mm). Release reverses the descent waypoints.
+
+Receipt `0b44e8d4fc6beed88b27b13e68a7df1077562052f193fb20d5ad3e80702366a6`
+records 49 waypoints and 481 FK samples along linear joint interpolation.
+At those samples the sphere stays at least 5.9977 mm inside the modeled
+key edges. Its lowest surface reaches 2.7001 mm below the resting top and
+returns to 8.9987 mm above it. These geometric depths assume an undeformed
+key reference. Key travel under load, switch events, entry from park, tool
+shaft clearance, and physical transfer remain unverified.
+
+### Park-to-SPACE connection
+
+Use `--plan-connected-stroke` in place of `--plan-local-stroke` with the
+same pinned inputs. The candidate joins the episode park pose to the first
+hover configuration using linear joint interpolation. It reverses the
+approach after the local release. All 422 segments passed the modeled arm
+self-clearance and nominal board/keyboard screens. During approach and
+return, a straight virtual capsule from hand TCP to tip center, assigned
+the tip sphere's 1 mm radius, stayed at least 3.703 mm above the keyboard
+top plane after subtracting a full-interval joint-motion bound. This
+assumed shaft radius needs a separate physical attachment profile.
+
+The receipt digest is
+`96b8bbb027bb468855bc3fc0284e23f47b3fa648b41f458f8c043eb56d276c85`.
+The local stroke still has sampled tip evidence only. The connected path
+contains positions without timing, simulated switch events, measured key
+displacement, or physical execution authority.
+
+### Timed SPACE response in a reduced key model
+
+Pass `--time-connected-stroke <connected-receipt.json>` with the same
+episode route, artifact root and fresh output path. Each linear joint
+segment gets at least one 120 Hz drive tick and enough ticks for the
+configured velocity bound. On this candidate, 422 ticks take 3.517 s.
+Maximum prescribed joint speed is 0.598 rad/s.
+
+The model assumes exact arm tracking and rigid unilateral tip contact. It
+integrates the episode's one-axis key mass, spring, and damper with implicit
+Euler and projects displacement onto the tip and upper-rest constraints.
+The inverse episode keyboard transform maps contact coordinates into the
+existing profile's key/neighbor classifier. The trace evaluator's estimated
+force uses nominal priors and is not a contact-force measurement.
+
+At four integration substeps per drive tick the classifier resolved SPACE,
+with one down at 1.748 s and one up at 1.785 s, 2.700 mm maximum travel
+and zero final compression. Two and eight substeps produced the same
+event sequence. The four-substep receipt has canonical digest
+`ba9fa1a744ad060d8fe4e7b210f8206d6b1dd350de64939b773fbd04805a40ae`.
+This experiment excludes native articulated tracking, native contact forces,
+physical switch signals and USB input. Waypoint timing and a successful
+one-axis key response do not qualify the real arm for motion.
+
+New native key traces retain the observed tip center in scene XY. The
+assessor uses the tip's lateral offset from the placed key, together with
+observed key displacement, to classify contact. Trace assessment rejects
+missing tip XY when called from the updated native capture paths. Legacy
+depth-only traces keep their historical assumed-center interpretation.
+An offline test exercises both a centered SPACE press and a 12 mm
+lateral miss with identical displacement. No new native run is recorded.
+
+The offline audit's `--prepare-native-space CONNECTED TIMED` mode checks the
+original route, the connected-path receipt and the four-substep timing receipt.
+It produces plan `7cb7129414390ad8dd0f2dbce14946625f403a2cba2df8486aca1b64d49fe7ea`.
+Tick zero initializes the parked arm. The 422 subsequent drive ticks contain
+one SPACE action, reaching hover at 187, maximum commanded depth at 211,
+hover again at 235 and park at 422.
+
+The simulation entry point is `software/integrations/isaac_sim/arm301_corrected_space_native.py`.
+It accepts the corrected-plan authorization through `--authorization`, checks
+the retained plan, layout, drive profile, USD, EULA and host memory, then
+exclusively claims `arm301-corrected-space-native-attempt-001` under the
+issue190 artifact directory. A completed run records observed joint tracking,
+root pose, tip XY, key displacement and the action assessment. The model
+uses the virtual 120 mm tool and one simulated key. Native contact and
+return to park require validation in Isaac.
+
+### Native SPACE attempt 001
+
+Isaac ran the corrected schedule once. The result in
+`arm301-corrected-space-native-attempt-001/receipt.json` has canonical SHA-256
+`bf05713ccd3456babdaba7de20b2004035b9b1cb3a9794a6487d58fb7db20827`.
+It stopped at transit tick 181 (1.508 s), before hover at 187 and the press
+endpoint at 211. Root rotation reached 0.11869 degrees against the 0.10 degree
+limit. Translation was 0.01475 mm against 0.05 mm. The trace contains 181
+samples, zero action assessments and zero post-initialization teleports.
+Peak joint tracking error was 0.05030 rad at tick 44 (limit 0.05 rad).
+
+At tick 1, URDF forward kinematics with the commanded joints put the sphere
+center at Z = 38.75 mm in the board frame. The same calculation with observed
+joints gave 16.78 mm, close to the native 16.49 mm. At tick 170 those heights
+were 30.76, 15.13 and 14.88 mm respectively. This places the main vertical
+discrepancy in articulated tracking during approach. Inspect settled joint
+error under gravity, drive gains and feedforward before adjusting the key
+position or the fixture tolerances. A useful offline acceptance check for a
+candidate drive correction is positive tool clearance over the key envelope
+along approach under the observed tracking errors.
+
+Isaac shutdown returned exit code zero on this blocked attempt. The retained
+status and receipt agree on `BLOCKED_CORRECTED_SPACE`. The corrected-plan
+runner now passes the outcome code into Isaac shutdown explicitly. This
+change was checked offline. No second native attempt was run.

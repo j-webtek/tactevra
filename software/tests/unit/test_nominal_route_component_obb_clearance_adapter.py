@@ -563,3 +563,66 @@ def test_review_file_prepares_deferred_component_backend_and_detects_replacement
         builder(paths)
     assert calls == [paths]
     assert not paths.governed_attempt_directory.exists()
+
+
+
+def test_nominal_workcell_screen_places_obstacles_relative_to_the_native_base(monkeypatch):
+    import json
+    pytest.importorskip("scipy")
+    monkeypatch.syspath_prepend(str(INTEGRATION))
+    import arm301_source_route_obb_audit as audit
+
+    layout = json.loads((ROOT / "active-project/RoCell_v0_3/config/workcell_layout.json").read_bytes())
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    # A 90-degree base yaw and a nonzero base height expose frame inversions
+    # and double application of the fixed URDF base offset (70.1 mm).
+    route = {"robot_placement_matrix_row_major": [
+        0, -1, 0, 100, 1, 0, 0, 200, 0, 0, 1, 90, 0, 0, 0, 1,
+    ]}
+    board, keyboard = audit._workcell_boxes(route, layout, urdf)
+    assert board.start_center_mm == pytest.approx((28.5, -205, -28.9))
+    assert keyboard.start_center_mm == pytest.approx((-41.5, -142.5, -9.4))
+    assert keyboard.half_extents_mm == pytest.approx((157.5, 73.5, 10.5))
+    assert keyboard.start_axes_row_major == pytest.approx((0, 1, 0, -1, 0, 0, 0, 0, 1))
+
+
+
+def test_local_space_stroke_returns_to_hover_with_episode_geometry(monkeypatch, tmp_path):
+    import json
+    from types import SimpleNamespace
+    pytest.importorskip("scipy")
+    monkeypatch.syspath_prepend(str(INTEGRATION))
+    monkeypatch.syspath_prepend(str(ROOT / "software/src"))
+    import arm301_source_route_obb_audit as audit
+
+    profile_path = ROOT / "software/config/virtual_commissioning_profile.json"
+    profile = json.loads(profile_path.read_bytes())
+    route = {
+        "episode_id": "fixture",
+        "source_bindings": {"virtual_profile_sha256": audit._file_sha(profile_path)},
+        "robot_placement_matrix_row_major": profile["study_input"]["physical_placement_input"]["matrix_row_major"],
+        "randomized_key_center_board_xy_mm": [224.0, 111.0],
+        "target_region": {"half_extent_mm": [48, 7]},
+        "contact_endpoint_sequences": [0],
+        "joint_targets": [{"joint_position_target_rad": [-0.096, 0.807, 1.698, -0.866, 0, 0]}],
+    }
+    paths = SimpleNamespace(repo_root=ROOT, route=tmp_path / "fixture.json",
+                            layout=ROOT / "software/config/nominal_target_profiles.json")
+    paths.route.write_text(json.dumps(route))
+    result = audit._corrected_space_cycle(route, paths)
+    assert result["waypoints_rad"][0] == result["waypoints_rad"][-1]
+    assert 2.4 <= result["maximum_geometric_depth_mm"] < 3
+    assert result["minimum_xy_edge_margin_mm"] >= 2.5
+    assert result["final_gap_mm"] == pytest.approx(9, abs=0.05)
+    park = [0.082, 1.054, 0.717, -0.132, 0, 0]
+    route["joint_targets"].insert(0, {"phase": "PARK", "joint_position_target_rad": park})
+    route["contact_endpoint_sequences"] = [1]
+    paths.route.write_text(json.dumps(route))
+    connected = audit._connected_stroke(route, paths)
+    assert connected["waypoints_rad"][0] == connected["waypoints_rad"][-1] == park
+    assert connected["clearance_segments"] == len(connected["waypoints_rad"]) - 1
+    assert connected["approach_return_minimum_tool_clearance_mm"] > 0.5
+    assert connected["arm_workcell_clearance"]["keyboard_envelope"]["segments_unresolved"] == 0
+    route["source_bindings"]["virtual_profile_sha256"] = "0" * 64
+    with pytest.raises(ValueError, match="profile or keyboard layout"):
+        audit._corrected_space_cycle(route, paths)

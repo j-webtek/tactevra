@@ -239,6 +239,32 @@ def test_native_displacement_uses_the_requested_representative_key_region():
         )
 
 
+def test_observed_tip_must_land_on_shifted_native_space():
+    mechanics = _load_key_mechanics()
+    profile = mechanics.build_profile(ROOT / "software/config/nominal_target_profiles.json")
+    center = [224.028, 111.019]
+    rows = [
+        {"time_s": i * 0.01, "key_center_z_m": 0.018 - depth / 1000,
+         "tip_key_separation_m": 0 if depth else 0.001,
+         "tip_center_xy_m": [v / 1000 for v in center]}
+        for i, depth in enumerate((0, 2.7, 0))
+    ]
+
+    def assess():
+        return mechanics.assess_native_key_trace(
+            profile, rows, rest_key_z_m=0.018, target_id="SPACE", scene_key_center_xy_mm=center
+        )
+
+    assert assess()["accepted"]
+    rows[1]["tip_center_xy_m"][1] += 0.012
+    rejected = assess()
+    assert not rejected["accepted"]
+    assert not rejected["native_contact_observed"]
+    del rows[1]["tip_center_xy_m"]
+    with pytest.raises(mechanics.MechanicsContractError, match="observed tip XY"):
+        assess()
+
+
 def _arm207_plan_fixture(mechanics):
     def signed(document, field):
         document[field]=mechanics._canonical_sha256(document)
@@ -5761,3 +5787,22 @@ def test_arm226_complete_progress_requires_full_target_denominator():
             attempted_joint_target_count=1,
             native_trace_row_count=3,
         )
+
+
+def test_corrected_space_entry_rejects_substituted_plan_before_claim(tmp_path):
+    import json
+
+    mechanics = _load_key_mechanics()
+    plan = {"schema": mechanics.DRIVE_CONTROLLED_ROBOT_H_REPLAY_PLAN_SCHEMA}
+    plan["plan_sha256"] = mechanics._canonical_sha256(plan)
+    source = tmp_path / "plan.json"
+    source.write_text(json.dumps(plan), encoding="utf-8")
+    missing = tmp_path / "unopened"
+    with pytest.raises(mechanics.MechanicsContractError, match="corrected SPACE"):
+        mechanics.run_drive_controlled_robot_h_replay(
+            replay_plan_path=source,
+            corrected_space_authorization=mechanics.CORRECTED_SPACE_NATIVE_AUTHORIZATION,
+            layout_path=missing, drive_profile_path=missing, robot_usd_path=missing,
+            output_path=missing / "receipt.json", status_path=missing / "status.json",
+        )
+    assert not missing.exists()
