@@ -444,3 +444,23 @@ Isaac shutdown returned exit code zero on this blocked attempt. The retained
 status and receipt agree on `BLOCKED_CORRECTED_SPACE`. The corrected-plan
 runner now passes the outcome code into Isaac shutdown explicitly. This
 change was checked offline. No second native attempt was run.
+
+### Compensated SPACE candidate
+
+The offline candidate uses the same virtual 120 mm tool. The training window
+was approach ticks 1 through 100 and the held-out window was 101 through
+170 of native attempt 001. The candidate uses a common lag of 0.0804 s
+and a gravity scale of 1.632 for three pitch joints. These are empirical
+values from one simulated approach. The saved 470-interval schedule has
+candidate digest `7fbca68b558be607b582cf3332984cf67f7bf6208e8abb459807b96c2a724356`.
+Hover, bottom, hover and return to park fall at ticks 199, 235, 271 and 470.
+The model estimates a 3.69 mm lower clearance bound on approach and return.
+Its initial state assumes a settled nominal park pose.
+
+The native launcher selects this schedule with `--compensated` and its own
+one-attempt authorization. Initialization places the arm at nominal park and
+applies the compensated park drive target during settling. Each subsequent
+tick records both the intended joint pose and compensated drive command.
+The existing 0.05 rad tracking threshold applies to measured error against
+the intended pose. Root stability and the native key assessment still apply.
+The independent attempt directory is `arm301-space-compensated-native-attempt-001`.

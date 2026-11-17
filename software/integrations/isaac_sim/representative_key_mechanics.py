@@ -10270,10 +10270,48 @@ CORRECTED_SPACE_NATIVE_AUTHORIZATION = (
 )
 
 
+COMPENSATED_SPACE_NATIVE_AUTHORIZATION = (
+    "I authorize one ARM-301 compensated SPACE native contact simulation using the "
+    "470-tick schedule, with no retry and no hardware or physical authority."
+)
+COMPENSATED_SPACE_CANDIDATE_SHA256 = "7fbca68b558be607b582cf3332984cf67f7bf6208e8abb459807b96c2a724356"
+COMPENSATED_SPACE_DIRECTORY = "arm301-space-compensated-native-attempt-001"
+
+
+def _compensated_space_targets(candidate_path: Path, plan: dict, dt: float) -> list[dict]:
+    candidate = json.loads(candidate_path.read_bytes())
+    digest = _require_canonical_hash(candidate, "candidate_sha256", "compensated SPACE candidate")
+    if digest != COMPENSATED_SPACE_CANDIDATE_SHA256:
+        raise MechanicsContractError("compensated SPACE candidate differs from screened schedule")
+    report = candidate["report"]
+    if (report["source_plan"] != plan["plan_sha256"] or candidate["joint_order"] != plan["joint_order"]
+            or report["physics_dt_s"] != dt):
+        raise MechanicsContractError("compensated SPACE schedule lineage or timing changed")
+    park, hover, bottom, release, end = report["landmark_ticks"]
+    rows = []
+    for tick, (reference, command) in enumerate(zip(
+        candidate["reference_positions_rad"], candidate["drive_targets_rad"], strict=True
+    )):
+        phase = "TRANSIT"
+        if tick in (park, end):
+            phase = "PARK"
+        elif tick in (hover, release):
+            phase = "HOVER"
+        elif hover < tick <= bottom:
+            phase = "CONTACT"
+        elif bottom < tick < release:
+            phase = "RETRACT"
+        rows.append(dict(sequence=tick, action_index=0, target_id="SPACE", phase=phase,
+                         phase_endpoint=tick == bottom, time_from_start_ns=round(tick * dt * 1e9),
+                         joint_position_target_rad=command, joint_position_reference_rad=reference))
+    return rows
+
+
 def run_drive_controlled_robot_h_replay(
     *,
     replay_plan_path: Path,
     corrected_space_authorization: str | None = None,
+    compensated_space_candidate: Path | None = None,
     layout_path: Path,
     drive_profile_path: Path,
     robot_usd_path: Path,
@@ -10291,10 +10329,12 @@ def run_drive_controlled_robot_h_replay(
     plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
     plan_hash = _require_canonical_hash(plan, "plan_sha256", "robot H replay plan")
     corrected_space = plan.get("schema") == "tactevra.arm301.corrected_space_native_plan.v1"
-    if (corrected_space or corrected_space_authorization is not None) and (
+    compensated = compensated_space_candidate is not None
+    authorization = COMPENSATED_SPACE_NATIVE_AUTHORIZATION if compensated else CORRECTED_SPACE_NATIVE_AUTHORIZATION
+    if (corrected_space or compensated or corrected_space_authorization is not None) and (
         not corrected_space
         or plan_hash != "7cb7129414390ad8dd0f2dbce14946625f403a2cba2df8486aca1b64d49fe7ea"
-        or corrected_space_authorization != CORRECTED_SPACE_NATIVE_AUTHORIZATION
+        or corrected_space_authorization != authorization
         or randomized_episode is not None
         or state_policy_manifest_sha256 is not None
         or state_policy_request_sha256 is not None
@@ -10606,7 +10646,11 @@ def run_drive_controlled_robot_h_replay(
         from nominal_route_isaac_eula_preflight import evaluate_eula_preflight
         from nominal_route_memory_preflight import collect_windows_memory_snapshot, evaluate_memory_preflight
 
-        directory = Path("C:/IsaacSim/artifacts/issue190/arm301-corrected-space-native-attempt-001")
+        directory_name = "arm301-corrected-space-native-attempt-001"
+        if compensated:
+            compensated_targets = _compensated_space_targets(compensated_space_candidate, plan, dt)
+            directory_name = COMPENSATED_SPACE_DIRECTORY
+        directory = Path("C:/IsaacSim/artifacts/issue190") / directory_name
         if (output_path.resolve() != directory / "receipt.json"
                 or status_path.resolve() != directory / "status.json"):
             raise MechanicsContractError("corrected SPACE requires a fresh dedicated attempt directory")
@@ -10775,11 +10819,11 @@ def run_drive_controlled_robot_h_replay(
         articulation.set_dof_gains([[dof["stiffness"]] * 6], [[dof["damping"]] * 6])
         articulation.set_dof_max_efforts([[dof["maximum_effort"]] * 6])
         articulation.set_dof_max_velocities([[dof["maximum_velocity_rad_s"]] * 6])
-        targets = plan["joint_targets"]
-        initial = targets[0]["joint_position_target_rad"]
+        targets = compensated_targets if compensated else plan["joint_targets"]
+        initial = targets[0]["joint_position_reference_rad" if compensated else "joint_position_target_rad"]
         articulation.set_dof_positions([initial])
         articulation.set_dof_velocities([[0.0] * 6])
-        articulation.set_dof_position_targets([initial])
+        articulation.set_dof_position_targets([targets[0]['joint_position_target_rad']])
         timeline = omni.timeline.get_timeline_interface()
         timeline.play()
         SimulationManager.step(steps=drive_profile["initial_settle_steps"])
@@ -10836,11 +10880,14 @@ def run_drive_controlled_robot_h_replay(
                     )
                 )
                 native_trace[-1]["tip_center_xy_m"] = [float(tip_translation[0]), float(tip_translation[1])]
+                if compensated:
+                    native_trace[-1]["joint_position_reference_rad"] = target["joint_position_reference_rad"]
+            reference = target["joint_position_reference_rad"] if compensated else desired
             observed = articulation.get_dof_positions().numpy().tolist()[0]
             tracking.append({
                 "sequence": target["sequence"],
                 "maximum_joint_error_rad": max(
-                    abs(observed[index] - desired[index]) for index in range(6)
+                    abs(observed[index] - reference[index]) for index in range(6)
                 ),
             })
             world = UsdGeom.Xformable(base_prim).ComputeLocalToWorldTransform(0.0)
@@ -10897,7 +10944,7 @@ def run_drive_controlled_robot_h_replay(
         )
         passed = (
             runtime_failure_reason is None
-            and (not corrected_space or elapsed_steps == plan["scheduled_physics_steps"])
+            and (not corrected_space or elapsed_steps == len(targets) - 1)
             and all(item["assessment"]["accepted"] for item in action_assessments)
             and all(
                 item["assessment"]["resolved_key"] == target_id
@@ -11000,9 +11047,13 @@ def run_drive_controlled_robot_h_replay(
                            status="PASS" if passed else "BLOCKED_CORRECTED_SPACE",
                            source_connected_sha256=plan["source_connected_sha256"],
                            source_timing_sha256=plan["source_timing_sha256"],
-                           episode_id=plan["episode_id"], scheduled_physics_steps=plan["scheduled_physics_steps"],
+                           episode_id=plan["episode_id"], scheduled_physics_steps=len(targets) - 1,
                            completed_schedule_steps=elapsed_steps, failure_reason=runtime_failure_reason,
                            maximum_joint_tracking_error_allowed_rad=maximum_tracking_error_allowed)
+        if compensated:
+            receipt.update(schema="tactevra.arm301.compensated_space_native_result.v1",
+                           source_candidate_sha256=COMPENSATED_SPACE_CANDIDATE_SHA256,
+                           tracking_reference="uncompensated_intended_joint_positions")
         if (
             representative_plan
             or representative_adapted_plan
