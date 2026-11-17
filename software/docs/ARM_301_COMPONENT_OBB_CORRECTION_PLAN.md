@@ -314,3 +314,22 @@ reproduce a row with a small residual while missing the intended key.
 Future SPACE planning must bind the episode tool and placement and solve
 against the intended board-space key target. The sampled FK comparison
 does not measure key displacement or identify the physical tool.
+
+### Corrected SPACE local stroke
+
+Run the audit with the pinned route, artifact root, a fresh output file and
+`--plan-local-stroke` to generate the local stroke independently of the old
+contact joint commands. The historical endpoint only seeds the first IK solve.
+The planning target is the episode key center. The tool uses the pinned
+virtual keyboard length (120 mm) and the native mechanics model's 1 mm tip
+sphere. The 9 mm hover is a planning choice. The 2.7 mm stroke depth is
+midway between the deepest assumed activation (2.4 mm) and shallowest
+assumed bottom stop (3.0 mm). Release reverses the descent waypoints.
+
+Receipt `0b44e8d4fc6beed88b27b13e68a7df1077562052f193fb20d5ad3e80702366a6`
+records 49 waypoints and 481 FK samples along linear joint interpolation.
+At those samples the sphere stays at least 5.9977 mm inside the modeled
+key edges. Its lowest surface reaches 2.7001 mm below the resting top and
+returns to 8.9987 mm above it. These geometric depths assume an undeformed
+key reference. Key travel under load, switch events, entry from park, tool
+shaft clearance, and physical transfer remain unverified.

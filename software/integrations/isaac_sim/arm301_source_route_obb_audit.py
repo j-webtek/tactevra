@@ -217,6 +217,142 @@ def _screen_tip(route, rows, urdf, profile_path, layout_path):
                 contact_endpoints=endpoints, phase_runs=ranges)
 
 
+def _corrected_space_cycle(route, paths):
+    """Offline local press stroke at the episode target, including tool-tip geometry."""
+    import math
+    from nominal_route_concrete_native_attempt_binding import (
+        _build_solver_kwargs,
+        EXPECTED_LAYOUT_SHA256,
+    )
+    from representative_key_mechanics import MECHANICS_PRIOR
+    from rocell.geometry import Point3Mm, RigidTransform, Rotation3, Vec3
+    from rocell.kinematics.ik import (
+        ARM_JOINT_NAMES,
+        BoardToolTipTarget,
+        RoArmM3NumericalIk,
+    )
+
+    profile_path = ROOT / "software/config/virtual_commissioning_profile.json"
+    if (
+        _file_sha(profile_path) != route["source_bindings"]["virtual_profile_sha256"]
+        or _file_sha(paths.layout) != EXPECTED_LAYOUT_SHA256
+    ):
+        raise ValueError("cycle tool profile or keyboard layout changed")
+    profile = json.loads(profile_path.read_bytes())
+    study = profile["study_input"]
+    if any(
+        abs(a - b) > 1e-12
+        for a, b in zip(
+            study["physical_placement_input"]["matrix_row_major"],
+            route["robot_placement_matrix_row_major"],
+            strict=True,
+        )
+    ):
+        raise ValueError("cycle base placement differs from episode")
+    m = study["derived_solver_transform"]["matrix_row_major"]
+    board = RigidTransform(
+        "board",
+        "world",
+        Rotation3(tuple(m[4 * i + j] for i in range(3) for j in range(3))),
+        Vec3(m[3], m[7], m[11]),
+    )
+    length = study["route_tool_lengths_mm"]["keyboard"]
+    options = _build_solver_kwargs(paths)
+    options.update(board_T_world=board, hand_tcp_to_tip_z_mm=-length)
+    solver = RoArmM3NumericalIk(**options)
+    x, y = route["randomized_key_center_board_xy_mm"]
+    half_x, half_y = route["target_region"]["half_extent_mm"]
+    rest = json.loads(paths.layout.read_bytes())["keyboard"]["target_plane_z_board_mm"]
+    radius = MECHANICS_PRIOR["tip_radius_mm"]
+    activation = MECHANICS_PRIOR["activation_mm"]["range"][1]
+    max_depth = MECHANICS_PRIOR["travel_mm"]["range"][0]
+    # Leave a symmetric allowance between the deepest activation and shallowest stop.
+    depth = (activation + max_depth) / 2
+    hover = rest + 9.0
+    bottom = rest - depth
+    segments = math.ceil((hover - bottom) / 0.5)
+    z_targets = [hover + (bottom - hover) * i / segments for i in range(segments + 1)]
+    seed = {
+        name: JointPosition.radians(q)
+        for name, q in zip(
+            ARM_JOINT_NAMES,
+            route["joint_targets"][route["contact_endpoint_sequences"][0]][
+                "joint_position_target_rad"
+            ][:5],
+            strict=True,
+        )
+    }
+    joints = []
+    for z in z_targets:
+        solved = solver.solve(
+            BoardToolTipTarget(Point3Mm("board", x, y, z)), seed_joint_positions=(seed,)
+        )
+        if not solved.converged:
+            raise ValueError(f"SPACE IK failed at height {z}")
+        seed = {v.name: v.position for v in solved.solution_arm_joint_positions}
+        joints.append(
+            [seed[n].value for n in ARM_JOINT_NAMES]
+            + [solver.fixed_gripper_position.value]
+        )
+    joints += joints[-2::-1]
+    z_targets += z_targets[-2::-1]
+    max_error = 0.0
+    min_edge = float("inf")
+    gaps = []
+    for index, (left, right) in enumerate(zip(joints, joints[1:])):
+        for step in range(0 if index == 0 else 1, 11):
+            t = step / 10
+            q = [a + (b - a) * t for a, b in zip(left, right)]
+            state = {
+                n: JointPosition.radians(v)
+                for n, v in zip(EXPECTED_DOF_NAMES, q, strict=True)
+            }
+            hand = board.compose(solver.model.forward_kinematics(state)["hand_tcp"])
+            center = hand.transform_position_mm(Vec3(0, 0, -length + radius))
+            gap = center.z - radius - rest
+            gaps.append(gap)
+            target_z = z_targets[index] + (z_targets[index + 1] - z_targets[index]) * t
+            max_error = max(max_error, abs(gap + rest - target_z))
+            min_edge = min(
+                min_edge,
+                half_x - abs(center.x - x) - radius,
+                half_y - abs(center.y - y) - radius,
+            )
+    stop = segments * 10
+    if not (
+        min_edge >= MECHANICS_PRIOR["center_margin_mm"]
+        and max_error <= 0.05
+        and activation <= -min(gaps) < max_depth
+        and gaps[-1] > 0
+        and all(a >= b for a, b in zip(gaps[:stop], gaps[1 : stop + 1]))
+        and all(a <= b for a, b in zip(gaps[stop:], gaps[stop + 1 :]))
+    ):
+        raise ValueError("sampled SPACE stroke outside tool/key envelope")
+    return dict(
+        schema="tactevra.offline_space_local_stroke.v1",
+        episode_id=route["episode_id"],
+        profile_id=profile["profile_id"],
+        profile_file_sha256=_file_sha(profile_path),
+        route_file_sha256=_file_sha(paths.route),
+        layout_file_sha256=_file_sha(paths.layout),
+        joint_order=list(EXPECTED_DOF_NAMES),
+        keyboard_tool_length_mm=length,
+        target_xy_mm=[x, y],
+        hover_above_rest_mm=hover - rest,
+        target_depth_mm=depth,
+        waypoints_rad=joints,
+        interpolation="LINEAR_JOINT_SPACE",
+        samples=len(gaps),
+        maximum_surface_height_error_mm=max_error,
+        minimum_xy_edge_margin_mm=min_edge,
+        maximum_geometric_depth_mm=-min(gaps),
+        final_gap_mm=gaps[-1],
+        hardware_access=False,
+        key_displacement_measured=False,
+        validated_scope="SAMPLED_LOCAL_STROKE_GEOMETRY_ONLY",
+    )
+
+
 def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | None = None, screen_workcell: bool = False, screen_tip: bool = False) -> dict:
     integration = Path(__file__).resolve().parent
     urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
@@ -334,7 +470,20 @@ def main() -> int:
     parser.add_argument("--ik-artifacts", type=Path, help="regenerate the governed IK window using retained adapter artifacts")
     parser.add_argument("--screen-workcell", action="store_true", help="screen the nominal board and keyboard envelope")
     parser.add_argument("--screen-tip", action="store_true", help="evaluate sampled virtual keyboard tip through contact and retraction")
+    parser.add_argument("--plan-local-stroke", action="store_true", help="generate offline episode-profile SPACE stroke")
     args = parser.parse_args()
+    if args.plan_local_stroke:
+        from nominal_route_concrete_native_attempt_binding import BindingPaths
+        if _file_sha(args.route) != ROUTE_SHA256 or args.ik_artifacts is None:
+            parser.error("local stroke requires pinned route and --ik-artifacts")
+        paths = BindingPaths(args.ik_artifacts, ROOT, args.output)
+        if paths.route.resolve() != args.route.resolve():
+            parser.error("artifact root and supplied route differ")
+        result = _signed(_corrected_space_cycle(json.loads(args.route.read_bytes()), paths), "receipt_sha256")
+        with args.output.open("x", encoding="utf-8") as stream:
+            json.dump(result, stream, indent=2, allow_nan=False)
+        print(json.dumps({k:v for k,v in result.items() if k != "waypoints_rad"}))
+        return 0
     result = audit(args.route, whole_components=args.whole_components, ik_artifacts=args.ik_artifacts,
                    screen_workcell=args.screen_workcell, screen_tip=args.screen_tip)
     with args.output.open("x", encoding="utf-8", newline="\n") as stream:
