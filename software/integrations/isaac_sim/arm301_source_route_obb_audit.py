@@ -146,11 +146,11 @@ def _workcell_boxes(route: dict, layout: dict, urdf: Path):
     )
 
 
-def _screen_workcell(runtime, rows, obstacles):
+def _screen_workcell(runtime, rows, obstacles, sequences=range(653, 941)):
     from nominal_route_component_obb_clearance import _separating_axis_gap_mm
 
     results = {box.link_name: {"segments_screened": 0, "segments_unresolved": 0} for box in obstacles}
-    for sequence in range(653, 941):
+    for sequence in sequences:
         moving = runtime.bound_link_obbs(
             start_joint_targets_rad=rows[sequence]["joint_position_target_rad"],
             end_joint_targets_rad=rows[sequence + 1]["joint_position_target_rad"],
@@ -353,6 +353,126 @@ def _corrected_space_cycle(route, paths):
     )
 
 
+def _connected_stroke(route, paths):
+    """Join the saved park pose to the local stroke, then return along the approach."""
+    import math
+    from nominal_route_native_component_obb_binding import (
+        _component_coefficients,
+        _joint_chain,
+    )
+    from nominal_route_whole_component_candidate import build_candidate
+    from representative_key_mechanics import MECHANICS_PRIOR
+    from rocell.geometry import Vec3
+
+    local = _corrected_space_cycle(route, paths)
+    park_row = route["joint_targets"][0]
+    if park_row["phase"] != "PARK":
+        raise ValueError("SPACE route does not start at park")
+    park = park_row["joint_position_target_rad"]
+    stroke = local["waypoints_rad"]
+    hover = stroke[0]
+    steps = math.ceil(max(abs(a - b) for a, b in zip(park, hover, strict=True)) / 0.005)
+    approach = [
+        [a + (b - a) * i / steps for a, b in zip(park, hover, strict=True)]
+        for i in range(steps)
+    ]
+    joints = approach + stroke + approach[::-1]
+    integration = Path(__file__).resolve().parent
+    urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
+    layout = ROOT / "active-project/RoCell_v0_3/config/workcell_layout.json"
+    definition = build_candidate(ROOT)
+    # This ephemeral record supplies the offline FK adapter only.
+    review = _signed(
+        dict(
+            schema="tactevra.isaac_lm4_native_component_obb_binding_review.v1",
+            status="ACCEPTED_FOR_COMPONENT_OBB_RUNTIME_INTEGRATION",
+            source_binding_sha256=definition["binding_sha256"],
+            runtime_instantiation_admitted=True,
+            launch_admitted=False,
+            hardware_access=False,
+            physical_authority=False,
+        ),
+        "review_sha256",
+    )
+    fk = _OfflineArticulation(urdf)
+    runtime = NativeComponentObbRuntime(
+        definition, binding_review=review, articulation=fk
+    )
+    obstacles = _workcell_boxes(route, json.loads(layout.read_bytes()), urdf)
+    rows = [{"joint_position_target_rad": q} for q in joints]
+    segments = range(len(rows) - 1)
+    workcell = _screen_workcell(runtime, rows, obstacles, segments)
+    if any(box["segments_unresolved"] for box in workcell.values()):
+        raise ValueError(
+            f"connected stroke has unresolved workcell intervals: {workcell}"
+        )
+    minimum_self = min(
+        check_continuous_self_clearance(
+            runtime,
+            start_sequence=i,
+            end_sequence=i + 1,
+            start_joint_targets_rad=joints[i],
+            end_joint_targets_rad=joints[i + 1],
+            reviewed_excluded_pairs=tuple(runtime.excluded_pairs),
+        )["minimum_clearance_mm"]
+        for i in segments
+    )
+    radius = MECHANICS_PRIOR["tip_radius_mm"]
+    length = local["keyboard_tool_length_mm"]
+    coefficients = _component_coefficients(
+        "hand_tcp", (0, 0, -length + radius), (0, 0, 0), _joint_chain(urdf.read_text())
+    )
+    # Work in URDF world. The pinned board pose is yaw-only; its top-plane
+    # normal is +Z here as well. Include the fixed URDF base height offset.
+    board_box, keyboard_box = obstacles
+    if tuple(round(v, 10) for v in keyboard_box.start_axes_row_major[6:]) != (0, 0, 1):
+        raise ValueError("tool-height certificate requires board Z aligned to world Z")
+    upper = max(box.start_center_mm[2] + box.half_extents_mm[2] for box in obstacles)
+    gap = math.inf
+    for i in range(steps):
+        state = {
+            name: JointPosition.radians(v)
+            for name, v in zip(EXPECTED_DOF_NAMES, joints[i], strict=True)
+        }
+        hand = fk.model.forward_kinematics(state)["hand_tcp"]
+        tip_center = hand.transform_position_mm(Vec3(0, 0, -length + radius))
+        drift = sum(
+            coefficients.get(name, 0) * abs(b - a)
+            for name, a, b in zip(
+                EXPECTED_DOF_NAMES, joints[i], joints[i + 1], strict=True
+            )
+        )
+        gap = min(
+            gap, min(hand.translation_mm.z, tip_center.z) - radius - drift - upper
+        )
+    if gap <= 0.5:
+        raise ValueError(f"approach tool clearance unresolved: {gap}")
+    return dict(
+        schema="tactevra.offline_space_connected_stroke.v1",
+        episode_id=route["episode_id"],
+        local_stroke_sha256=_sha(local),
+        profile_file_sha256=local["profile_file_sha256"],
+        route_file_sha256=local["route_file_sha256"],
+        workcell_file_sha256=_file_sha(layout),
+        audit_source_sha256=_file_sha(integration / "arm301_source_route_obb_audit.py"),
+        component_definition_sha256=definition["binding_sha256"],
+        waypoints_rad=joints,
+        joint_order=list(EXPECTED_DOF_NAMES),
+        approach_segments=steps,
+        stroke_segments=len(stroke) - 1,
+        return_segments=steps,
+        clearance_segments=len(segments),
+        minimum_arm_self_clearance_mm=minimum_self,
+        arm_workcell_clearance=workcell,
+        approach_return_virtual_capsule_radius_mm=radius,
+        approach_return_minimum_tool_clearance_mm=gap,
+        modeled_tip_stroke_samples=local["samples"],
+        hardware_access=False,
+        physical_authority=False,
+        key_displacement_measured=False,
+    )
+
+
 def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | None = None, screen_workcell: bool = False, screen_tip: bool = False) -> dict:
     integration = Path(__file__).resolve().parent
     urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
@@ -471,15 +591,17 @@ def main() -> int:
     parser.add_argument("--screen-workcell", action="store_true", help="screen the nominal board and keyboard envelope")
     parser.add_argument("--screen-tip", action="store_true", help="evaluate sampled virtual keyboard tip through contact and retraction")
     parser.add_argument("--plan-local-stroke", action="store_true", help="generate offline episode-profile SPACE stroke")
+    parser.add_argument("--plan-connected-stroke", action="store_true", help="screen park, SPACE stroke and return offline")
     args = parser.parse_args()
-    if args.plan_local_stroke:
+    if args.plan_local_stroke or args.plan_connected_stroke:
         from nominal_route_concrete_native_attempt_binding import BindingPaths
         if _file_sha(args.route) != ROUTE_SHA256 or args.ik_artifacts is None:
             parser.error("local stroke requires pinned route and --ik-artifacts")
         paths = BindingPaths(args.ik_artifacts, ROOT, args.output)
         if paths.route.resolve() != args.route.resolve():
             parser.error("artifact root and supplied route differ")
-        result = _signed(_corrected_space_cycle(json.loads(args.route.read_bytes()), paths), "receipt_sha256")
+        planner = _connected_stroke if args.plan_connected_stroke else _corrected_space_cycle
+        result = _signed(planner(json.loads(args.route.read_bytes()), paths), "receipt_sha256")
         with args.output.open("x", encoding="utf-8") as stream:
             json.dump(result, stream, indent=2, allow_nan=False)
         print(json.dumps({k:v for k,v in result.items() if k != "waypoints_rad"}))

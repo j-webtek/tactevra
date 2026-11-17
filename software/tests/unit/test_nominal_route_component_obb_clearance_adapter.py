@@ -567,6 +567,15 @@ def test_local_space_stroke_returns_to_hover_with_episode_geometry(monkeypatch, 
     assert 2.4 <= result["maximum_geometric_depth_mm"] < 3
     assert result["minimum_xy_edge_margin_mm"] >= 2.5
     assert result["final_gap_mm"] == pytest.approx(9, abs=0.05)
+    park = [0.082, 1.054, 0.717, -0.132, 0, 0]
+    route["joint_targets"].insert(0, {"phase": "PARK", "joint_position_target_rad": park})
+    route["contact_endpoint_sequences"] = [1]
+    paths.route.write_text(json.dumps(route))
+    connected = audit._connected_stroke(route, paths)
+    assert connected["waypoints_rad"][0] == connected["waypoints_rad"][-1] == park
+    assert connected["clearance_segments"] == len(connected["waypoints_rad"]) - 1
+    assert connected["approach_return_minimum_tool_clearance_mm"] > 0.5
+    assert connected["arm_workcell_clearance"]["keyboard_envelope"]["segments_unresolved"] == 0
     route["source_bindings"]["virtual_profile_sha256"] = "0" * 64
     with pytest.raises(ValueError, match="profile or keyboard layout"):
         audit._corrected_space_cycle(route, paths)

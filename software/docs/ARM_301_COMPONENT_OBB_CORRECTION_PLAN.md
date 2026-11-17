@@ -333,3 +333,21 @@ key edges. Its lowest surface reaches 2.7001 mm below the resting top and
 returns to 8.9987 mm above it. These geometric depths assume an undeformed
 key reference. Key travel under load, switch events, entry from park, tool
 shaft clearance, and physical transfer remain unverified.
+
+### Park-to-SPACE connection
+
+Use `--plan-connected-stroke` in place of `--plan-local-stroke` with the
+same pinned inputs. The candidate joins the episode park pose to the first
+hover configuration using linear joint interpolation. It reverses the
+approach after the local release. All 422 segments passed the modeled arm
+self-clearance and nominal board/keyboard screens. During approach and
+return, a straight virtual capsule from hand TCP to tip center, assigned
+the tip sphere's 1 mm radius, stayed at least 3.703 mm above the keyboard
+top plane after subtracting a full-interval joint-motion bound. This
+assumed shaft radius needs a separate physical attachment profile.
+
+The receipt digest is
+`96b8bbb027bb468855bc3fc0284e23f47b3fa648b41f458f8c043eb56d276c85`.
+The local stroke still has sampled tip evidence only. The connected path
+contains positions without timing, simulated switch events, measured key
+displacement, or physical execution authority.
