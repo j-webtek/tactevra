@@ -14,6 +14,7 @@ import hashlib
 from itertools import product
 import json
 import math
+import os
 from pathlib import Path
 from typing import Any, Iterable
 
@@ -10263,9 +10264,16 @@ def build_state_policy_native_execution_progress(
     }
 
 
+CORRECTED_SPACE_NATIVE_AUTHORIZATION = (
+    "I authorize one ARM-301 corrected SPACE native contact simulation using the "
+    "422-tick schedule, with no retry and no hardware or physical authority."
+)
+
+
 def run_drive_controlled_robot_h_replay(
     *,
     replay_plan_path: Path,
+    corrected_space_authorization: str | None = None,
     layout_path: Path,
     drive_profile_path: Path,
     robot_usd_path: Path,
@@ -10282,6 +10290,15 @@ def run_drive_controlled_robot_h_replay(
 
     plan = json.loads(replay_plan_path.resolve(strict=True).read_bytes())
     plan_hash = _require_canonical_hash(plan, "plan_sha256", "robot H replay plan")
+    corrected_space = plan.get("schema") == "tactevra.arm301.corrected_space_native_plan.v1"
+    if corrected_space and (
+        plan_hash != "7cb7129414390ad8dd0f2dbce14946625f403a2cba2df8486aca1b64d49fe7ea"
+        or corrected_space_authorization != CORRECTED_SPACE_NATIVE_AUTHORIZATION
+        or randomized_episode is not None
+        or state_policy_manifest_sha256 is not None
+        or state_policy_request_sha256 is not None
+    ):
+        raise MechanicsContractError("corrected SPACE requires its pinned plan and fresh one-attempt authorization")
     profile = build_profile(layout_path.resolve(strict=True))
     drive_raw = drive_profile_path.resolve(strict=True).read_bytes()
     drive_profile = json.loads(drive_raw)
@@ -10354,12 +10371,13 @@ def run_drive_controlled_robot_h_replay(
             or representative_adapted_plan
             or representative_refined_plan
             or state_policy_plan
+            or corrected_space
         )
         else "H"
     )
     randomized_parameters = (
         _validate_randomized_replay_parameters(plan.get("randomized_parameters"))
-        if state_policy_plan
+        if state_policy_plan or corrected_space
         else None
     )
     if randomized_episode is not None:
@@ -10387,6 +10405,7 @@ def run_drive_controlled_robot_h_replay(
             or representative_adapted_plan
             or representative_refined_plan
             or state_policy_plan
+            or corrected_space
         )
         else plan.get("h_contact_endpoint_sequences")
     )
@@ -10401,10 +10420,11 @@ def run_drive_controlled_robot_h_replay(
             or representative_adapted_plan
             or representative_refined_plan
             or state_policy_plan
+            or corrected_space
         )
         or plan.get("sample_count") != len(plan.get("joint_targets", []))
         or not isinstance(contact_endpoint_sequences, list)
-        or len(contact_endpoint_sequences) != 2
+        or len(contact_endpoint_sequences) != (1 if corrected_space else 2)
         or not isinstance(target_region, dict)
         or bindings.get("key_mechanics_profile_sha256") != profile["profile_sha256"]
         or bindings.get("drive_profile_file_sha256")
@@ -10581,7 +10601,21 @@ def run_drive_controlled_robot_h_replay(
     ):
         raise MechanicsContractError("drive profile boundary changed")
 
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    if corrected_space:
+        from nominal_route_isaac_eula_preflight import evaluate_eula_preflight
+        from nominal_route_memory_preflight import collect_windows_memory_snapshot, evaluate_memory_preflight
+
+        directory = Path("C:/IsaacSim/artifacts/issue190/arm301-corrected-space-native-attempt-001")
+        if (output_path.resolve() != directory / "receipt.json"
+                or status_path.resolve() != directory / "status.json"):
+            raise MechanicsContractError("corrected SPACE requires a fresh dedicated attempt directory")
+        if evaluate_eula_preflight(os.environ)["status"] != "PASS_EULA_PREFLIGHT":
+            raise MechanicsContractError("Isaac EULA preflight failed")
+        if evaluate_memory_preflight(collect_windows_memory_snapshot())["status"] != "PASS_MEMORY_PREFLIGHT":
+            raise MechanicsContractError("Isaac memory preflight failed")
+        output_path.parent.mkdir(parents=True, exist_ok=False)
+    else:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.parent.mkdir(parents=True, exist_ok=True)
     app = None
     try:
@@ -10757,7 +10791,8 @@ def run_drive_controlled_robot_h_replay(
         stopped_target = None
         previous_ns = int(targets[0]["time_from_start_ns"])
         elapsed_steps = 0
-        for target in targets:
+        # For the corrected path row zero is already installed and settled.
+        for target in (targets[1:] if corrected_space else targets):
             desired = target["joint_position_target_rad"]
             articulation.set_dof_position_targets([desired])
             target_ns = int(target["time_from_start_ns"])
@@ -10819,7 +10854,7 @@ def run_drive_controlled_robot_h_replay(
             root["sequence"] = target["sequence"]
             root_records.append(root)
             if not root["passed"]:
-                if state_policy_plan:
+                if state_policy_plan or corrected_space:
                     runtime_failure_reason = "ROOT_INVARIANT"
                     stopped_target = target
                     break
@@ -10828,7 +10863,7 @@ def run_drive_controlled_robot_h_replay(
 
         action_assessments = []
         if runtime_failure_reason is None:
-            for action_index in (0, 1):
+            for action_index in ((0,) if corrected_space else (0, 1)):
                 rows = [row for row in native_trace if row["action_index"] == action_index]
                 assessment = assess_native_key_trace(
                     profile,
@@ -10854,11 +10889,13 @@ def run_drive_controlled_robot_h_replay(
                 or representative_adapted_plan
                 or representative_refined_plan
                 or state_policy_plan
+                or corrected_space
             )
             else None
         )
         passed = (
             runtime_failure_reason is None
+            and (not corrected_space or elapsed_steps == plan["scheduled_physics_steps"])
             and all(item["assessment"]["accepted"] for item in action_assessments)
             and all(
                 item["assessment"]["resolved_key"] == target_id
@@ -10949,12 +10986,21 @@ def run_drive_controlled_robot_h_replay(
                         or representative_adapted_plan
                         or representative_refined_plan
                         or state_policy_plan
+                        or corrected_space
                     )
                     else "single_representative_H_key_only"
                 ),
                 "tool_tip_collision_surface_is_governed_hand_tcp_minus_120_mm_endpoint",
             ],
         }
+        if corrected_space:
+            receipt.update(schema="tactevra.arm301.corrected_space_native_result.v1",
+                           status="PASS" if passed else "BLOCKED_CORRECTED_SPACE",
+                           source_connected_sha256=plan["source_connected_sha256"],
+                           source_timing_sha256=plan["source_timing_sha256"],
+                           episode_id=plan["episode_id"], scheduled_physics_steps=plan["scheduled_physics_steps"],
+                           completed_schedule_steps=elapsed_steps, failure_reason=runtime_failure_reason,
+                           maximum_joint_tracking_error_allowed_rad=maximum_tracking_error_allowed)
         if (
             representative_plan
             or representative_adapted_plan

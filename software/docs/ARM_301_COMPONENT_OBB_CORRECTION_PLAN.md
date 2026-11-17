@@ -383,3 +383,19 @@ missing tip XY when called from the updated native capture paths. Legacy
 depth-only traces keep their historical assumed-center interpretation.
 An offline test exercises both a centered SPACE press and a 12 mm
 lateral miss with identical displacement. No new native run is recorded.
+
+The offline audit's `--prepare-native-space CONNECTED TIMED` mode checks the
+original route, the connected-path receipt and the four-substep timing receipt.
+It produces plan `7cb7129414390ad8dd0f2dbce14946625f403a2cba2df8486aca1b64d49fe7ea`.
+Tick zero initializes the parked arm. The 422 subsequent drive ticks contain
+one SPACE action, reaching hover at 187, maximum commanded depth at 211,
+hover again at 235 and park at 422.
+
+The simulation entry point is `software/integrations/isaac_sim/arm301_corrected_space_native.py`.
+It accepts the corrected-plan authorization through `--authorization`, checks
+the retained plan, layout, drive profile, USD, EULA and host memory, then
+exclusively claims `arm301-corrected-space-native-attempt-001` under the
+issue190 artifact directory. A completed run records observed joint tracking,
+root pose, tip XY, key displacement and the action assessment. The model
+uses the virtual 120 mm tool and one simulated key. Native contact and
+return to park require validation in Isaac.

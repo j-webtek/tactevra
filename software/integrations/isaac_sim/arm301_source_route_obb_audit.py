@@ -717,6 +717,55 @@ def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | N
     }, "receipt_sha256")
 
 
+def prepare_native_space_plan(route_path, connected_path, response_path):
+    """Map the screened stroke and its exact tick schedule to native target rows."""
+    route = json.loads(route_path.read_bytes())
+    path = json.loads(connected_path.read_bytes())
+    timing = json.loads(response_path.read_bytes())
+    for document, digest in (
+        (path, "96b8bbb027bb468855bc3fc0284e23f47b3fa648b41f458f8c043eb56d276c85"),
+        (timing, "ba9fa1a744ad060d8fe4e7b210f8206d6b1dd350de64939b773fbd04805a40ae"),
+    ):
+        if (document["receipt_sha256"] != digest
+                or _sha({k: v for k, v in document.items() if k != "receipt_sha256"}) != digest):
+            raise ValueError("screened SPACE input digest changed")
+    if (_file_sha(route_path) != ROUTE_SHA256 or path["route_file_sha256"] != ROUTE_SHA256
+            or timing["source_path_sha256"] != path["receipt_sha256"]):
+        raise ValueError("screened SPACE lineage changed")
+    start = path["approach_segments"]
+    bottom = start + path["stroke_segments"] // 2
+    end = start + path["stroke_segments"]
+    ticks = timing["waypoint_ticks"]
+    if ticks != list(range(423)):
+        raise ValueError("native one-target-per-tick schedule changed")
+    targets = []
+    for tick, joints in zip(ticks, path["waypoints_rad"], strict=True):
+        phase = "TRANSIT"
+        if tick in (0, ticks[-1]):
+            phase = "PARK"
+        elif tick in (start, end):
+            phase = "HOVER"
+        elif start < tick <= bottom:
+            phase = "CONTACT"
+        elif bottom < tick < end:
+            phase = "RETRACT"
+        targets.append(dict(sequence=tick, action_index=0, target_id="SPACE", phase=phase,
+                            phase_endpoint=tick==bottom, joint_position_target_rad=joints,
+                            time_from_start_ns=round(tick * timing["tick_s"] * 1e9)))
+    plan = {key: route[key] for key in (
+        "episode_id", "target_id", "target_region", "joint_order", "robot_placement_matrix_row_major",
+        "randomized_parameters", "randomized_key_center_board_xy_mm", "source_bindings",
+        "execution_contract", "limitations", "hardware_access", "physical_authority",
+        "hardware_writes", "physical_movements", "controller_commands", "gate_promotions",
+    )}
+    plan.update(schema="tactevra.arm301.corrected_space_native_plan.v1",
+                source_connected_sha256=path["receipt_sha256"], source_timing_sha256=timing["receipt_sha256"],
+                source_route_file_sha256=ROUTE_SHA256, joint_targets=targets, action_count=1,
+                contact_endpoint_sequences=[bottom], sample_count=len(targets),
+                initialization_sequence=0, scheduled_physics_steps=ticks[-1])
+    return _signed(plan, "plan_sha256")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--route", type=Path, required=True)
@@ -728,7 +777,15 @@ def main() -> int:
     parser.add_argument("--plan-local-stroke", action="store_true", help="generate offline episode-profile SPACE stroke")
     parser.add_argument("--plan-connected-stroke", action="store_true", help="screen park, SPACE stroke and return offline")
     parser.add_argument("--time-connected-stroke", type=Path, help="evaluate retained connected path with the episode key dynamics")
+    parser.add_argument("--prepare-native-space", nargs=2, type=Path, metavar=("CONNECTED", "TIMED"),
+                        help="prepare the one-action native plan offline")
     args = parser.parse_args()
+    if args.prepare_native_space:
+        result = prepare_native_space_plan(args.route, *args.prepare_native_space)
+        with args.output.open("x", encoding="utf-8") as stream:
+            json.dump(result, stream, indent=2, allow_nan=False)
+        print(result["plan_sha256"])
+        return 0
     if args.plan_local_stroke or args.plan_connected_stroke or args.time_connected_stroke:
         from nominal_route_concrete_native_attempt_binding import BindingPaths
         if _file_sha(args.route) != ROUTE_SHA256 or args.ik_artifacts is None:
