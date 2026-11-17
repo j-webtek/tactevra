@@ -260,6 +260,25 @@ rather than silently skipping for a missing package.
 Any failure remains fail-closed. ARM-300 stays immutable and no authorization
 from ARM-300 transfers to ARM-301.
 
+### Preparing the reviewed SPACE backend offline
+
+With the integration dependencies available and `software/src` on PYTHONPATH,
+run the following from the repository root. Supply the SHA-256 of the exact
+review file selected during independent review. The review must identify the
+reconstructed whole-component simulation geometry and its scope.
+
+```text
+python software/integrations/isaac_sim/arm301_prepare_component_backend.py --repo-root . --artifact-root <issue190-artifacts> --governed-attempt-directory <unused-attempt-path> --component-review <review.json> --component-review-sha256 <review-file-sha256>
+```
+
+The command prints the preparation receipt. It uses the retained robot USD,
+SPACE route, and canonical IK inputs, and leaves the attempt path unused.
+A future governed simulation launcher can pass the same
+`ReviewedComponentBindingBuilder` the preflight paths and use the returned
+backend after a fresh claim. This preparation leaves native route clearance,
+simulated typing, and physical transfer outstanding.
+
+
 ### Regenerated SPACE route self-clearance
 
 Pass `--whole-components --ik-artifacts <issue190-artifact-root>` to
@@ -399,3 +418,29 @@ issue190 artifact directory. A completed run records observed joint tracking,
 root pose, tip XY, key displacement and the action assessment. The model
 uses the virtual 120 mm tool and one simulated key. Native contact and
 return to park require validation in Isaac.
+
+### Native SPACE attempt 001
+
+Isaac ran the corrected schedule once. The result in
+`arm301-corrected-space-native-attempt-001/receipt.json` has canonical SHA-256
+`bf05713ccd3456babdaba7de20b2004035b9b1cb3a9794a6487d58fb7db20827`.
+It stopped at transit tick 181 (1.508 s), before hover at 187 and the press
+endpoint at 211. Root rotation reached 0.11869 degrees against the 0.10 degree
+limit. Translation was 0.01475 mm against 0.05 mm. The trace contains 181
+samples, zero action assessments and zero post-initialization teleports.
+Peak joint tracking error was 0.05030 rad at tick 44 (limit 0.05 rad).
+
+At tick 1, URDF forward kinematics with the commanded joints put the sphere
+center at Z = 38.75 mm in the board frame. The same calculation with observed
+joints gave 16.78 mm, close to the native 16.49 mm. At tick 170 those heights
+were 30.76, 15.13 and 14.88 mm respectively. This places the main vertical
+discrepancy in articulated tracking during approach. Inspect settled joint
+error under gravity, drive gains and feedforward before adjusting the key
+position or the fixture tolerances. A useful offline acceptance check for a
+candidate drive correction is positive tool clearance over the key envelope
+along approach under the observed tracking errors.
+
+Isaac shutdown returned exit code zero on this blocked attempt. The retained
+status and receipt agree on `BLOCKED_CORRECTED_SPACE`. The corrected-plan
+runner now passes the outcome code into Isaac shutdown explicitly. This
+change was checked offline. No second native attempt was run.

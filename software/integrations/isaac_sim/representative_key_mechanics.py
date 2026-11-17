@@ -10618,6 +10618,7 @@ def run_drive_controlled_robot_h_replay(
     else:
         output_path.parent.mkdir(parents=True, exist_ok=True)
     status_path.parent.mkdir(parents=True, exist_ok=True)
+    corrected_exit_code = 2
     app = None
     try:
         from isaacsim import SimulationApp
@@ -11104,6 +11105,8 @@ def run_drive_controlled_robot_h_replay(
             "status": receipt.get("status", receipt.get("disposition")),
             "receipt_sha256": receipt["receipt_sha256"],
         }, sort_keys=True) + "\n", encoding="utf-8")
+        if corrected_space and receipt["status"] == "PASS":
+            corrected_exit_code = 0
         return receipt
     except BaseException as exc:
         if (
@@ -11181,7 +11184,10 @@ def run_drive_controlled_robot_h_replay(
         raise
     finally:
         if app is not None:
-            app.close()
+            if corrected_space:
+                app.close(exit_code=corrected_exit_code)
+            else:
+                app.close()
 
 
 def run_state_policy_root_drift_diagnostic(

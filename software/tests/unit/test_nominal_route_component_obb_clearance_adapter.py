@@ -518,6 +518,53 @@ def test_concrete_binding_admits_only_reviewed_simulation_surrogate_without_star
         )
 
 
+def test_review_file_prepares_deferred_component_backend_and_detects_replacement(tmp_path, monkeypatch):
+    import hashlib
+    import json
+    from types import SimpleNamespace
+
+    monkeypatch.syspath_prepend(str(INTEGRATION))
+    import arm301_prepare_component_backend as entry
+    import nominal_route_concrete_native_attempt_binding as concrete
+    import nominal_route_native_component_obb_binding as component
+
+    paths = entry.BindingPaths(tmp_path, ROOT, tmp_path / "unused-attempt")
+    definition = entry.build_candidate(ROOT)
+    review = {
+        "schema": component.REVIEW_SCHEMA,
+        "status": "ACCEPTED_FOR_COMPONENT_OBB_RUNTIME_INTEGRATION",
+        "source_binding_sha256": definition["binding_sha256"],
+        "runtime_instantiation_admitted": True,
+        "geometry_scope": "SIMULATED_VENDOR_MESH_CONVEX_HULL_SURROGATE",
+        "physical_geometry_qualified": False,
+        "launch_admitted": False,
+        "hardware_access": False,
+        "physical_authority": False,
+    }
+    review["review_sha256"] = component._sha(review)
+    review_file = tmp_path / "fixture-review.json"
+    review_file.write_bytes(json.dumps(review).encode())
+    digest = hashlib.sha256(review_file.read_bytes()).hexdigest()
+    calls = []
+
+    def construct(binding_paths, *, runtime_factory):
+        calls.append(binding_paths)
+        return SimpleNamespace(backend=pytest.fail, receipt={"binding_id": "fixture"})
+
+    monkeypatch.setattr(concrete, "build_concrete_native_attempt_binding", construct)
+    builder = entry.ReviewedComponentBindingBuilder(review_file, digest)
+    binding = builder(paths)
+    assert binding.backend is pytest.fail
+    assert binding.receipt["component_review_file_sha256"] == digest
+    assert binding.receipt["component_definition_sha256"] == definition["binding_sha256"]
+    assert binding.receipt["attempt_consumed"] is False
+    review_file.write_bytes(review_file.read_bytes() + b" ")
+    with pytest.raises(ValueError, match="file digest changed"):
+        builder(paths)
+    assert calls == [paths]
+    assert not paths.governed_attempt_directory.exists()
+
+
 
 def test_nominal_workcell_screen_places_obstacles_relative_to_the_native_base(monkeypatch):
     import json
