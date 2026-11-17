@@ -75,6 +75,8 @@ def test_composition_replaces_only_self_test_and_keeps_environment_sweeps():
 
     assert result["continuous"] is True
     assert result["proof_method"] == "COMPONENT_OBB_SELF_PLUS_ENVIRONMENT_SPHERE_SWEEPS"
+    assert result["geometry_scope"] == "MODEL_GEOMETRY_ONLY"
+    assert result["physical_geometry_qualified"] is False
     assert result["self_clearance"]["minimum_clearance_mm"] == pytest.approx(10.0)
     assert environment.sweeps == 2
 
@@ -277,10 +279,14 @@ def test_worker_factory_callback_preserves_native_objects_and_checks_metadata(mo
         calls.append(kwargs)
         return "composed"
     monkeypatch.setattr(module, "construct_component_obb_route_runtime", construct)
+    component_definition = {"id": "component", "nested": {"value": 1}}
+    component_review = {"id": "review", "nested": {"value": 2}}
     factory = module.ComponentObbRuntimeFactory(
-        base_factory=base_factory, component_definition={"id": "component"},
-        component_review={"id": "review"},
+        base_factory=base_factory, component_definition=component_definition,
+        component_review=component_review,
     )
+    component_definition["nested"]["value"] = 99
+    component_review["nested"]["value"] = 99
     articulation, scene = object(), object()
     arguments = {
         "documents": {"binding_definition": {"id": "sweep"}, "binding_review": {}},
@@ -291,6 +297,8 @@ def test_worker_factory_callback_preserves_native_objects_and_checks_metadata(mo
     assert calls[1]["route_runtime"] is route
     assert calls[1]["articulation"] is articulation
     assert calls[1]["scene_query"] is scene
+    assert calls[1]["component_definition"]["nested"]["value"] == 1
+    assert calls[1]["component_review"]["nested"]["value"] == 2
     arguments["native_metadata"] = {"environment_only_scene": False}
     with pytest.raises(module.ComponentObbClearanceError, match="incomplete"):
         factory({"id": "factory"}, **arguments)
@@ -402,7 +410,7 @@ def test_whole_component_inventory_rejects_missing_or_altered_box():
         audit._verify_whole_component_inventory({"component_obbs": definition["component_obbs"][:-1]}, reduction)
 
 
-def test_concrete_binding_rejects_surface_only_geometry_without_starting_session(monkeypatch):
+def test_concrete_binding_admits_only_reviewed_simulation_surrogate_without_starting_session(monkeypatch):
     import types
 
     module = _module()
@@ -437,7 +445,7 @@ def test_concrete_binding_rejects_surface_only_geometry_without_starting_session
     }
     review["review_sha256"] = component_binding._sha(review)
     paths = types.SimpleNamespace(repo_root=ROOT)
-    with pytest.raises(module.ComponentObbClearanceError, match="solid containment is not certified"):
+    with pytest.raises(module.ComponentObbClearanceError, match="simulation surrogate scope"):
         module.build_component_obb_concrete_binding(
             paths, component_definition=definition, component_review=review,
         )
@@ -446,13 +454,36 @@ def test_concrete_binding_rejects_surface_only_geometry_without_starting_session
     whole = build_candidate(ROOT)
     whole_review = dict(review)
     whole_review["source_binding_sha256"] = whole["binding_sha256"]
+    whole_review["geometry_scope"] = "SIMULATED_VENDOR_MESH_CONVEX_HULL_SURROGATE"
+    whole_review["physical_geometry_qualified"] = False
     whole_review.pop("review_sha256")
     whole_review["review_sha256"] = component_binding._sha(whole_review)
-    with pytest.raises(module.ComponentObbClearanceError, match="solid containment is not certified"):
-        module.build_component_obb_concrete_binding(
-            paths, component_definition=whole, component_review=whole_review,
-        )
+    actual_backend, binding_receipt = module.build_component_obb_concrete_binding(
+        paths, component_definition=whole, component_review=whole_review,
+    )
+    assert actual_backend is backend
+    assert isinstance(seen[0][1], module.ComponentObbRuntimeFactory)
+    assert binding_receipt["geometry_scope"] == "SIMULATED_VENDOR_MESH_CONVEX_HULL_SURROGATE"
+    assert binding_receipt["physical_geometry_qualified"] is False
+    assert binding_receipt["isaac_started"] is False
     assert len(whole["component_obbs"]) == 14
+    seen.clear()
+    unscoped = dict(whole_review)
+    unscoped.pop("geometry_scope")
+    unscoped.pop("review_sha256")
+    unscoped["review_sha256"] = component_binding._sha(unscoped)
+    with pytest.raises(module.ComponentObbClearanceError, match="simulation surrogate scope"):
+        module.build_component_obb_concrete_binding(
+            paths, component_definition=whole, component_review=unscoped,
+        )
+    physical_claim = dict(whole_review)
+    physical_claim["physical_geometry_qualified"] = True
+    physical_claim.pop("review_sha256")
+    physical_claim["review_sha256"] = component_binding._sha(physical_claim)
+    with pytest.raises(module.ComponentObbClearanceError, match="simulation surrogate scope"):
+        module.build_component_obb_concrete_binding(
+            paths, component_definition=whole, component_review=physical_claim,
+        )
     assert seen == []
     import copy
     altered = copy.deepcopy(whole)
