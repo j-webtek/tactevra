@@ -9544,6 +9544,7 @@ def assess_native_key_trace(
     *,
     rest_key_z_m: float | None = None,
     target_id: str = "H",
+    scene_key_center_xy_mm: list[float] | None = None,
 ) -> dict[str, Any]:
     """Convert native key displacement into the shared mechanism-state contract."""
     rows = list(native_samples)
@@ -9557,20 +9558,38 @@ def assess_native_key_trace(
         "native rest key z",
     )
     target_center = regions[target_id]["center_board_xy_mm"]
+    observed_xy = scene_key_center_xy_mm is not None or any("tip_center_xy_m" in row for row in rows)
+    if scene_key_center_xy_mm is None:
+        scene_key_center_xy_mm = target_center
+    if len(scene_key_center_xy_mm) != 2:
+        raise MechanicsContractError("native key center requires two coordinates")
+    scene_center = [_finite_number(v, "native key center") for v in scene_key_center_xy_mm]
     contract_trace = []
     native_contact_steps = 0
     for index, row in enumerate(rows):
         key_z = _finite_number(row.get("key_center_z_m"), f"native sample {index} key z")
         separation = _finite_number(row.get("tip_key_separation_m"), f"native sample {index} separation")
-        if separation <= 0.00005:
+        x, y = target_center
+        if observed_xy:
+            xy = row.get("tip_center_xy_m")
+            if not isinstance(xy, (list, tuple)) or len(xy) != 2:
+                raise MechanicsContractError("native trace lacks observed tip XY")
+            # The native cube is axis-aligned at the episode's shifted center.
+            x, y = [nominal + 1000.0 * _finite_number(obs, "native tip XY") - placed
+                    for nominal, obs, placed in zip(target_center, xy, scene_center)]
+        if separation <= 0.00005 and _intersects_region(
+            x, y, profile["mechanics_prior"]["tip_radius_mm"], regions[target_id]
+        ):
             native_contact_steps += 1
         contract_trace.append({
             "time_s": _finite_number(row.get("time_s"), f"native sample {index} time"),
-            "tip_x_board_mm": target_center[0],
-            "tip_y_board_mm": target_center[1],
+            "tip_x_board_mm": x,
+            "tip_y_board_mm": y,
             "compression_mm": max(0.0, (rest_z - key_z) * 1000.0),
         })
     result = evaluate_trace(profile, contract_trace)
+    if observed_xy:
+        result["tip_xy_source"] = "OBSERVED_SCENE_TIP_RELATIVE_TO_PLACED_KEY"
     result["commanded_key"] = target_id
     result["native_contact_step_count"] = native_contact_steps
     result["native_contact_observed"] = native_contact_steps > 0
@@ -9692,16 +9711,18 @@ def run_native_h_probe(
             SimulationManager.step(steps=1)
             observed_key_z = float(key_view.get_world_poses()[0].numpy().tolist()[0][2])
             key_top = observed_key_z + key_half_z_m
-            tip_bottom = command["tip_z_m"] - tip_radius_m
+            observed_tip = tip_view.get_world_poses()[0].numpy().tolist()[0]
+            tip_bottom = observed_tip[2] - tip_radius_m
             native_samples.append({
                 "step": command["step"],
                 "time_s": command["time_s"],
-                "tip_center_z_m": command["tip_z_m"],
+                "tip_center_z_m": observed_tip[2],
+                "tip_center_xy_m": observed_tip[:2],
                 "key_center_z_m": observed_key_z,
                 "tip_key_separation_m": tip_bottom - key_top,
             })
         assessment = assess_native_key_trace(
-            profile, native_samples, rest_key_z_m=settled_z
+            profile, native_samples, rest_key_z_m=settled_z, scene_key_center_xy_mm=h_region["center_board_xy_mm"]
         )
         passed = assessment["accepted"] and assessment["resolved_key"] == "H" and assessment["native_contact_observed"]
         receipt: dict[str, Any] = {
@@ -10755,7 +10776,8 @@ def run_drive_controlled_robot_h_replay(
                 elapsed_steps += 1
                 observed_key_z = float(key_view.get_world_poses()[0].numpy().tolist()[0][2])
                 tip_world = UsdGeom.Xformable(tip.GetPrim()).ComputeLocalToWorldTransform(0.0)
-                tip_center_z = float(tip_world.ExtractTranslation()[2])
+                tip_translation = tip_world.ExtractTranslation()
+                tip_center_z = float(tip_translation[2])
                 separation = tip_center_z - prior["tip_radius_mm"] / 1000.0 - (observed_key_z + key_half_z)
                 observed_positions = [
                     float(value)
@@ -10776,6 +10798,7 @@ def run_drive_controlled_robot_h_replay(
                         tip_key_separation_m=separation,
                     )
                 )
+                native_trace[-1]["tip_center_xy_m"] = [float(tip_translation[0]), float(tip_translation[1])]
             observed = articulation.get_dof_positions().numpy().tolist()[0]
             tracking.append({
                 "sequence": target["sequence"],
@@ -10812,6 +10835,7 @@ def run_drive_controlled_robot_h_replay(
                     rows,
                     rest_key_z_m=settled_z,
                     target_id=target_id,
+                    scene_key_center_xy_mm=key_center_xy_mm,
                 )
                 action_assessments.append({"action_index": action_index, "assessment": assessment})
         maximum_tracking_error = max(

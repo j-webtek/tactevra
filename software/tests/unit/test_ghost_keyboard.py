@@ -239,6 +239,32 @@ def test_native_displacement_uses_the_requested_representative_key_region():
         )
 
 
+def test_observed_tip_must_land_on_shifted_native_space():
+    mechanics = _load_key_mechanics()
+    profile = mechanics.build_profile(ROOT / "software/config/nominal_target_profiles.json")
+    center = [224.028, 111.019]
+    rows = [
+        {"time_s": i * 0.01, "key_center_z_m": 0.018 - depth / 1000,
+         "tip_key_separation_m": 0 if depth else 0.001,
+         "tip_center_xy_m": [v / 1000 for v in center]}
+        for i, depth in enumerate((0, 2.7, 0))
+    ]
+
+    def assess():
+        return mechanics.assess_native_key_trace(
+            profile, rows, rest_key_z_m=0.018, target_id="SPACE", scene_key_center_xy_mm=center
+        )
+
+    assert assess()["accepted"]
+    rows[1]["tip_center_xy_m"][1] += 0.012
+    rejected = assess()
+    assert not rejected["accepted"]
+    assert not rejected["native_contact_observed"]
+    del rows[1]["tip_center_xy_m"]
+    with pytest.raises(mechanics.MechanicsContractError, match="observed tip XY"):
+        assess()
+
+
 def _arm207_plan_fixture(mechanics):
     def signed(document, field):
         document[field]=mechanics._canonical_sha256(document)

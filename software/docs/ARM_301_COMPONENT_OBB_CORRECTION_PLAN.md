@@ -375,3 +375,11 @@ event sequence. The four-substep receipt has canonical digest
 This experiment excludes native articulated tracking, native contact forces,
 physical switch signals and USB input. Waypoint timing and a successful
 one-axis key response do not qualify the real arm for motion.
+
+New native key traces retain the observed tip center in scene XY. The
+assessor uses the tip's lateral offset from the placed key, together with
+observed key displacement, to classify contact. Trace assessment rejects
+missing tip XY when called from the updated native capture paths. Legacy
+depth-only traces keep their historical assumed-center interpretation.
+An offline test exercises both a centered SPACE press and a 12 mm
+lateral miss with identical displacement. No new native run is recorded.
