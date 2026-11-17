@@ -292,3 +292,25 @@ The native scene loader currently creates the board and SPACE cube.
 The keyboard envelope in this offline check comes from the nominal workcell
 layout. The check omits attached tools, fixtures outside those two boxes,
 and the rest of the route. It does not establish a keypress.
+
+### SPACE tip-path discrepancy
+
+Add `--screen-tip` to the regenerated audit to include all 1,416 commanded
+tip samples. The retained episode pins the virtual commissioning profile.
+Its keyboard tool extends 120 mm along hand TCP negative Z. Using its
+board transform, rows 1061 and 1299 both put the tip at approximately
+(231.99, 122.40, 1.55) mm. The randomized SPACE center is
+(224.03, 111.02) mm with a 7 mm Y half-extent and a 21 mm rest height.
+Both endpoints miss the rear edge by 4.39 mm and lie about 19.45 mm below
+the rest surface. The contact rows are retained source commands, outside
+the regenerated IK window. The whole-arm approach clearance result
+excludes this virtual tip. The canonical tip-screen receipt digest is
+`6057fff1ab0038e544e5ffb6e8031bddcd00ce70319077d1ff758047c0e5a778`.
+
+The current deferred backend constructs its solver from the canonical
+scenario (100 mm tool and a different board transform). Its IK adapter
+derives each regeneration target from the source joint row. This can
+reproduce a row with a small residual while missing the intended key.
+Future SPACE planning must bind the episode tool and placement and solve
+against the intended board-space key target. The sampled FK comparison
+does not measure key displacement or identify the physical tool.

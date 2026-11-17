@@ -169,7 +169,55 @@ def _screen_workcell(runtime, rows, obstacles):
     return results
 
 
-def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | None = None, screen_workcell: bool = False) -> dict:
+def _screen_tip(route, rows, urdf, profile_path, layout_path):
+    """Evaluate commanded tip samples using the episode's own virtual tool."""
+    import numpy as np
+    from nominal_route_concrete_native_attempt_binding import EXPECTED_LAYOUT_SHA256
+
+    if (_file_sha(profile_path) != route["runtime_files"]["virtual_profile"]["sha256"]
+            or _file_sha(layout_path) != EXPECTED_LAYOUT_SHA256):
+        raise ValueError("tip screen profile or key layout digest changed")
+    profile = json.loads(profile_path.read_bytes())
+    study = profile["study_input"]
+    placement = study["physical_placement_input"]["matrix_row_major"]
+    if not np.allclose(placement, route["robot_placement_matrix_row_major"], rtol=0, atol=1e-12):
+        raise ValueError("virtual profile and episode base placements disagree")
+    if tuple(route["joint_order"]) != tuple(EXPECTED_DOF_NAMES):
+        raise ValueError("tip screen joint order changed")
+    board_from_world = np.array(study["derived_solver_transform"]["matrix_row_major"]).reshape(4, 4)
+    length = study["route_tool_lengths_mm"]["keyboard"]
+    top = json.loads(layout_path.read_bytes())["keyboard"]["target_plane_z_board_mm"]
+    center = route["randomized_key_center_board_xy_mm"]
+    half = route["target_region"]["half_extent_mm"]
+    model = UrdfModel.from_file(urdf)
+    endpoints = []
+    ranges = []
+    for joint_row, source in zip(rows, route["joint_targets"], strict=True):
+        joints = joint_row["joint_position_target_rad"]
+        state = {name: JointPosition.radians(q) for name, q in zip(EXPECTED_DOF_NAMES, joints, strict=True)}
+        hand = model.forward_kinematics(state)["hand_tcp"]
+        t = hand.translation_mm
+        z_axis = np.array(hand.rotation.matrix).reshape(3, 3)[:, 2]
+        world = np.array([t.x, t.y, t.z]) - length * z_axis
+        x, y, z, _ = board_from_world @ np.append(world, 1.0)
+        gap = float(z - top)
+        inside = bool(abs(x - center[0]) <= half[0] and abs(y - center[1]) <= half[1])
+        sequence, phase = source["sequence"], source["phase"]
+        if not ranges or ranges[-1]["phase"] != phase:
+            ranges.append(dict(phase=phase, first=sequence, min_gap_mm=gap, max_gap_mm=gap))
+        span = ranges[-1]
+        span.update(last=sequence, min_gap_mm=min(gap, span["min_gap_mm"]),
+                    max_gap_mm=max(gap, span["max_gap_mm"]))
+        if sequence in route["contact_endpoint_sequences"]:
+            endpoints.append(dict(sequence=sequence, tip_board_mm=[x, y, z],
+                                  gap_to_undeformed_top_mm=gap, inside_key_xy=inside))
+    return dict(profile_id=profile["profile_id"], profile_file_sha256=_file_sha(profile_path),
+                layout_file_sha256=_file_sha(layout_path), keyboard_tool_length_mm=length,
+                sampled_rows=len(rows), key_center_board_xy_mm=center, key_top_mm=top,
+                contact_endpoints=endpoints, phase_runs=ranges)
+
+
+def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | None = None, screen_workcell: bool = False, screen_tip: bool = False) -> dict:
     integration = Path(__file__).resolve().parent
     urdf = ROOT / "software/models/roarm_m3/roarm_m3_kinematic_40dbd84.urdf"
     partition = integration / "evidence/roarm_m3_triangle_partition_link2_20261005.json"
@@ -223,6 +271,13 @@ def audit(route: Path, *, whole_components: bool = False, ik_artifacts: Path | N
             "geometry": "BOARD_AND_SOLID_NOMINAL_KEYBOARD_ENVELOPE",
             "obstacles": _screen_workcell(runtime, rows, obstacles),
         }
+    if screen_tip:
+        if not regenerated:
+            raise ValueError("tip screen requires regenerated whole-component route")
+        regenerated["sampled_tip_path"] = _screen_tip(
+            data, rows, urdf, ROOT / "software/config/virtual_commissioning_profile.json",
+            ROOT / "software/config/nominal_target_profiles.json",
+        )
     outcomes = []
     for sequence in range(653, 941):
         left, right = rows[sequence], rows[sequence + 1]
@@ -278,9 +333,10 @@ def main() -> int:
     parser.add_argument("--whole-components", action="store_true", help="audit exploratory whole-component boxes")
     parser.add_argument("--ik-artifacts", type=Path, help="regenerate the governed IK window using retained adapter artifacts")
     parser.add_argument("--screen-workcell", action="store_true", help="screen the nominal board and keyboard envelope")
+    parser.add_argument("--screen-tip", action="store_true", help="evaluate sampled virtual keyboard tip through contact and retraction")
     args = parser.parse_args()
     result = audit(args.route, whole_components=args.whole_components, ik_artifacts=args.ik_artifacts,
-                   screen_workcell=args.screen_workcell)
+                   screen_workcell=args.screen_workcell, screen_tip=args.screen_tip)
     with args.output.open("x", encoding="utf-8", newline="\n") as stream:
         json.dump(result, stream, indent=2, sort_keys=True, allow_nan=False)
         stream.write("\n")
